@@ -137,7 +137,7 @@ body {
 #scrolly {
   position: relative;
   display: flex;
-  /* background-color: #f3f1ed; */
+
   padding: 1rem;
   min-height: 100vh;
   margin-left: 2.6rem;
@@ -209,7 +209,7 @@ figure p {
   /* Remove vertical positioning that pushed steps down */
   /* position: relative; */
   /* top: 50%; */
-  opacity: 0.9;
+  opacity: 0.3;
 }
 
 .step:last-child {
