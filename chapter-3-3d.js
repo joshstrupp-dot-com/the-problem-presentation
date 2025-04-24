@@ -87,9 +87,12 @@
             "Cred Score: %{z}<br>",
           marker: {
             size: data.map((d) => (d.highlighted ? 25 : 8)),
-            color: data.map((d) =>
-              d.highlighted ? "var(--color-yellow)" : "#e1d6c2"
-            ),
+            color: data.map((d) => {
+              if (d.author_clean === "Gabor Maté") {
+                return "url(assets/authors/gabor-mate.jpeg)";
+              }
+              return d.highlighted ? "var(--color-yellow)" : "#e1d6c2";
+            }),
             opacity: data.map((d) => opacityScale(d.avg_star_rating)),
             line: {
               color: data.map((d) => {
@@ -277,12 +280,35 @@
     if (window.dataCache && window.dataCache.authorData) {
       console.log("Using preloaded author data for 3D visualization");
       allAuthorData = window.dataCache.authorData;
+      // Set credibility score for specific authors and filter out zero credibility
+      allAuthorData = allAuthorData
+        .map((author) => {
+          if (
+            author.author_clean === "P.T. Barnum" ||
+            author.author_clean === "Kevin Trudeau"
+          ) {
+            author.avg_cred_score = "1";
+          }
+          return author;
+        })
+        .filter((author) => +author.avg_cred_score > 0);
       displayAuthorData3D(filterDataForStep("the-secret"), "the-secret"); // Default to the-secret step
     } else {
       // Try loading data directly if not preloaded
       d3.csv("data/sh_0415_author/author.csv")
         .then((data) => {
-          allAuthorData = data;
+          // Set credibility score for specific authors and filter out zero credibility
+          allAuthorData = data
+            .map((author) => {
+              if (
+                author.author_clean === "P.T. Barnum" ||
+                author.author_clean === "Kevin Trudeau"
+              ) {
+                author.avg_cred_score = "1";
+              }
+              return author;
+            })
+            .filter((author) => +author.avg_cred_score > 0);
           displayAuthorData3D(filterDataForStep("the-secret"), "the-secret");
         })
         .catch(() => {
@@ -300,7 +326,18 @@
                 });
                 return obj;
               });
-              allAuthorData = parsedData;
+              // Set credibility score for specific authors and filter out zero credibility
+              allAuthorData = parsedData
+                .map((author) => {
+                  if (
+                    author.author_clean === "P.T. Barnum" ||
+                    author.author_clean === "Kevin Trudeau"
+                  ) {
+                    author.avg_cred_score = "1";
+                  }
+                  return author;
+                })
+                .filter((author) => +author.avg_cred_score > 0);
               displayAuthorData3D(
                 filterDataForStep("the-secret"),
                 "the-secret"

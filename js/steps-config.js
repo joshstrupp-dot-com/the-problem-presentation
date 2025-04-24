@@ -684,25 +684,13 @@ const stepsConfig = [
       setTimeout(() => {
         document.dispatchEvent(
           new CustomEvent("visualizationUpdate", {
-            detail: { step: "credibility-score" },
+            detail: { step: "authors-1" },
           })
         );
       }, 100);
     },
   },
-  // {
-  //   id: "celebrity-authors-2",
-  //   text: "There are some who publish an appropriate number of books. A number that indicates less ghost writing and more research.",
-  //   fullwidth: true,
-  //   render: () => {
-  //     // Maintain the credibility-score state
-  //     document.dispatchEvent(
-  //       new CustomEvent("visualizationUpdate", {
-  //         detail: { step: "credibility-score" },
-  //       })
-  //     );
-  //   },
-  // },
+
   {
     id: "quality-authors",
     text: "There are some who are beloved, with ratings in the top 10% of all authors.",
@@ -711,24 +699,12 @@ const stepsConfig = [
       // Maintain the credibility-score state
       document.dispatchEvent(
         new CustomEvent("visualizationUpdate", {
-          detail: { step: "credibility-score" },
+          detail: { step: "authors-2" },
         })
       );
     },
   },
-  // {
-  //   id: "pusher-authors",
-  //   text: "And there are some who have neither. Let's call them pushers. No, they're not selling drugs. But look at these titles and tell me you don't want a taste.",
-  //   fullwidth: true,
-  //   render: () => {
-  //     // Maintain the credibility-score state
-  //     document.dispatchEvent(
-  //       new CustomEvent("visualizationUpdate", {
-  //         detail: { step: "credibility-score" },
-  //       })
-  //     );
-  //   },
-  // },
+
   {
     id: "credibility-score",
     text: "Then there are those who I’ve heard referred to as “drug dealers.” This may seem excessive, but when you see titles like “You Are a Badass” and“Turn Your Weight Loss Vision Into Reality!,” tell me you don’t want a taste.",
@@ -737,7 +713,7 @@ const stepsConfig = [
       // Maintain the credibility-score state
       document.dispatchEvent(
         new CustomEvent("visualizationUpdate", {
-          detail: { step: "credibility-score" },
+          detail: { step: "authors-3" },
         })
       );
     },
@@ -789,18 +765,6 @@ const stepsConfig = [
     },
   },
 
-  // {
-  //   id: "conclusion-header",
-  //   text: "Conclusion",
-  //   fullwidth: true,
-  //   fadeIn: true,
-  //   fadeOut: true,
-  //   customClass: "header",
-  //   render: () => {
-  //     const figure = d3.select("#figure-container");
-  //     figure.html("");
-  //   },
-  // },
   {
     id: "conclusion",
     text: "To wrap it up: in an effort to address my disillusionment with self-help, I wrote a thesis about self help, which, in a way, ended up kinda being self help. I feel it’s turned the genre into two genres: books about “solutions” and books about “clarity.” A broken arm is a broken arm. A persistent fear of failure — less clear. I think “the problem with fixing yourself,” is that you can’t. And thats ok.My hope is that this thesis can serve as self help in and of itself, to others like me.",

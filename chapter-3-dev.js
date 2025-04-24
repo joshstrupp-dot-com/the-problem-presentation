@@ -11,6 +11,15 @@
   chapter3Div.style.overflow = "hidden";
   chapter3Div.style.position = "relative";
 
+  // Featured authors configuration
+  const featuredAuthors = {
+    "Deepak Chopra": "assets/authors/deepak-chopra.jpg",
+    "Jen Sincero": "assets/authors/jen-sincero.jpg",
+    "Michelle Obama": "assets/authors/michelle-obama.jpg",
+    "Gabor Maté": "assets/authors/gabor-mate.jpeg",
+    "Rhonda Byrne": "assets/authors/rhonda-byrne.jpg",
+  };
+
   // Get the actual dimensions of the container
   const fullWidth = chapter3Div.clientWidth;
   const fullHeight = chapter3Div.clientHeight;
@@ -22,116 +31,30 @@
 
   let allAuthorData; // Store the data globally
   let svg; // Store the SVG globally
-
-  // Define celebrity authors list once
-  const celebrityAuthors = [
-    "50 Cent",
-    "Arnold Schwarzenegger",
-    "Cameron Diaz",
-    "Brené Brown",
-    "Deepak Chopra",
-    "Demi Lovato",
-    "Donald J. Trump",
-    "Eckhart Tolle",
-    "Esther Hicks",
-    "Gabrielle Bernstein",
-    "Gary Vaynerchuk",
-    "Gwyneth Paltrow",
-    "Jay Shetty",
-    "Jordan B. Peterson",
-    "Jen Sincero",
-    "Jillian Michaels",
-    "Marie Kondo",
-    "Mark Manson",
-    "Matthew McConaughey",
-    "Mel Robbins",
-    "Oprah Winfrey",
-    "Michelle Obama",
-    "Rachel Hollis",
-    "Rhonda Byrne",
-    "Russell Brand",
-    "Phillip C. McGraw",
-    "Stephen King",
-    "Tim Ferriss",
-    "Tony Robbins",
-    "Rich Roll",
-    "Russell Brand",
-  ];
+  let currentStepId = "all-authors"; // Track current step
 
   ///////////////////////////////////////////////////////////// ! Data Filtering Functions
   // Function to filter data based on step ID
   function filterDataForStep(stepId) {
     if (!allAuthorData) return [];
 
-    switch (stepId) {
-      case "celebrity-authors":
-        return allAuthorData.filter((d) =>
-          celebrityAuthors.includes(d.author_clean)
-        );
-      case "celebrity-authors-2":
-        return allAuthorData.filter((d) => {
-          const isCelebrity = celebrityAuthors.includes(d.author_clean);
-          if (isCelebrity) {
-            d.highlighted =
-              d.author_clean === "Matthew McConaughey" ||
-              d.author_clean === "Jay Shetty" ||
-              d.author_clean === "Rainn Wilson" ||
-              d.author_clean === "Demi Lovato" ||
-              d.author_clean === "Jillian Michaels" ||
-              d.author_clean === "50 Cent" ||
-              d.author_clean === "Michelle Obama";
-          }
-          return isCelebrity;
-        });
-      case "quality-authors":
-        return allAuthorData.filter((d) => {
-          const isCelebrity = celebrityAuthors.includes(d.author_clean);
-          const isHighlighted =
-            d.author_clean === "Esther Hicks" ||
-            d.author_clean === "James Clear" ||
-            d.author_clean === "Brené Brown" ||
-            d.author_clean === "Michelle Obama" ||
-            d.author_clean === "Arnold Schwarzenegger" ||
-            d.author_clean === "Oprah Winfrey" ||
-            d.author_clean === "Matthew McConaughey";
-
-          if (isHighlighted) {
-            d.highlighted = true;
-          } else {
-            d.highlighted = false;
-          }
-          return isCelebrity;
-        });
-
-      case "pusher-authors":
-        return allAuthorData.filter((d) => {
-          const isCelebrity = celebrityAuthors.includes(d.author_clean);
-          const isHighlighted =
-            d.author_clean === "Deepak Chopra" ||
-            d.author_clean === "Jen Sincero" ||
-            d.author_clean === "Donald J. Trump" ||
-            d.author_clean === "Phillip C. McGraw";
-          if (isHighlighted) {
-            d.highlighted = true;
-          } else {
-            d.highlighted = false;
-          }
-          return isCelebrity;
-        });
-      case "credibility-score":
-        return allAuthorData.map((d) => {
-          d.highlighted = d.avg_star_rating < 3.9 && d.author_num_books > 80;
-          return d;
-        });
-      case "all-authors":
-      default:
-        return allAuthorData;
+    // For authors-2 step, we'll mark Deepak Chopra for animation
+    if (stepId === "authors-2") {
+      allAuthorData.forEach((d) => {
+        d.shouldAnimate = d.author_clean === "Deepak Chopra";
+      });
+    } else {
+      allAuthorData.forEach((d) => {
+        d.shouldAnimate = false;
+      });
     }
+
+    return allAuthorData;
   }
 
   ///////////////////////////////////////////////////////////// ! Visualization Functions
   // Function to display author data
-  function displayAuthorData(data) {
+  function displayAuthorData(data, stepId) {
     if (!data || data.length === 0) return;
 
     // Clear existing SVG content first
@@ -144,7 +67,14 @@
       d.author_num_books = Math.max(1, +d.author_num_books); // Ensure minimum value of 1
       d.avg_cred_score = +d.avg_cred_score;
       d.bt_count = +d.bt_count;
+
+      // Mark featured authors
+      d.isFeatured = featuredAuthors.hasOwnProperty(d.author_clean);
     });
+
+    // Uniform circle size
+    const circleRadius = 5;
+    const featuredRadius = 30; // Larger radius for featured authors
 
     ///////////////////////////////////////////////////////////// ! Scales Creation
     // Create scales
@@ -165,14 +95,6 @@
       ])
       .nice()
       .range([height, 0]);
-
-    // Color scale for avg_cred_score (1-5)
-    const colorScale = d3
-      .scaleSequential()
-      .domain([1, 5])
-      .interpolator(
-        d3.interpolateHsl("var(--color-yellow)", "var(--color-pink)")
-      );
 
     ///////////////////////////////////////////////////////////// ! Axes Creation
     // Add X axis
@@ -216,26 +138,97 @@
     const tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
     ///////////////////////////////////////////////////////////// ! Data Points Creation
-    // Add dots
-    const circles = svg
-      .selectAll("circle")
-      .data(data)
+    // Create patterns for featured authors
+    const defs = svg.append("defs");
+
+    // Create patterns for each featured author
+    Object.entries(featuredAuthors).forEach(([author, imgUrl]) => {
+      const patternId = `pattern-${author.toLowerCase().replace(/\s+/g, "-")}`;
+
+      const pattern = defs
+        .append("pattern")
+        .attr("id", patternId)
+        .attr("width", 1)
+        .attr("height", 1)
+        .attr("patternUnits", "objectBoundingBox")
+        .attr("patternContentUnits", "objectBoundingBox");
+
+      pattern
+        .append("image")
+        .attr("width", 1)
+        .attr("height", 1)
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("preserveAspectRatio", "xMidYMid slice")
+        .attr("xlink:href", imgUrl);
+    });
+
+    // Split data into regular and featured authors
+    const regularData = data.filter((d) => !d.isFeatured);
+    const featuredData = data.filter((d) => d.isFeatured);
+
+    // Create groups for regular authors first
+    const regularPoints = svg
+      .selectAll(".regular-point")
+      .data(regularData)
       .enter()
+      .append("g")
+      .attr("class", "data-point")
+      .attr(
+        "transform",
+        (d) =>
+          `translate(${xScale(d.avg_star_rating)},${yScale(
+            d.author_num_books
+          )})`
+      );
+
+    // Add circles for regular authors
+    regularPoints
       .append("circle")
-      .attr("cx", (d) => xScale(d.avg_star_rating))
-      .attr("cy", (d) => yScale(d.author_num_books))
-      .attr("r", (d) => (d.highlighted ? 10 : 5))
-      .style("fill", (d) =>
-        d.highlighted ? "var(--color-yellow)" : "var(--color-base-darker)"
+      .attr("r", circleRadius)
+      .style("fill", "var(--color-base-darker)")
+      .style("opacity", 0.9)
+      .style("stroke", "black")
+      .style("stroke-opacity", 0.3)
+      .style("stroke-width", 1);
+
+    // Create groups for featured authors (will be drawn last/on top)
+    const featuredPoints = svg
+      .selectAll(".featured-point")
+      .data(featuredData)
+      .enter()
+      .append("g")
+      .attr("class", "data-point")
+      .attr(
+        "transform",
+        (d) =>
+          `translate(${xScale(d.avg_star_rating)},${yScale(
+            d.author_num_books
+          )})`
+      );
+
+    // Add featured authors' circles with animation
+    featuredPoints
+      .append("circle")
+      .attr("r", featuredRadius)
+      .style(
+        "fill",
+        (d) =>
+          `url(#pattern-${d.author_clean.toLowerCase().replace(/\s+/g, "-")})`
       )
       .style("opacity", 0.9)
-      .style("stroke", (d) =>
-        d.highlighted ? "black" : d.bt_count > 0 ? "var(--color-teal)" : "none"
-      )
-      .style("stroke-width", 1.5);
+      .style("stroke", "black")
+      .style("stroke-opacity", 0.3)
+      .style("stroke-width", 1)
+      .transition() // Add transition
+      .duration(1000) // 1 second duration
+      .attr("r", (d) =>
+        d.shouldAnimate ? featuredRadius * 1.5 : featuredRadius
+      ); // Scale up if shouldAnimate is true
 
-    // Add mouseover and mouseout events to circles
-    circles.on("mouseover", function (event, d) {
+    // Add mouseover and mouseout events to all points
+    const allPoints = svg.selectAll(".data-point");
+    allPoints.on("mouseover", function (event, d) {
       tooltip
         .html(
           `<strong>${d.author_clean}</strong><br/>
@@ -247,28 +240,12 @@
         .style("opacity", 0.9);
     });
 
-    circles.on("mouseout", function () {
+    allPoints.on("mouseout", function () {
       tooltip.style("opacity", 0);
     });
 
-    // Apply transition separately after setting up the event handlers
-    circles
-      .transition()
-      .duration(800)
-      .ease(d3.easeCubicOut)
-      .attr("r", (d) => (d.highlighted ? 10 : 5));
-  }
-
-  // ///////////////////////////////////////////////////////////// ! Call Filters
-
-  function stepFilter() {
-    allAuthorData = hardcodedData;
-
-    // Get initial step from URL if available
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentStep = urlParams.get("step") || "all-authors";
-
-    displayAuthorData(filterDataForStep(currentStep));
+    // Update current step
+    currentStepId = stepId;
   }
 
   ///////////////////////////////////////////////////////////// ! Initialization
@@ -303,7 +280,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const currentStep = urlParams.get("step") || "all-authors";
 
-      displayAuthorData(filterDataForStep(currentStep));
+      displayAuthorData(filterDataForStep(currentStep), currentStep);
     } else {
       // Try loading data directly if not preloaded
       d3.csv("data/sh_0415_author/author.csv")
@@ -325,18 +302,20 @@
           const urlParams = new URLSearchParams(window.location.search);
           const currentStep = urlParams.get("step") || "all-authors";
 
-          displayAuthorData(filterDataForStep(currentStep));
+          displayAuthorData(filterDataForStep(currentStep), currentStep);
         })
-        .catch(stepFilter);
+        .catch((error) => {
+          console.error("Error loading data:", error);
+        });
     }
   } catch (error) {
-    stepFilter();
+    console.error("Error in initialization:", error);
   }
 
   ///////////////////////////////////////////////////////////// ! Event Listeners
   // Add event listener for visualization updates
   document.addEventListener("visualizationUpdate", (event) => {
     const stepId = event.detail.step;
-    displayAuthorData(filterDataForStep(stepId));
+    displayAuthorData(filterDataForStep(stepId), stepId);
   });
 })();
