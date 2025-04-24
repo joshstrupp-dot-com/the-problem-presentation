@@ -1,0 +1,322 @@
+:root {
+  --color-base: #f2efe9;
+  --color-base-darker: #e1d6c2;
+  --color-purple: #6822ff;
+  --color-orange: #c37500;
+  --color-teal: #1ec6c0;
+  --color-yellow: #bfbf1d;
+  --color-pink: #be00d7;
+}
+
+/* New text classes */
+.title {
+  font-family: "Libre Caslon Display", serif;
+  font-size: 65px;
+  font-weight: normal;
+  color: #000;
+  position: absolute;
+}
+
+.body {
+  font-family: "Libre Franklin", sans-serif;
+  font-weight: 200;
+  font-size: 20px;
+  color: #000;
+  position: absolute;
+}
+
+/* Hero Section */
+#hero {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.top-left {
+  top: 2rem;
+  left: 2rem;
+}
+
+.top-right {
+  top: 2rem;
+  right: 2rem;
+  max-width: 300px;
+  text-align: right;
+}
+
+.center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.bottom-left {
+  bottom: 2rem;
+  left: 2rem;
+}
+
+.bottom-right {
+  bottom: 2rem;
+  right: 2rem;
+}
+
+.body a {
+  color: #000;
+  text-decoration: underline;
+}
+
+.body a:hover {
+  color: var(--color-purple);
+}
+
+.tooltip {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 10px;
+  font-family: "Andale Mono";
+  font-size: 14px;
+  color: #333;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-width: 250px;
+}
+
+.tooltip strong {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--color-purple);
+}
+
+.annotation {
+  color: #000;
+  font-family: "Andale Mono";
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 27px; /* 168.75% */
+  text-transform: uppercase;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f3f1ed;
+}
+
+#intro {
+  max-width: 40rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.intro__hed {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.intro__dek {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+#scrolly {
+  position: relative;
+  display: flex;
+  /* background-color: #f3f1ed; */
+  padding: 1rem;
+  min-height: 100vh;
+  margin-left: 2.6rem;
+}
+
+#scrolly > * {
+  flex: 1;
+}
+
+article {
+  position: relative;
+  padding: 1rem 1rem 0 1rem;
+  max-width: 20rem;
+  z-index: 1001;
+  min-height: 200vh;
+}
+
+figure {
+  position: sticky;
+  width: 100%;
+  height: calc(100vh - 2rem);
+  top: 1rem;
+  margin: 0;
+  transform: translate3d(0, 0, 0);
+  /* background-color: #8a8a8a; */
+  z-index: 0;
+}
+
+figure.fullwidth {
+  position: fixed;
+  width: 100vw;
+  left: 0;
+  right: 0;
+  z-index: 0;
+}
+
+figure p {
+  text-align: center;
+  padding: 1rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.step {
+  margin: 0 auto;
+  display: inline-flex;
+  padding: 32px;
+  justify-content: flex-start;
+  align-items: center;
+  border-radius: 2px;
+  border: 1px solid #0000006a;
+  width: 24rem; /* Added width to make step slightly wider */
+  background: url(../assets/paper.eps) lightgray 0% 0% / 154.22531366348267px
+      154.22531366348267px repeat,
+    radial-gradient(
+      151.92% 127.02% at 15.32% 21.04%,
+      rgba(246, 244, 238, 0.75) 0%,
+      rgba(246, 244, 238, 0.75) 77.08%,
+      rgba(245, 243, 237, 0.75) 100%
+    );
+  background-blend-mode: overlay, normal;
+  backdrop-filter: blur(40px);
+  color: #333;
+  /* Remove vertical positioning that pushed steps down */
+  /* position: relative; */
+  /* top: 50%; */
+  opacity: 0.9;
+}
+
+.step:last-child {
+  margin-bottom: 0;
+}
+
+.step.fade {
+  opacity: 0;
+}
+
+.step p {
+  text-align: left;
+  color: #000;
+  font-family: "Libre Caslon Display", serif;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 25px;
+}
+
+/* Common styling for statement and header steps */
+.step.statement,
+.step.header {
+  border: none;
+  width: calc(100vw - 9rem);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Libre Caslon Display", serif;
+}
+
+.step.statement {
+  padding: 40vh 2rem;
+  min-height: 100vh;
+  max-width: 100vw;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+/* Common styling for statement and header paragraphs */
+.step.statement p,
+.step.header p {
+  line-height: 1.3;
+  text-align: center;
+  max-width: 80%;
+  margin: 0 auto;
+  padding: 0 6rem;
+}
+
+/* Specific styling for header paragraphs */
+.step.header p {
+  font-size: 65px;
+  font-weight: normal;
+  color: #000;
+  margin-top: 40vh;
+}
+
+.step.emphasis-step {
+  opacity: 0.9;
+  background-color: var(--color-base);
+  background-image: radial-gradient(
+      circle at 30% 30%,
+      var(--color-teal),
+      transparent 70%
+    ),
+    radial-gradient(circle at 70% 70%, var(--color-orange), transparent 80%),
+    radial-gradient(circle at 20% 60%, var(--color-teal), transparent 60%),
+    radial-gradient(circle at 80% 20%, var(--color-base), transparent 50%);
+  background-size: 200% 200%;
+  position: relative;
+  animation: moveGradient 15s ease infinite;
+}
+
+.step.emphasis-step::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+  opacity: 1;
+  pointer-events: none;
+}
+
+.step.emphasis-step p {
+  color: #000;
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes moveGradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 50% 25%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 75%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}

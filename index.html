@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fear. Read. Repeat.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Franklin:wght@200;400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.2/browser/pixi.min.js"></script>
+  </head>
+  <body>
+    <main>
+      <!-- Hero section with full viewport image -->
+      <section id="hero">
+        <div class="title top-left">Fear.</div>
+        <div class="title center">Read.</div>
+        <div class="title bottom-right">Repeat.</div>
+        <div class="body bottom-left">
+          By me, <a href="https://joshstrupp.com" target="_blank">Josh</a>.
+        </div>
+        <div class="body top-right">
+          Visualizing the impact of self-help literature on the American psyche.
+        </div>
+      </section>
+
+      <!-- <section id="intro">
+        <h1 class="intro__hed">Basic Scrollama Example</h1>
+        <p class="intro__dek">Start scrolling to see how it works.</p>
+      </section> -->
+
+      <section id="scrolly">
+        <article id="steps-container">
+          <!-- Steps will be dynamically generated from config -->
+        </article>
+
+        <figure id="figure-container">
+          <!-- Figure content will be dynamically updated -->
+        </figure>
+      </section>
+
+      <!-- <section id="outro">
+        <h2>End of demonstration</h2>
+        <p>
+          This is a modular implementation of scrollama.js for scrollytelling.
+        </p>
+      </section> -->
+    </main>
+
+    <!-- Libraries -->
+    <script src="lib/d3.v7.min.js"></script>
+    <script src="lib/scrollama.min.js"></script>
+    <script
+      src="https://cdn.plot.ly/plotly-3.0.1.min.js"
+      charset="utf-8"
+    ></script>
+
+    <!-- Application Scripts -->
+    <script src="js/steps-config.js"></script>
+    <script src="js/scrolly-utils.js"></script>
+    <script src="js/chapter-1-dev-b.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

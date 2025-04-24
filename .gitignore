@@ -1,0 +1,26 @@
+archive/
+
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node modules if you add them later
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+
+# Build files
+dist/
+build/
+
+# Logs
+*.log 
