@@ -62,8 +62,14 @@ function handleStepEnter(response) {
   if (currentStep && currentStep.render) {
     currentStep.render();
   }
-  // Per-step fade-in; ensure visibility for steps without fadeIn
-  if (currentStep.fadeIn) {
+
+  // Only apply fade-in if explicitly set and not transitioning between 3D visualization steps
+  const prev3dStep =
+    response.index > 0 &&
+    window.stepsConfig[response.index - 1]?.id?.includes("credibility");
+  const current3dStep = currentStep?.id?.includes("credibility");
+
+  if (currentStep.fadeIn && !(prev3dStep && current3dStep)) {
     figure
       .interrupt()
       .style("opacity", 0)
@@ -79,15 +85,20 @@ function handleStepEnter(response) {
 // Handle step exit transitions
 function handleStepExit(response) {
   // response = { element, direction, index }
-  // Per-step fade-out
   const exitingStep = window.stepsConfig[response.index];
-  if (exitingStep.fadeOut) {
+  const nextStep = window.stepsConfig[response.index + 1];
+
+  // Only apply fade-out if explicitly set and not transitioning between 3D visualization steps
+  const is3dTransition =
+    exitingStep?.id?.includes("credibility") &&
+    nextStep?.id?.includes("credibility");
+
+  if (exitingStep.fadeOut && !is3dTransition) {
     figure.interrupt().transition().duration(500).style("opacity", 0);
   }
+
   console.log("Step exit:", response);
   console.log(`Exiting Step ID: ${window.stepsConfig[response.index]?.id}`);
-
-  // Additional exit handling can be added here if needed
 }
 
 // Generic window resize listener event

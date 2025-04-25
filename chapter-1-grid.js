@@ -44,10 +44,92 @@
   // Keep a reference to the book covers
   let bookElements = [];
 
+  // Define specific books to include at non-sequential positions
+  const specificBooks = [
+    {
+      position: 35,
+      image: "assets/astro.jpg",
+      name: "An Astronaut's Guide to Life on Earth",
+    },
+    {
+      position: 105,
+      image: "assets/whydoeshe.jpg",
+      name: "Why Does He Do That?: Inside the Minds of Angry and Controlling Men",
+    },
+    {
+      position: 70,
+      image: "assets/dontwannatalk.jpg",
+      name: "I Don't Want to Talk About It: Overcoming the Secret Legacy of Male Depression",
+    },
+    {
+      position: 109,
+      image: "assets/shutup.jpg",
+      name: "Shut Up, Stop Whining, And Get a Life: A Kick-butt Approach to a Better Life",
+    },
+    {
+      position: 32,
+      image: "assets/souldetox.jpg",
+      name: "Soul Detox: Clean Living in a Contaminated World",
+    },
+    {
+      position: 62,
+      image: "assets/rulesofwork.jpg",
+      name: "The Rules Of Work: The Unspoken Truth About Getting Ahead In Business",
+    },
+  ];
+
   // Load and display book covers in a more compact grid with entry animation
   d3.csv("data/sh_train_0409.csv")
     .then((data) => {
-      const covers = data.slice(0, 140);
+      // Create a map to track which positions are already taken by specific books
+      const takenPositions = new Set(
+        specificBooks.map((book) => book.position)
+      );
+
+      // Create a list of all books to display (140 total)
+      const allBooks = [];
+
+      // Add the specific books at their designated positions
+      specificBooks.forEach((book) => {
+        allBooks[book.position] = {
+          image_url: book.image,
+          name: book.name,
+          is_specific: true,
+        };
+      });
+
+      // Fill in the remaining positions with books from the CSV
+      let csvIndex = 0;
+      for (let i = 0; i < 140; i++) {
+        if (!takenPositions.has(i)) {
+          if (csvIndex < data.length) {
+            // Skip the book we want to exclude - using a more robust comparison
+            const bookName = data[csvIndex].name || "";
+            const bookToExclude =
+              "Shut Up, Stop Whining, And Get a Life: A Kick-butt Approach to a Better Life";
+
+            // Check if the book name contains the key parts of the title we want to exclude
+            if (
+              bookName.includes("Shut Up, Stop Whining") ||
+              bookName.includes("Kick-butt Approach")
+            ) {
+              console.log("Skipping duplicate book:", bookName);
+              csvIndex++;
+              continue;
+            }
+
+            allBooks[i] = {
+              ...data[csvIndex],
+              is_specific: false,
+            };
+            csvIndex++;
+          }
+        }
+      }
+
+      // Filter out any undefined positions to get a clean array
+      const covers = allBooks.filter((book) => book !== undefined);
+
       gridContainer.innerHTML = ""; // clear placeholder content
 
       // More compact grid layout with more columns and smaller gaps
@@ -94,6 +176,8 @@
         img.style.pointerEvents = "none";
         img.dataset.index = i;
         img.dataset.bookId = d.book_id || i; // Store book ID if available
+        img.dataset.name = d.name || ""; // Store book name
+        img.dataset.isSpecific = d.is_specific ? "true" : "false"; // Mark if this is a specific book
         bookElements.push(img);
 
         // Add the initial animation
@@ -208,31 +292,25 @@
       if (initialAnimationComplete && !positionsFrozen) {
         freezeBookPositions();
       }
-    } else if (step === "systemic-problems") {
-      // Add a style for the cascade animation
-      const cascadeStyle = document.createElement("style");
-      cascadeStyle.textContent = `
-        @keyframes cascadeOut {
-          0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-          100% { transform: translate(var(--target-x), 150vh) rotate(var(--rotate-deg)); opacity: 0; }
+    } else if (step === "blame-game-2") {
+      // Add a style for the scale animation
+      const scaleStyle = document.createElement("style");
+      scaleStyle.textContent = `
+        @keyframes scaleUp {
+          0% { transform: scale(1); }
+          100% { transform: scale(2); }
         }
       `;
-      document.head.appendChild(cascadeStyle);
+      document.head.appendChild(scaleStyle);
 
-      // Ensure positions are frozen before cascading
+      // Ensure positions are frozen before scaling
       if (!positionsFrozen && initialAnimationComplete) {
         freezeBookPositions();
       }
 
-      // Calculate the center point (bottom middle of screen)
-      const centerX = window.gridViewportWidth / 2;
-      const bottomY = window.gridViewportHeight;
-
-      // Apply cascade animation to each book with staggered delay
+      // Apply scale animation only to the target book
       bookElements.forEach((img) => {
         const i = parseInt(img.dataset.index);
-
-        // Get stored position
         const storedPos = bookPositions.get(i);
 
         if (!storedPos) {
@@ -242,38 +320,225 @@
 
         // Reset any existing animations
         img.style.animation = "none";
+        void img.offsetWidth; // Force reflow
 
-        // Force a reflow to make sure animation cancellation takes effect
-        void img.offsetWidth;
-
-        // Make sure book is at its stored position before starting animation
+        // Position book at stored position
         img.style.position = "fixed";
         img.style.left = `${storedPos.left}px`;
         img.style.top = `${storedPos.top}px`;
         img.style.width = `${storedPos.width}px`;
         img.style.opacity = "1";
-        img.style.transform = "translate(0, 0) rotate(0deg)";
 
-        // Calculate how far to move horizontally to reach center
-        const currentX = storedPos.left + storedPos.width / 2;
-        const targetX = centerX - currentX;
-        img.style.setProperty("--target-x", `${targetX}px`);
-
-        // Random rotation for more natural falling effect
-        const randomRotation = -20 + Math.random() * 40;
-        img.style.setProperty("--rotate-deg", `${randomRotation}deg`);
-
-        // Apply animation with staggered delay
-        const delay = 0.1 + i * 0.02 + Math.random() * 0.1; // Add some randomness to delay
-
-        // Force a reflow again before adding the new animation
-        void img.offsetWidth;
-
-        img.style.animation = `cascadeOut 1.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards ${delay}s`;
-
-        // Ensure proper transform origin
-        img.style.transformOrigin = "center";
+        // Only apply scale animation if this is the target book
+        if (
+          img.dataset.name ===
+            "I Don't Want to Talk About It: Overcoming the Secret Legacy of Male Depression" ||
+          img.dataset.name === "An Astronaut's Guide to Life on Earth" ||
+          img.dataset.name ===
+            "Why Does He Do That?: Inside the Minds of Angry and Controlling Men"
+        ) {
+          img.style.animation = `scaleUp 0.5s ease-out forwards`;
+          img.style.zIndex = "9999"; // Ensure it's above all other books
+        } else {
+          // Fade out all other books
+          img.style.transition = "opacity 0.5s ease-out";
+          img.style.opacity = "0.2";
+        }
       });
+    } else if (step === "blame-game-3") {
+      // Add a style for the scale animations
+      const scaleStyle = document.createElement("style");
+      scaleStyle.textContent = `
+        @keyframes scaleDown {
+          0% { transform: scale(2); }
+          100% { transform: scale(1); }
+        }
+        @keyframes scaleUp {
+          0% { transform: scale(1); }
+          100% { transform: scale(2); }
+        }
+      `;
+      document.head.appendChild(scaleStyle);
+
+      // Ensure positions are frozen before scaling
+      if (!positionsFrozen && initialAnimationComplete) {
+        freezeBookPositions();
+      }
+
+      // Apply scale animations to books
+      bookElements.forEach((img) => {
+        const i = parseInt(img.dataset.index);
+        const storedPos = bookPositions.get(i);
+
+        if (!storedPos) {
+          console.warn(`No stored position for book ${i}`);
+          return;
+        }
+
+        // Reset any existing animations
+        img.style.animation = "none";
+        void img.offsetWidth; // Force reflow
+
+        // Position book at stored position
+        img.style.position = "fixed";
+        img.style.left = `${storedPos.left}px`;
+        img.style.top = `${storedPos.top}px`;
+        img.style.width = `${storedPos.width}px`;
+        img.style.opacity = "1";
+
+        // Check if this is one of the previously highlighted books
+        if (
+          img.dataset.name ===
+            "I Don't Want to Talk About It: Overcoming the Secret Legacy of Male Depression" ||
+          img.dataset.name === "An Astronaut's Guide to Life on Earth" ||
+          img.dataset.name ===
+            "Why Does He Do That?: Inside the Minds of Angry and Controlling Men"
+        ) {
+          // Scale down the previously highlighted books
+          img.style.animation = `scaleDown 0.5s ease-out forwards`;
+          img.style.zIndex = "1"; // Reset z-index
+
+          // After scale down animation completes, set opacity to match other books
+          setTimeout(() => {
+            img.style.transition = "opacity 0.5s ease-out";
+            img.style.opacity = "0.2";
+          }, 500);
+        }
+        // Check if this is the new book to highlight from specificBooks
+        else if (
+          img.dataset.name ===
+            "Shut Up, Stop Whining, And Get a Life: A Kick-butt Approach to a Better Life" ||
+          img.dataset.name ===
+            "Soul Detox: Clean Living in a Contaminated World" ||
+          img.dataset.name ===
+            "The Rules Of Work: The Unspoken Truth About Getting Ahead In Business"
+        ) {
+          // Scale up the new book
+          img.style.animation = `scaleUp 0.5s ease-out forwards`;
+          img.style.zIndex = "9999"; // Ensure it's above all other books
+          img.style.opacity = "1";
+        } else {
+          // Keep other books at low opacity
+          img.style.transition = "opacity 0.5s ease-out";
+          img.style.opacity = "0.2";
+        }
+      });
+    } else if (step === "systemic-problems") {
+      // Add a style for the cascade animation
+      const cascadeStyle = document.createElement("style");
+      cascadeStyle.textContent = `
+        @keyframes cascadeOut {
+          0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+          100% { transform: translate(var(--target-x), 150vh) rotate(var(--rotate-deg)); opacity: 0; }
+        }
+        @keyframes scaleDown {
+          0% { transform: scale(2); }
+          100% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0.2; }
+          100% { opacity: 1; }
+        }
+      `;
+      document.head.appendChild(cascadeStyle);
+
+      // Ensure positions are frozen before cascading
+      if (!positionsFrozen && initialAnimationComplete) {
+        freezeBookPositions();
+      }
+
+      // First, transition all books back to their original state
+      bookElements.forEach((img) => {
+        const i = parseInt(img.dataset.index);
+        const storedPos = bookPositions.get(i);
+
+        if (!storedPos) {
+          console.warn(`No stored position for book ${i}`);
+          return;
+        }
+
+        // Reset any existing animations
+        img.style.animation = "none";
+        void img.offsetWidth; // Force reflow
+
+        // Position book at stored position
+        img.style.position = "fixed";
+        img.style.left = `${storedPos.left}px`;
+        img.style.top = `${storedPos.top}px`;
+        img.style.width = `${storedPos.width}px`;
+        img.style.transform = "translate(0, 0) rotate(0deg)";
+        img.style.transformOrigin = "center";
+        img.style.zIndex = "1"; // Reset z-index
+
+        // Check if this is one of the previously highlighted books from blame-game-3
+        if (
+          img.dataset.name ===
+            "Shut Up, Stop Whining, And Get a Life: A Kick-butt Approach to a Better Life" ||
+          img.dataset.name ===
+            "Soul Detox: Clean Living in a Contaminated World" ||
+          img.dataset.name ===
+            "The Rules Of Work: The Unspoken Truth About Getting Ahead In Business"
+        ) {
+          // Scale down the previously highlighted books
+          img.style.animation = `scaleDown 0.5s ease-out forwards`;
+        }
+
+        // Fade in all books to full opacity
+        img.style.transition = "opacity 0.5s ease-out";
+        img.style.opacity = "1";
+      });
+
+      // Wait for the transition to complete before starting the cascade animation
+      setTimeout(() => {
+        // Calculate the center point (bottom middle of screen)
+        const centerX = window.gridViewportWidth / 2;
+        const bottomY = window.gridViewportHeight;
+
+        // Apply cascade animation to each book with staggered delay
+        bookElements.forEach((img) => {
+          const i = parseInt(img.dataset.index);
+
+          // Get stored position
+          const storedPos = bookPositions.get(i);
+
+          if (!storedPos) {
+            console.warn(`No stored position for book ${i}`);
+            return;
+          }
+
+          // Reset any existing animations
+          img.style.animation = "none";
+          void img.offsetWidth; // Force reflow
+
+          // Make sure book is at its stored position before starting animation
+          img.style.position = "fixed";
+          img.style.left = `${storedPos.left}px`;
+          img.style.top = `${storedPos.top}px`;
+          img.style.width = `${storedPos.width}px`;
+          img.style.opacity = "1";
+          img.style.transform = "translate(0, 0) rotate(0deg)";
+
+          // Calculate how far to move horizontally to reach center
+          const currentX = storedPos.left + storedPos.width / 2;
+          const targetX = centerX - currentX;
+          img.style.setProperty("--target-x", `${targetX}px`);
+
+          // Random rotation for more natural falling effect
+          const randomRotation = -20 + Math.random() * 40;
+          img.style.setProperty("--rotate-deg", `${randomRotation}deg`);
+
+          // Apply animation with staggered delay
+          const delay = 0.1 + i * 0.02 + Math.random() * 0.1; // Add some randomness to delay
+
+          // Force a reflow again before adding the new animation
+          void img.offsetWidth;
+
+          img.style.animation = `cascadeOut 1.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards ${delay}s`;
+
+          // Ensure proper transform origin
+          img.style.transformOrigin = "center";
+        });
+      }, 600); // Wait for the transition to complete (0.5s + 0.1s buffer)
     } else {
       // For other steps, hide the absolute container
       absoluteContainer.style.display = "none";

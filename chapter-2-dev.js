@@ -49,8 +49,8 @@
   styleElement.textContent = `
     @keyframes pulsate {
       0% {
-        r: 5;
-        opacity: .8;
+        r: 10;
+        opacity: .3;
         stroke-width: 1;
       }
       
@@ -61,8 +61,8 @@
       }
       
       100% {
-        r: 5;
-        opacity: .8;
+        r: 10;
+        opacity: .3;
         stroke-width: 1;
       }
     }
@@ -222,25 +222,25 @@
         .attr("fill", "var(--color-base)")
         .attr("stroke", color(origin))
         .attr("stroke-width", 1.5)
-        .style("opacity", 0.9)
-        .on("mouseover", (event, d) => {
-          const customTooltips = {
-            "1890-1894": "custom text!",
-            // Add more year-bin keys as needed
-          };
-          const content =
-            origin === "INTERNAL" && d.year === "1900-1904"
-              ? '<img src="assets/image-test.png" style="max-width:150px; display:block;" />'
-              : customTooltips[d.year] || d.names.slice(0, 3).join("<br>");
-          tooltip.transition().duration(100).style("opacity", 0.9);
-          tooltip
-            .html(content)
-            .style("left", event.pageX + 10 + "px")
-            .style("top", event.pageY - 10 + "px");
-        })
-        .on("mouseout", () => {
-          tooltip.transition().duration(200).style("opacity", 0);
-        })
+        .style("opacity", 0.0)
+        // .on("mouseover", (event, d) => {
+        //   const customTooltips = {
+        //     "1890-1894": "custom text!",
+        //     // Add more year-bin keys as needed
+        //   };
+        //   const content =
+        //     origin === "INTERNAL" && d.year === "1900-1904"
+        //       ? '<img src="assets/image-test.png" style="max-width:150px; display:block;" />'
+        //       : customTooltips[d.year] || d.names.slice(0, 3).join("<br>");
+        //   tooltip.transition().duration(100).style("opacity", 0.9);
+        //   tooltip
+        //     .html(content)
+        //     .style("left", event.pageX + 10 + "px")
+        //     .style("top", event.pageY - 10 + "px");
+        // })
+        // .on("mouseout", () => {
+        //   tooltip.transition().duration(200).style("opacity", 0);
+        // })
         .merge(hotspots)
         .transition()
         .duration(500)
@@ -479,7 +479,7 @@
 
     ///////////////////////////////////////////////////////////// ! Color Scales
     // Color scale for origin
-    const originColors = ["var(--color-teal)", "var(--color-orange)"];
+    const originColors = ["var(--color-orange)", "var(--color-teal)"];
 
     // Extended color scale for categories
     color = d3
@@ -615,140 +615,609 @@
     if (stepId === "samuel-smiles") {
       currentVisibleCount = 1;
       updateChart();
-      // After chart update, add pulsating effect to INTERNAL hotspot for 1855-1859
+
+      // Remove any existing image
+      d3.select("#smiles-image").remove();
+      d3.select("#smiles-connector").remove();
+
+      // After chart update, add pulsating effect to EXTERNAL hotspot for 1855-1859
       setTimeout(() => {
-        d3.selectAll(".hotspot-EXTERNAL")
-          .filter((d) => d.year === "1855-1859")
+        const hotspot = d3
+          .selectAll(".hotspot-EXTERNAL")
+          .filter((d) => d.year === "1855-1859");
+
+        // Add pulsating effect to the hotspot
+        hotspot
           .classed("hotspot-pulse", true)
           .style("stroke", color("EXTERNAL"))
-          .style("stroke-opacity", 0.7);
-      }, 600); // Small delay to ensure chart has updated
-    } else if (stepId === "turn-of-century") {
-      // Show all available years
-      currentVisibleCount = 8;
-      updateChart();
-      // Add pulsating effect to EXTERNAL hotspots from 1890-1899
-      setTimeout(() => {
-        d3.selectAll(".hotspot-EXTERNAL, .hotspot-INTERNAL")
-          .filter((d) => d.year === "1890-1894" || d.year === "1895-1899")
-          .classed("hotspot-pulse", true)
-          .style("stroke", function () {
-            return d3.select(this).classed("hotspot-EXTERNAL")
-              ? color("EXTERNAL")
-              : color("INTERNAL");
-          })
-          .style("stroke-opacity", 0.7);
-      }, 600);
-    } else if (stepId === "through-ww1") {
-      // Show years through World War I
-      currentVisibleCount = 11;
-      updateChart();
+          .style("stroke-opacity", 0.7)
+          .style("opacity", 1) // Make hotspot fully visible
+          .attr("r", 8) // Increase the radius to make it more visible
+          .style("fill-opacity", 0.8); // Increase fill opacity for visibility
 
-      // Add pulsating effect to hotspots
-      setTimeout(() => {
-        // Add pulsating effect to both hotspots
-        const pulsatingHotspots = d3
-          .selectAll(".hotspot-EXTERNAL")
-          .filter((d) => d.year === "1905-1909" || d.year === "1910-1914")
-          .classed("hotspot-pulse", true)
-          .style("stroke", color("EXTERNAL"))
-          .style("stroke-opacity", 0.7);
+        // Get position of the hotspot for image placement
+        const hotspotNode = hotspot.node();
+        if (hotspotNode) {
+          const cx = parseFloat(hotspot.attr("cx"));
+          const cy = parseFloat(hotspot.attr("cy"));
+          const imageX = cx - 20;
+          const imageY = cy - 150;
 
-        // Only select the 1905-1909 hotspot for image placement
-        const targetHotspot = d3
-          .selectAll(".hotspot-EXTERNAL")
-          .filter((d) => d.year === "1905-1909")
-          .nodes()[0];
+          // Add the image next to the hotspot
+          svg
+            .append("image")
+            .attr("id", "smiles-image")
+            .attr("xlink:href", "assets/smiles.jpg")
+            .attr("x", imageX) // Position to the right of the hotspot
+            .attr("y", imageY) // Position centered vertically with the hotspot, adjusted for larger size
+            .attr("transform", "rotate(10)")
+            .attr("width", 250)
+            .attr("height", 250)
+            .style("opacity", 0)
+            .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))") // Add drop shadow
+            .transition()
+            .duration(1000)
+            .style("opacity", 0.85);
 
-        if (targetHotspot) {
-          // Get position relative to the SVG
-          const bbox = targetHotspot.getBoundingClientRect();
-          const svgRect = svg.node().getBoundingClientRect();
-
-          // Calculate position relative to the page
-          const x = bbox.x - svgRect.x + bbox.width + 10;
-          const y = bbox.y - svgRect.y - 75;
-
-          // Position the image next to the hotspot
-          d3.select("#chapter-2")
-            .append("img")
-            .attr("id", "step-image")
-            .attr("src", "assets/sample-books.png")
-            .style("width", "150px")
-            .style("position", "absolute")
-            .style("top", `${y}px`)
-            .style("left", `${x}px`);
+          // Add curved connector line from hotspot to image
+          svg
+            .append("path")
+            .attr("id", "smiles-connector")
+            .attr(
+              "d",
+              `M ${cx},${cy} Q ${cx + 30},${cy - 50} ${imageX + 125},${
+                imageY + 125
+              }`
+            )
+            .style("fill", "none")
+            .style("stroke", color("EXTERNAL"))
+            .style("stroke-width", 1.5)
+            .style("stroke-opacity", 0)
+            .style("stroke-dasharray", "5,3")
+            .transition()
+            .duration(1000)
+            .style("stroke-opacity", 0.6);
         }
-      }, 600);
+      }, 600); // Small delay to ensure chart has updated
     } else if (stepId === "post-20s") {
       // Show years through post-1920s
       currentVisibleCount = 16;
       updateChart();
-      // Add pulsating effect to both INTERNAL and EXTERNAL hotspots for 1920-1924
+
+      // Remove any existing images and videos
+      // Remove any existing connector lines
+      d3.select("#smiles-connector").remove();
+      d3.select("#smiles-image").remove();
+      d3.select("#conquest-image").remove();
+      d3.select("#carnegie-image").remove();
+      d3.select("#napoleon-image").remove();
+      d3.select("#depression-video").remove();
+
+      // Get the figure container
+      const figure = d3.select("#figure-container");
+
+      // Create the gasmask image element
+      svg
+        .append("image")
+        .attr("id", "gasmask-image")
+        .attr("xlink:href", "assets/gasmask.png")
+        .attr("x", width / 2.3) // Position it horizontally centered
+        .attr("y", height * 0.67) // Position it 10% from bottom of screen
+        .attr("width", 300) // Set appropriate size
+        .attr("height", 300) // Set appropriate size
+        .style("opacity", 0) // Start invisible for fade-in
+        .style("z-index", "1")
+        .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
+
+      // Then fade it in (this is the existing code)
+      d3.select("#gasmask-image")
+        .transition()
+        .duration(1000)
+        .style("opacity", 1);
+
+      // // Create a video element with low opacity
+      // const videoBackground = figure
+      //   .append("video")
+      //   .attr("id", "depression-video")
+      //   .attr("src", "assets/depression.mp4")
+      //   .attr("playsinline", "")
+      //   .attr("loop", "")
+      //   .attr("muted", "")
+      //   .property("muted", true) // Ensure muted property is set
+      //   .style("position", "absolute")
+      //   .style("bottom", "0")
+      //   .style("left", "-10")
+      //   .style("width", "120%")
+      //   .style("height", "120%")
+      //   .style("object-fit", "cover")
+      //   .style("z-index", "-1")
+      //   .style("opacity", "0") // Start with opacity 0 for fade-in
+      //   .transition() // Add transition for fade-in effect
+      //   .duration(1000) // 1 second fade-in
+      //   .style("opacity", "0.08");
+
+      // // Set video to play without requiring user interaction
+      // // This uses the fact that muted videos can autoplay
+      // const videoElement = videoBackground.node();
+      // videoElement.defaultMuted = true;
+
+      // // Try different methods to start the video
+      // videoElement.load();
+
+      // // Use a promise to handle the play attempt
+      // const playPromise = videoElement.play();
+      // if (playPromise !== undefined) {
+      //   playPromise
+      //     .then(() => {
+      //       // Video playback started successfully
+      //       console.log("Video playing successfully");
+      //     })
+      //     .catch((error) => {
+      //       // Auto-play was prevented
+      //       console.log("Video autoplay prevented:", error);
+      //       // We'll still show the video, it just won't autoplay
+      //     });
+      // }
+
+      // Add hover effect to INTERNAL hotspots for 1900-1904, 1920-1924, and 1935-1939
       setTimeout(() => {
-        d3.selectAll(".hotspot-INTERNAL, .hotspot-EXTERNAL")
-          .filter((d) => d.year === "1935-1939")
+        // First, set all hotspots to opacity 0
+        d3.selectAll(".hotspot").style("opacity", 0);
+
+        // Then, make only the specific hotspots visible and add pulse effect
+        const hotspots = d3
+          .selectAll(".hotspot-INTERNAL")
+          .filter((d) =>
+            ["1900-1904", "1920-1924", "1935-1939"].includes(d.year)
+          )
           .classed("hotspot-pulse", true)
-          .style("stroke", function () {
-            return d3.select(this).attr("fill");
-          })
-          .style("stroke-opacity", 0.7);
-      }, 600);
-    } else if (stepId === "post-ww2") {
-      // Show years through post-1940s
-      currentVisibleCount = 23;
-      updateChart();
-      // Add pulsating effect to EXTERNAL hotspots for 1945-1949
-      setTimeout(() => {
-        d3.selectAll(".hotspot-EXTERNAL")
-          .filter((d) => d.year === "1970-1974")
-          .classed("hotspot-pulse", true)
-          .style("stroke", color("EXTERNAL"))
-          .style("stroke-opacity", 0.7);
+          .style("stroke", color("INTERNAL"))
+          .style("stroke-opacity", 0.7)
+          .style("opacity", 0.9); // Make visible again
+
+        // Set up hover interactions for each hotspot
+        hotspots.each(function (d) {
+          const hotspot = d3.select(this);
+          const cx = parseFloat(hotspot.attr("cx"));
+          const cy = parseFloat(hotspot.attr("cy"));
+
+          let imageFile, imageId, rotation, width, height, xOffset, yOffset;
+
+          if (d.year === "1900-1904") {
+            imageFile = "conquest.jpg";
+            imageId = "conquest-image";
+            rotation = -8;
+            width = 150;
+            height = 250;
+            xOffset = -170;
+            yOffset = -180;
+          } else if (d.year === "1920-1924") {
+            imageFile = "napoleon.jpg";
+            imageId = "napoleon-image";
+            rotation = 5;
+            width = 240;
+            height = 260;
+            xOffset = -240;
+            yOffset = -240;
+          } else if (d.year === "1935-1939") {
+            imageFile = "carnegie.jpg";
+            imageId = "carnegie-image";
+            rotation = 3;
+            width = 150;
+            height = 230;
+            xOffset = -180;
+            yOffset = 10;
+          }
+
+          // Calculate positions for connector and image
+          const connectorId = `${imageId}-connector`;
+          const imageX = cx + xOffset + width / 2;
+          const imageY = cy + yOffset + height / 2;
+
+          // Create a curved path from hotspot to image
+          const path = d3.path();
+          path.moveTo(cx, cy);
+
+          // Calculate control point for curve (midpoint with offset)
+          const midX = (cx + imageX) / 2;
+          const midY = (cy + imageY) / 2;
+          const curveFactor = 30; // Adjust for more or less curve
+
+          // Add a slight curve to the connector line
+          path.quadraticCurveTo(
+            midX + (d.year === "1935-1939" ? -curveFactor : curveFactor),
+            midY + (d.year === "1935-1939" ? curveFactor : -curveFactor),
+            imageX,
+            imageY
+          );
+
+          // Add the connector line (initially hidden)
+          const connector = svg
+            .append("path")
+            .style("z-index", "0")
+            .attr("id", connectorId)
+            .attr("d", path.toString())
+            .attr("stroke", color("INTERNAL"))
+            .attr("stroke-width", 2)
+            .attr("fill", "none")
+            .attr("stroke-dasharray", "5,5")
+            .style("opacity", 0);
+
+          // Add the image (initially hidden)
+          const image = svg
+            .append("image")
+            .attr("id", imageId)
+            .attr("xlink:href", `assets/${imageFile}`)
+            .attr("x", cx + xOffset)
+            .attr("y", cy + yOffset)
+            .attr("transform", `rotate(${rotation}, ${cx}, ${cy})`)
+            .attr("width", width)
+            .attr("height", height)
+            .style("opacity", 0)
+            .style("z-index", "1")
+            .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
+
+          // Add hover event listeners
+          hotspot
+            .on("mouseenter", function () {
+              // Immediately stop any ongoing transitions
+              connector.interrupt();
+              image.interrupt();
+
+              // Set initial state to prevent flicker
+              connector.style("opacity", 0.7);
+              image.style("opacity", 0.85);
+
+              // Apply animations after ensuring stable state
+              connector
+                .transition()
+                .duration(300)
+                .ease(d3.easeBounce)
+                .style("opacity", 0.7);
+
+              image
+                .transition()
+                .duration(500)
+                .ease(d3.easeElastic)
+                .style("opacity", 0.85);
+            })
+            .on("mouseleave", function () {
+              // Immediately stop any ongoing transitions
+              connector.interrupt();
+              image.interrupt();
+
+              // Hide connector and image on mouse leave
+              connector.transition().duration(300).style("opacity", 0);
+              image.transition().duration(300).style("opacity", 0);
+            });
+        });
       }, 600);
     }
     // neoliberal-shift that takes us to visible count through 1994, which is visible count of 26
     else if (stepId === "neoliberal-shift") {
       currentVisibleCount = 26;
       updateChart();
-      // Add pulsating effect to INTERNAL hotspots for 1980-1994
+      // Remove any existing images
+      d3.select("#smiles-image").remove();
+      d3.select("#conquest-image").remove();
+      d3.select("#carnegie-image").remove();
+      d3.select("#napoleon-image").remove();
+      d3.select("#smiles-image").remove();
+      d3.select("#fear-image").remove();
+      d3.select("#effective-image").remove();
+      // remove gasmask image
+      d3.select("#gasmask-image").remove();
+      // Remove any existing videos from previous steps
+      d3.select("#depression-video")
+        .transition()
+        .duration(300)
+        .style("opacity", 0)
+        .on("end", function () {
+          d3.select(this).remove();
+        });
+      // Add pulsating effect to INTERNAL hotspots for specific years
       setTimeout(() => {
-        d3.selectAll(".hotspot-INTERNAL")
+        // First, set all hotspots to opacity 0
+        d3.selectAll(".hotspot").style("opacity", 0);
+
+        // Then, make only the specific hotspots visible and add pulse effect
+        const pulsatingHotspots = d3
+          .selectAll(".hotspot-INTERNAL")
           .filter((d) =>
-            ["1980-1984", "1985-1989", "1990-1994"].includes(d.year)
+            ["1965-1969", "1975-1979", "1985-1989"].includes(d.year)
           )
           .classed("hotspot-pulse", true)
           .style("stroke", color("INTERNAL"))
-          .style("stroke-opacity", 0.7);
-      }, 600);
-    } else if (stepId === "self-as-battlefield") {
-      // Show years through 1994
-      currentVisibleCount = 26;
-      updateChart();
-      // Add pulsating effect to both INTERNAL and EXTERNAL hotspots for 1990-1994
-      setTimeout(() => {
-        d3.selectAll(".hotspot-INTERNAL, .hotspot-EXTERNAL")
-          .filter((d) => d.year === "1990-1994")
-          .classed("hotspot-pulse", true)
-          .style("stroke", function () {
-            return d3.select(this).attr("fill");
-          })
-          .style("stroke-opacity", 0.7);
+          .style("stroke-opacity", 0.7)
+          .style("opacity", 0.9); // Make visible again
+
+        // Set up hover interactions for each hotspot
+        pulsatingHotspots.each(function (d) {
+          const hotspot = d3.select(this);
+          const cx = parseFloat(hotspot.attr("cx"));
+          const cy = parseFloat(hotspot.attr("cy"));
+
+          let imageFile, imageId, rotation, width, height, xOffset, yOffset;
+
+          if (d.year === "1965-1969") {
+            imageFile = "bodies.jpg";
+            imageId = "bodies-image";
+            rotation = -5;
+            width = 180;
+            height = 240;
+            xOffset = -200;
+            yOffset = -180;
+          } else if (d.year === "1975-1979") {
+            imageFile = "fear.jpg";
+            imageId = "fear-image";
+            rotation = 3;
+            width = 160;
+            height = 230;
+            xOffset = -180;
+            yOffset = -200;
+          } else if (d.year === "1985-1989") {
+            imageFile = "effective.jpg";
+            imageId = "effective-image";
+            rotation = 4;
+            width = 170;
+            height = 220;
+            xOffset = -190;
+            yOffset = -200;
+          }
+
+          // Calculate positions for connector and image
+          const connectorId = `${imageId}-connector`;
+          const imageX = cx + xOffset + width / 2;
+          const imageY = cy + yOffset + height / 2;
+
+          // Create a curved path from hotspot to image
+          const path = d3.path();
+          path.moveTo(cx, cy);
+
+          // Calculate control point for curve (midpoint with offset)
+          const midX = (cx + imageX) / 2;
+          const midY = (cy + imageY) / 2;
+          const curveFactor = 30; // Adjust for more or less curve
+
+          // Add a slight curve to the connector line
+          path.quadraticCurveTo(
+            midX + curveFactor,
+            midY - curveFactor,
+            imageX,
+            imageY
+          );
+
+          // Add the connector line (initially hidden)
+          const connector = svg
+            .append("path")
+            .style("z-index", "0")
+            .attr("id", connectorId)
+            .attr("d", path.toString())
+            .attr("stroke", color("INTERNAL"))
+            .attr("stroke-width", 2)
+            .attr("fill", "none")
+            .attr("stroke-dasharray", "5,5")
+            .style("opacity", 0);
+
+          // Add the image (initially hidden)
+          const image = svg
+            .append("image")
+            .attr("id", imageId)
+            .attr("xlink:href", `assets/${imageFile}`)
+            .attr("x", cx + xOffset)
+            .attr("y", cy + yOffset)
+            .attr("transform", `rotate(${rotation}, ${cx}, ${cy})`)
+            .attr("width", width)
+            .attr("height", height)
+            .style("opacity", 0)
+            .style("z-index", "1")
+            .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
+
+          // Add hover event listeners
+          hotspot
+            .on("mouseenter", function () {
+              // Immediately stop any ongoing transitions
+              connector.interrupt();
+              image.interrupt();
+
+              // Set initial state to prevent flicker
+              connector.style("opacity", 0.7);
+              image.style("opacity", 0.85);
+
+              // Apply animations after ensuring stable state
+              connector
+                .transition()
+                .duration(300)
+                .ease(d3.easeBounce)
+                .style("opacity", 0.7);
+
+              image
+                .transition()
+                .duration(500)
+                .ease(d3.easeElastic)
+                .style("opacity", 0.85);
+            })
+            .on("mouseleave", function () {
+              // Immediately stop any ongoing transitions
+              connector.interrupt();
+              image.interrupt();
+
+              // Hide connector and image on mouse leave
+              connector.transition().duration(300).style("opacity", 0);
+
+              image.transition().duration(300).style("opacity", 0);
+            });
+        });
       }, 600);
     } else if (stepId === "all-years") {
       // Show all available years
       currentVisibleCount = years.length;
       updateChart();
-      // Add pulsating effect to the most recent year for both origins
+      // Remove any existing images
+      d3.select("#smiles-image").remove();
+      d3.select("#conquest-image").remove();
+      d3.select("#carnegie-image").remove();
+      d3.select("#napoleon-image").remove();
+      d3.select("#fear-image").remove();
+      d3.select("#effective-image").remove();
+      d3.select("#bodies-image").remove();
+      // remove connector lines
+      d3.selectAll(".connector-line").remove();
+
+      // Set up images with connectors on hover
       setTimeout(() => {
-        const lastYear = years[years.length - 2];
-        d3.selectAll(".hotspot-INTERNAL, .hotspot-EXTERNAL")
-          .filter((d) => d.year === lastYear)
-          .classed("hotspot-pulse", true)
-          .style("stroke", function () {
-            return d3.select(this).attr("fill");
-          })
-          .style("stroke-opacity", 0.7);
+        // First, set all hotspots to opacity 0
+        d3.selectAll(".hotspot").style("opacity", 0);
+
+        // Define the image data for each time period
+        const imageData = [
+          {
+            year: "2010-2014",
+            imageFile: "bed.jpg",
+            id: "bed-image",
+            origin: "INTERNAL",
+            rotation: 5,
+            width: 180,
+            height: 240,
+            xOffset: -200,
+            yOffset: -50,
+          },
+          {
+            year: "2005-2009",
+            imageFile: "bitch.jpg",
+            id: "bitch-image",
+            origin: "INTERNAL",
+            rotation: -3,
+            width: 160,
+            height: 230,
+            xOffset: -180,
+            yOffset: -200,
+          },
+          {
+            year: "2015-2019",
+            imageFile: "12rules.jpg",
+            id: "rules-image",
+            origin: "INTERNAL",
+            rotation: 4,
+            width: 170,
+            height: 220,
+            xOffset: -290,
+            yOffset: -100,
+          },
+        ];
+
+        // For each image, find the corresponding hotspot and add hover effects
+        imageData.forEach(
+          ({
+            year,
+            imageFile,
+            id,
+            origin,
+            rotation,
+            width,
+            height,
+            xOffset,
+            yOffset,
+          }) => {
+            // Find hotspots for this year and origin
+            d3.selectAll(`.hotspot-${origin}`)
+              .filter((d) => d.year === year)
+              .each(function () {
+                const hotspot = d3.select(this);
+                const cx = parseFloat(hotspot.attr("cx"));
+                const cy = parseFloat(hotspot.attr("cy"));
+
+                // Make this hotspot visible and add pulse effect
+                hotspot
+                  .classed("hotspot-pulse", true)
+                  .style("opacity", 0.9)
+                  .style("stroke", color(origin))
+                  .style("stroke-opacity", 0.7);
+
+                // Calculate positions for connector and image
+                const connectorId = `${id}-connector`;
+                const imageX = cx + xOffset + width / 2;
+                const imageY = cy + yOffset + height / 2;
+
+                // Create a curved path from hotspot to image
+                const path = d3.path();
+                path.moveTo(cx, cy);
+
+                // Calculate control point for curve (midpoint with offset)
+                const midX = (cx + imageX) / 2;
+                const midY = (cy + imageY) / 2;
+                const curveFactor = 30; // Adjust for more or less curve
+
+                // Add a slight curve to the connector line
+                path.quadraticCurveTo(
+                  midX + curveFactor,
+                  midY - curveFactor,
+                  imageX,
+                  imageY
+                );
+
+                // Add the connector line (initially hidden)
+                const connector = svg
+                  .append("path")
+                  .attr("class", "connector-line")
+                  .attr("id", connectorId)
+                  .attr("d", path.toString())
+                  .attr("stroke", color(origin))
+                  .attr("stroke-width", 2)
+                  .attr("fill", "none")
+                  .attr("stroke-dasharray", "5,5")
+                  .style("opacity", 0);
+
+                // Add the image (initially hidden)
+                const image = svg
+                  .append("image")
+                  .attr("id", id)
+                  .attr("xlink:href", `assets/${imageFile}`)
+                  .attr("x", cx + xOffset)
+                  .attr("y", cy + yOffset)
+                  .attr("transform", `rotate(${rotation}, ${cx}, ${cy})`)
+                  .attr("width", width)
+                  .attr("height", height)
+                  .style("opacity", 0)
+                  .style("z-index", "1")
+                  .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
+
+                // Add hover event listeners
+                hotspot
+                  .on("mouseenter", function () {
+                    // Immediately stop any ongoing transitions
+                    connector.interrupt();
+                    image.interrupt();
+
+                    // Set initial state to prevent flicker
+                    connector.style("opacity", 0.7);
+                    image.style("opacity", 0.85);
+
+                    // Apply animations after ensuring stable state
+                    connector
+                      .transition()
+                      .duration(300)
+                      .ease(d3.easeBounce)
+                      .style("opacity", 0.7);
+
+                    image
+                      .transition()
+                      .duration(500)
+                      .ease(d3.easeElastic)
+                      .style("opacity", 0.85);
+                  })
+                  .on("mouseleave", function () {
+                    // Immediately stop any ongoing transitions
+                    connector.interrupt();
+                    image.interrupt();
+
+                    // Hide connector and image on mouse leave
+                    connector.transition().duration(300).style("opacity", 0);
+                    image.transition().duration(300).style("opacity", 0);
+                  });
+              });
+          }
+        );
       }, 600);
     }
   });
