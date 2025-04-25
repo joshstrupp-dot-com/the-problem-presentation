@@ -18,12 +18,6 @@
     if (!allAuthorData || allAuthorData.length === 0) return [];
 
     switch (stepId) {
-      case "the-secret":
-        return allAuthorData.map((d) => {
-          // Highlight "The Secret" author (Rhonda Byrne)
-          d.highlighted = d.author_clean === "Rhonda Byrne";
-          return d;
-        });
       case "earned-credibility":
         return allAuthorData.map((d) => {
           d.highlighted =
@@ -39,11 +33,7 @@
             d.author_clean === "P.T. Barnum";
           return d;
         });
-      case "bibliotherapy":
-        return allAuthorData.map((d) => {
-          d.highlighted = d.bt_count >= 1;
-          return d;
-        });
+
       default:
         return allAuthorData;
     }
@@ -140,68 +130,24 @@
 
       ///////////////////////////////////////////////////////////// ! Camera Positioning
       // Set specific camera position for steps
-      if (stepId === "the-secret") {
-        layout.scene.camera = {
-          center: {
-            x: -0.02872391965685726,
-            y: 0.0984779590366186,
-            z: -0.1589975536559734,
-          },
-          eye: {
-            x: 0.16537051999361835,
-            y: 0.4324496308738745,
-            z: 0.012789338634007247,
-          },
-          up: {
-            x: -0.0049316314146487635,
-            y: 0.002874487571948146,
-            z: 0.9999837081237974,
-          },
-        };
-      } else if (stepId === "earned-credibility") {
-        layout.scene.camera = {
-          center: {
-            x: 0.24002179524366402,
-            y: 0.019691129043068713,
-            z: 0.15702536208015727,
-          },
-          eye: {
-            x: -0.34537609362768534,
-            y: 0.8232176147970166,
-            z: 1.434816476508483,
-          },
-          up: {
-            x: -0.05679119061976506,
-            y: 0.047866731273655566,
-            z: 0.9972379539032624,
-          },
-        };
-      } else if (stepId === "low-credibility") {
-        layout.scene.camera = {
-          center: {
-            x: 0.23527415804782587,
-            y: 0.15659747965894885,
-            z: -0.5702677770421271,
-          },
-          eye: {
-            x: 0.5960229081108494,
-            y: 0.7773255383359325,
-            z: -0.25098038237298147,
-          },
-          up: {
-            x: 0,
-            y: 0,
-            z: 1,
-          },
-        };
-      } else if (stepId === "bibliotherapy") {
-        // Zoom out to default overview and highlight bibliotherapy authors
-        layout.scene.camera = {
-          center: { x: 0, y: 0, z: 0 },
-          eye: { x: 1.5, y: 1.5, z: 1.5 },
-          up: { x: 0, y: 0, z: 1 },
-        };
-      }
+      // Use the same camera position for all steps
+      layout.scene.camera = {
+        center: {
+          x: 0.3487183886806972,
+          y: 0.2648659619748207,
+          z: -0.133097816787365,
+        },
+        eye: {
+          x: -1.2115474570501374,
+          y: 1.8512747823703717,
+          z: 1.3530130180083257,
+        },
+        up: {
+          x: 0.338273785959222,
+          y: -0.444374857260449,
+          z: 0.8295190365311517,
+        },
+      };
 
       ///////////////////////////////////////////////////////////// ! Responsive Behavior
       // Add window resize event handler for responsive behavior
@@ -214,30 +160,30 @@
 
       // Reference the graph div
       const graphDiv = document.getElementById("chapter-3-3d");
-      // If already plotted, animate camera; otherwise do a fresh plot
+
+      // If already plotted, only update the marker styling
       if (graphDiv && graphDiv._fullLayout && graphDiv._fullLayout.scene) {
-        // Animate only the camera movement
-        Plotly.animate(
-          "chapter-3-3d",
-          {
-            layout: { scene: { camera: layout.scene.camera } },
-          },
-          {
-            transition: { duration: 10000, easing: "cubic-in-out" }, //transition will take 10 seconds
-          }
-        );
-        Plotly.restyle(
-          "chapter-3-3d",
-          {
-            "marker.size": [plotData[0].marker.size],
-            "marker.color": [plotData[0].marker.color],
-            "marker.opacity": [plotData[0].marker.opacity],
-            "marker.line.color": [plotData[0].marker.line.color],
-            "marker.line.width": [plotData[0].marker.line.width],
-          },
-          [0]
-        );
+        Plotly.restyle("chapter-3-3d", {
+          "marker.size": [data.map((d) => (d.highlighted ? 25 : 8))],
+          "marker.color": [
+            data.map((d) => {
+              if (d.author_clean === "Gabor Maté") {
+                return "url(assets/authors/gabor-mate.jpeg)";
+              }
+              return d.highlighted ? "var(--color-yellow)" : "#e1d6c2";
+            }),
+          ],
+          "marker.opacity": [data.map((d) => opacityScale(d.avg_star_rating))],
+          "marker.line.color": [
+            data.map((d) => {
+              if (d.highlighted) return "black";
+              return d.bt_count > 0 ? "var(--color-teal)" : "rgba(0,0,0,0)";
+            }),
+          ],
+          "marker.line.width": [data.map((d) => (d.highlighted ? 2 : 1))],
+        });
       } else {
+        // Initial plot creation
         Plotly.newPlot("chapter-3-3d", plotData, layout);
       }
 

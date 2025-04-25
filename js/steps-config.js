@@ -21,7 +21,7 @@ const stepsConfig = [
 
   {
     id: "quick-fixes",
-    text: "Life can really suck. Advice can help. And there is no shortage of advice.You’re one Amazon order from never aging again. You’re 8 minutes from knowing all of Wall Street’s secrets.",
+    text: "Life can really suck. Advice can help. And there is no shortage of advice.You're one Amazon order from never aging again. You're 8 minutes from knowing all of Wall Street's secrets.",
     fullwidth: true,
     fadeIn: true,
     fadeOut: true,
@@ -471,7 +471,7 @@ const stepsConfig = [
   },
   {
     id: "external-internal",
-    text: "THE WORLD — think society, family, metaphysics. <br><br> YOU — think self-esteem, willpower, internalized doubt",
+    text: "THE WORLD — think society, family, metaphysics. <br><br> YOU — think self-esteem, willpower, internalized doubt",
     fullwidth: true,
     fadeOut: true,
     render: () => {
@@ -723,25 +723,30 @@ const stepsConfig = [
     text: "If we expand this visualization to include another metric, credibility score, we can see those at the top are people like Elisabeth Kübler-Ross, who gave us the Five Stages of Grief, and Dr. Gabor Maté, whose writing on addiction has helped tens of millions.",
     fullwidth: true,
     fadeIn: true,
-    fadeOut: true,
+    fadeOut: false,
     render: () => {
-      // Clear existing content
-      const figure = d3.select("#figure-container");
-      figure.html("");
+      // Only create the container if it doesn't exist
+      let vizContainer = d3.select("#chapter-3-3d");
+      if (vizContainer.empty()) {
+        const figure = d3.select("#figure-container");
+        figure.html("");
 
-      // Create a container for the chapter-3-3d visualization
-      const vizContainer = figure
-        .append("div")
-        .attr("id", "chapter-3-3d")
-        .style("width", "100%")
-        .style("height", "100%");
+        vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-3-3d")
+          .style("width", "100%")
+          .style("height", "100%");
 
-      // Load and execute chapter-3-3d.js
-      const script = document.createElement("script");
-      script.src = "chapter-3-3d.js";
-      document.body.appendChild(script);
+        // Load and execute chapter-3-3d.js only if not already loaded
+        if (!window.chapter3_3d_loaded) {
+          const script = document.createElement("script");
+          script.src = "chapter-3-3d.js";
+          document.body.appendChild(script);
+          window.chapter3_3d_loaded = true;
+        }
+      }
 
-      // Dispatch an initialization event
+      // Dispatch the visualization update
       setTimeout(() => {
         document.dispatchEvent(
           new CustomEvent("visualizationUpdate", {
@@ -755,8 +760,10 @@ const stepsConfig = [
     id: "l-ron-hubbard",
     text: "On the other hand, you have authors like L. Ron Hubbard, the founder of Scientology, and Kevin Trudeau, a literal convicted felon because his self help series was actually a pyramid scheme, and PT Barnum, the showman who once sewed a monkey torso to a fish tail and convinced audiences it was a mermaid. He sold books about personal finance.",
     fullwidth: true,
+    fadeIn: false,
+    fadeOut: false,
     render: () => {
-      // Update the existing visualization
+      // Simply update the visualization state
       document.dispatchEvent(
         new CustomEvent("visualizationUpdate", {
           detail: { step: "low-credibility" },
