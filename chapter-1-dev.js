@@ -560,13 +560,28 @@
           // Apply transition with delay
           const withinBatchDelay = Math.random() * 130; // Reduce from 400ms to 130ms
 
+          // Get the data associated with this node
+          const nodeData = d3.select(node.element).datum();
+
+          // Determine the target color based on category
+          let targetColor = "var(--color-base-darker)";
+          if (nodeData && nodeData.key_cat_primary_agg) {
+            if (selfHelpCategories.includes(nodeData.key_cat_primary_agg)) {
+              targetColor = "var(--color-orange)";
+            } else if (otherCategories.includes(nodeData.key_cat_primary_agg)) {
+              targetColor = "var(--color-teal)";
+            }
+          }
+
+          // Apply both position and color transitions simultaneously
           d3.select(node.element)
             .transition()
             .delay(batchDelay + withinBatchDelay)
             .duration(80) // Reduce from 100ms to 80ms
             .ease(d3.easeQuadOut) // Change to slightly faster easing
             .attr("x", targetX - rectWidth / 2)
-            .attr("y", targetY - rectHeight / 2);
+            .attr("y", targetY - rectHeight / 2)
+            .attr("fill", targetColor);
         }
       }
 
@@ -603,24 +618,132 @@
           .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
       });
     } else if (stepId === "external-internal") {
-      // Apply color changes immediately based on category
-      g.selectAll("rect").attr("fill", function (d) {
-        if (
-          d &&
-          d.key_cat_primary_agg &&
-          selfHelpCategories.includes(d.key_cat_primary_agg)
-        ) {
-          return "var(--color-teal)";
-        } else if (
-          d &&
-          d.key_cat_primary_agg &&
-          otherCategories.includes(d.key_cat_primary_agg)
-        ) {
-          return "var(--color-orange)";
+      console.log("external-internal step is now combined with intro-2");
+    } else if (stepId === "external-internal-sort") {
+      // Define positions for the two piles on the right half of the screen
+      const worldPilePosition = {
+        x: chartWidth * 0.75, // 75% of the screen width (right half)
+        y: chartHeight * 0.4, // 40% of the screen height
+      };
+
+      const youPilePosition = {
+        x: chartWidth * 0.75, // 75% of the screen width (right half)
+        y: chartHeight * 0.6, // 60% of the screen height
+      };
+
+      // Remove any existing category labels
+      g.selectAll(".category-label").remove();
+
+      // Add labels for the two piles
+      g.append("foreignObject")
+        .attr("class", "category-label")
+        .attr("x", worldPilePosition.x - 100)
+        .attr("y", worldPilePosition.y - 50)
+        .attr("width", 200)
+        .attr("height", 40)
+        .html(
+          `<div style="
+          width: 100%;
+          text-align: center;
+          font-family: 'Andale Mono', monospace;
+          font-weight: 200;
+          font-size: 16px;
+          color: #000;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        ">THE WORLD</div>`
+        )
+        .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
+
+      g.append("foreignObject")
+        .attr("class", "category-label")
+        .attr("x", youPilePosition.x - 100)
+        .attr("y", youPilePosition.y - 50)
+        .attr("width", 200)
+        .attr("height", 40)
+        .html(
+          `<div style="
+          width: 100%;
+          text-align: center;
+          font-family: 'Andale Mono', monospace;
+          font-weight: 200;
+          font-size: 16px;
+          color: #000;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        ">YOU</div>`
+        )
+        .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
+
+      // Prepare nodes for positioning
+      const nodes = [];
+      g.selectAll("rect").each(function (d) {
+        if (!d) return; // Skip if no data
+
+        const rect = d3.select(this);
+        const currentFill = rect.attr("fill");
+
+        // Determine which pile this rectangle belongs to based on its color
+        let targetPile;
+        if (currentFill === "var(--color-teal)") {
+          targetPile = "world";
+        } else if (currentFill === "var(--color-orange)") {
+          targetPile = "you";
         } else {
-          return "var(--color-base-darker)";
+          // Skip rectangles that aren't teal or orange
+          return;
         }
+
+        // Store node data
+        nodes.push({
+          pile: targetPile,
+          element: this,
+          x: parseFloat(rect.attr("x")) + rectWidth / 2,
+          y: parseFloat(rect.attr("y")) + rectHeight / 2,
+        });
       });
+
+      // Apply positions with staggered movement in batches
+      const batchSize = 200;
+
+      // Process nodes in batches
+      for (
+        let batch = 0;
+        batch < Math.ceil(nodes.length / batchSize);
+        batch++
+      ) {
+        const start = batch * batchSize;
+        const end = Math.min(start + batchSize, nodes.length);
+
+        // Add a delay between batches
+        const batchDelay = batch * 70;
+
+        // Process this batch
+        for (let i = start; i < end; i++) {
+          const node = nodes[i];
+          const pos =
+            node.pile === "world" ? worldPilePosition : youPilePosition;
+
+          // Add random offset within the pile to create natural clustering
+          const offsetX = (Math.random() - 0.5) * 200;
+          const offsetY = (Math.random() - 0.5) * 100;
+
+          // Calculate target position
+          const targetX = pos.x + offsetX;
+          const targetY = pos.y + offsetY;
+
+          // Apply transition with delay
+          const withinBatchDelay = Math.random() * 130;
+
+          d3.select(node.element)
+            .transition()
+            .delay(batchDelay + withinBatchDelay)
+            .duration(80)
+            .ease(d3.easeQuadOut)
+            .attr("x", targetX - rectWidth / 2)
+            .attr("y", targetY - rectHeight / 2);
+        }
+      }
     } else if (stepId === "goodreads-data") {
       // Remove our visualization when moving to the next section
       const chapter1Div = document.getElementById("chapter-1");

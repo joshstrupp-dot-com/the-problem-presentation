@@ -487,7 +487,7 @@ const stepsConfig = [
     },
   },
   {
-    id: "external-internal",
+    id: "external-internal-sort",
     text: "THE WORLD — think society, family, metaphysics. <br><br> YOU — think self-esteem, willpower, internalized doubt",
     fullwidth: true,
     fadeOut: true,
@@ -495,7 +495,7 @@ const stepsConfig = [
       // Empty placeholder for this step
       document.dispatchEvent(
         new CustomEvent("visualizationUpdate", {
-          detail: { step: "external-internal" },
+          detail: { step: "external-internal-sort" },
         })
       );
     },
