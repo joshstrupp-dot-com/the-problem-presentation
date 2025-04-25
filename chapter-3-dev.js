@@ -85,7 +85,7 @@
           d.author_clean === "James Clear" ||
           d.author_clean === "Brené Brown" ||
           d.author_clean === "Michelle Obama" ||
-          d.author_clean === "Arnold Schwarzenegger" ||
+          // d.author_clean === "Arnold Schwarzenegger" ||
           d.author_clean === "Oprah Winfrey" ||
           d.author_clean === "Matthew McConaughey";
       });
@@ -93,7 +93,7 @@
       // For authors-3 step, animate another set of authors
       allAuthorData.forEach((d) => {
         d.shouldAnimate =
-          d.author_clean === "Deepak Chopra" ||
+          // d.author_clean === "Deepak Chopra" ||
           d.author_clean === "Jen Sincero" ||
           d.author_clean === "Donald J. Trump" ||
           d.author_clean === "Phillip C. McGraw";
@@ -218,14 +218,58 @@
         .attr("xlink:href", imgUrl);
     });
 
-    // Split data into regular and featured authors
+    // Split data into categories based on current state and animation
     const regularData = data.filter((d) => !d.isFeatured);
-    const featuredData = data.filter((d) => d.isFeatured);
 
-    // Update regular points using data join
+    // Featured authors that were previously animated but aren't in current step
+    const previouslyAnimatedData = data.filter((d) => {
+      if (!d.isFeatured || d.shouldAnimate) return false;
+
+      const author = d.author_clean;
+
+      // Authors from step 1 that should be featured in step 2 and 3
+      const step1Authors = [
+        "Matthew McConaughey",
+        "Jay Shetty",
+        "Rainn Wilson",
+        "Demi Lovato",
+        "Jillian Michaels",
+        "50 Cent",
+        "Michelle Obama",
+      ];
+
+      // Authors from step 2 that should be featured in step 3
+      const step2Authors = [
+        "Esther Hicks",
+        "James Clear",
+        "Brené Brown",
+        "Michelle Obama",
+        "Oprah Winfrey",
+        "Matthew McConaughey",
+      ];
+
+      if (stepId === "authors-2") {
+        return step1Authors.includes(author);
+      } else if (stepId === "authors-3") {
+        return step1Authors.includes(author) || step2Authors.includes(author);
+      }
+
+      return false;
+    });
+
+    // Currently animated featured authors
+    const animatedData = data.filter((d) => d.isFeatured && d.shouldAnimate);
+
+    // Featured authors that haven't been animated yet
+    const upcomingFeaturedData = data.filter(
+      (d) =>
+        d.isFeatured && !d.shouldAnimate && !previouslyAnimatedData.includes(d)
+    );
+
+    // First render regular points and upcoming featured points (as regular style)
     const regularPoints = svg
       .selectAll(".regular-point")
-      .data(regularData, (d) => d.author_clean); // Use author name as key for stable transitions
+      .data([...regularData, ...upcomingFeaturedData], (d) => d.author_clean);
 
     // Remove old points
     regularPoints.exit().remove();
@@ -239,7 +283,7 @@
     regularPointsEnter
       .append("circle")
       .attr("r", circleRadius)
-      .style("fill", "var(--color-base-darker)")
+      .style("fill", "var(--color-base-darker)") // All regular points start gray
       .style("opacity", 0.9)
       .style("stroke", "black")
       .style("stroke-opacity", 0.3)
@@ -256,21 +300,21 @@
           )})`
       );
 
-    // Update featured points using data join
-    const featuredPoints = svg
-      .selectAll(".featured-point")
-      .data(featuredData, (d) => d.author_clean); // Use author name as key for stable transitions
+    // Then render previously animated featured points
+    const previouslyFeaturedPoints = svg
+      .selectAll(".featured-point:not(.animated)")
+      .data(previouslyAnimatedData, (d) => d.author_clean);
 
     // Remove old featured points
-    featuredPoints.exit().remove();
+    previouslyFeaturedPoints.exit().remove();
 
     // Add new featured points
-    const featuredPointsEnter = featuredPoints
+    const previouslyFeaturedPointsEnter = previouslyFeaturedPoints
       .enter()
       .append("g")
       .attr("class", "featured-point data-point");
 
-    featuredPointsEnter
+    previouslyFeaturedPointsEnter
       .append("circle")
       .attr("r", featuredRadius)
       .style(
@@ -283,22 +327,59 @@
       .style("stroke-opacity", 0.3)
       .style("stroke-width", 1);
 
-    // Update all featured points with transitions
-    const allFeaturedPoints = featuredPoints.merge(featuredPointsEnter);
+    // Update all previously featured points
+    const allPreviouslyFeaturedPoints = previouslyFeaturedPoints.merge(
+      previouslyFeaturedPointsEnter
+    );
 
-    allFeaturedPoints.attr(
+    allPreviouslyFeaturedPoints.attr(
       "transform",
       (d) =>
         `translate(${xScale(d.avg_star_rating)},${yScale(d.author_num_books)})`
     );
 
-    // Update circle sizes with transitions
-    allFeaturedPoints
+    // Finally render currently animated featured points
+    const animatedPoints = svg
+      .selectAll(".featured-point.animated")
+      .data(animatedData, (d) => d.author_clean);
+
+    // Remove old animated points
+    animatedPoints.exit().remove();
+
+    // Add new animated points
+    const animatedPointsEnter = animatedPoints
+      .enter()
+      .append("g")
+      .attr("class", "featured-point animated data-point");
+
+    animatedPointsEnter
+      .append("circle")
+      .attr("r", circleRadius) // Start at regular size
+      .style("fill", "var(--color-base-darker)") // Start with regular style
+      .style("opacity", 0.9)
+      .style("stroke", "black")
+      .style("stroke-opacity", 0.3)
+      .style("stroke-width", 1);
+
+    // Update all animated points with transitions
+    const allAnimatedPoints = animatedPoints.merge(animatedPointsEnter);
+
+    allAnimatedPoints.attr(
+      "transform",
+      (d) =>
+        `translate(${xScale(d.avg_star_rating)},${yScale(d.author_num_books)})`
+    );
+
+    // Animate to large size and change to image
+    allAnimatedPoints
       .select("circle")
       .transition()
       .duration(1000)
-      .attr("r", (d) =>
-        d.shouldAnimate ? featuredRadius * 3 : featuredRadius
+      .attr("r", featuredRadius * 3)
+      .style(
+        "fill",
+        (d) =>
+          `url(#pattern-${d.author_clean.toLowerCase().replace(/\s+/g, "-")})`
       );
 
     // Add mouseover and mouseout events to all points
