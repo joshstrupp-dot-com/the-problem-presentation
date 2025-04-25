@@ -578,34 +578,7 @@ const stepsConfig = [
       );
     },
   },
-  // {
-  //   id: "post-20s",
-  //   text: "This is the moment where American self help books begin to emphesize the power of the mind; the inward shift from life's unpredictability to the control we have over it.",
-  //   fullwidth: true,
-  //   customClass: "emphasis-step",
-  //   render: () => {
-  //     // Just update the existing visualization
-  //     document.dispatchEvent(
-  //       new CustomEvent("visualizationUpdate", {
-  //         detail: { step: "post-20s" },
-  //       })
-  //     );
-  //   },
-  // },
-  // {
-  //   id: "post-ww2",
-  //   text: "Despite selling millions, the books that indicate your problems come from<span style='color: var(--color-teal);'>you</span> were no match for those that blame <span style='color: var(--color-orange);'>the world</span> books that, once again, reflected the powerlessness that comes from genocide and nuclear doom. <br><br>We look to God. We find meaning in our relationships. We don't focus on ourselves, we focus on our community and our country.",
 
-  //   fullwidth: true,
-  //   render: () => {
-  //     // Just update the existing visualization
-  //     document.dispatchEvent(
-  //       new CustomEvent("visualizationUpdate", {
-  //         detail: { step: "post-ww2" },
-  //       })
-  //     );
-  //   },
-  // },
   {
     id: "neoliberal-shift",
     text: "Eventually we get to the “Me Decade.” Flower power blossomed and Watergate sowed doubt, Reagan Era neoliberalism was on the rise. “YOU can take care of yourself” became the common sentiment. Suddenly, book shelves saw fewer guides to changing the world, and more manuals for changing yourself.",
@@ -619,19 +592,7 @@ const stepsConfig = [
       );
     },
   },
-  // {
-  //   id: "self-as-battlefield",
-  //   text: 'People no longer saw their suffering as something society could heal.\nThey began to ask "What\'s wrong with me?" instead of "What\'s wrong with us?"\nAnd the American psyche—once aimed outward at enemies, causes, or institutions—started treating the self as both battlefield and solution.',
-  //   fullwidth: true,
-  //   render: () => {
-  //     // Just update the existing visualization
-  //     document.dispatchEvent(
-  //       new CustomEvent("visualizationUpdate", {
-  //         detail: { step: "neoliberal-shift" },
-  //       })
-  //     );
-  //   },
-  // },
+
   {
     id: "all-years",
     text: "The gap finally closes as we enter the 21st century. Self-help pivots toward coping and finding resilience within yourself. Many authors push “personal hustle” as a response to economic insecurity, or “leaning in” first, addressing sexism second.",

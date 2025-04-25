@@ -69,12 +69,14 @@
           z: data.map((d) => d.avg_cred_score),
           mode: "markers",
           type: "scatter3d",
+          showlegend: false,
           text: data.map((d) => d.author_clean),
           hovertemplate:
             "<b>%{text}</b><br>" +
             "Books: %{x}<br>" +
             "Rating: %{y}<br>" +
-            "Cred Score: %{z}<br>",
+            "Cred Score: %{z}<br>" +
+            "<extra></extra>",
           marker: {
             size: data.map((d) => (d.highlighted ? 25 : 8)),
             color: data.map((d) => {
@@ -99,7 +101,8 @@
         autosize: true,
         height: chapter3_3dDiv.clientHeight,
         width: chapter3_3dDiv.clientWidth,
-        paper_bgcolor: "#f2efe9", // Set background color
+        showlegend: false,
+        paper_bgcolor: "#f2efe9",
         plot_bgcolor: "#f2efe9",
         scene: {
           xaxis: {
