@@ -180,62 +180,19 @@
           .attr("stroke", "rgba(0, 0, 0, 0.05)")
           .attr("rx", 1) // Add 1px rounded corner
           .datum(data[i])
-          .style("opacity", 0);
-        // .on("mouseover", function (event, d) {
-        //   // Grow the rectangle on hover
-        //   d3.select(this)
-        //     .transition()
-        //     .duration(400)
-        //     .attr("width", rectWidth * 50)
-        //     .attr("height", rectHeight * 40)
-        //     .attr("x", x - rectWidth / 2)
-        //     .attr("y", y - rectHeight / 2);
-
-        //   // Get the expanded rect dimensions
-        //   const expandedWidth = rectWidth * 50;
-        //   const expandedHeight = rectHeight * 40;
-        //   const padding = 20; // Padding inside the rectangle
-        //   const textWidth = expandedWidth - padding * 2; // Text area width
-
-        //   // Create a foreignObject to allow HTML/CSS text wrapping
-        //   const textElement = g
-        //     .append("foreignObject")
-        //     .attr("class", "temp-book-name")
-        //     .attr("x", x - rectWidth / 2 + padding)
-        //     .attr("y", y - rectHeight / 2 + padding)
-        //     .attr("width", textWidth)
-        //     .attr("height", expandedHeight - padding * 2)
-        //     .style("opacity", 0) // Start with opacity 0
-        //     .html(`<div style="
-        //       font-family: 'Libre Franklin', sans-serif;
-        //       font-weight: 200;
-        //       font-size: 12px;
-        //       color: #000;
-        //       width: 100%;
-        //       height: 100%;
-        //       overflow: hidden;
-        //       text-overflow: ellipsis;
-        //     ">${d.name || "Unnamed Record"}</div>`);
-
-        //   // Animate text opacity
-        //   textElement.transition().duration(400).style("opacity", 1); // Fade in to opacity 1
-        // })
-        // .on("mouseout", function () {
-        //   // Reset size on mouseout
-        //   d3.select(this)
-        //     .transition()
-        //     .duration(100)
-        //     .attr("width", rectWidth)
-        //     .attr("height", rectHeight)
-        //     .attr("x", x)
-        //     .attr("y", y);
-
-        //   // Remove the temporary book name text
-        //   g.selectAll(".temp-book-name").remove();
-
-        //   // // Hide tooltip
-        //   // tooltip.style("opacity", 0);
-        // });
+          .style("opacity", 0)
+          .on("mouseover", function (event, d) {
+            // Show tooltip with book name
+            tooltip
+              .html(`<strong>${d.name || "Unnamed Record"}</strong>`)
+              .style("opacity", 0.9)
+              .style("left", event.pageX + 10 + "px")
+              .style("top", event.pageY - 28 + "px");
+          })
+          .on("mouseout", function () {
+            // Hide tooltip
+            tooltip.style("opacity", 0);
+          });
       }
 
       // Add info text about visualization
@@ -349,7 +306,7 @@
           .transition()
           .delay(row * 100) // Delay each row by 100ms
           .duration(300)
-          .ease(d3.easeLinear)
+          .ease(d3.easeCubicInOut) // Changed from easeLinear to easeCubicInOut for smoother fade-in
           .style("opacity", 1);
       }
 
@@ -372,6 +329,7 @@
       g.selectAll("rect")
         .transition()
         .duration(750)
+        .ease(d3.easeCubicInOut) // Added easing for smoother grid reset
         .attr("x", function (d, i) {
           const col = i % rectsPerRow;
           return col * totalRectWidth + spacing;
@@ -407,6 +365,7 @@
             rect
               .transition()
               .duration(400)
+              .ease(d3.easeElasticOut) // Added elastic easing for a more dynamic expansion
               .attr("width", rectWidth * 50)
               .attr("height", rectHeight * 40)
               .attr("x", x - rectWidth / 2)
@@ -439,6 +398,7 @@
               )
               .transition()
               .duration(400)
+              .ease(d3.easeCubicInOut) // Added easing for smoother text appearance
               .style("opacity", 1);
           });
       }, 500);
@@ -464,6 +424,7 @@
         .filter((d) => d && targetBooks.includes(d.name))
         .transition()
         .duration(400)
+        .ease(d3.easeCubicInOut) // Added easing for smoother return to original size
         .attr("width", rectWidth)
         .attr("height", rectHeight)
         .attr("x", function (d) {
@@ -578,7 +539,7 @@
             .transition()
             .delay(batchDelay + withinBatchDelay)
             .duration(80) // Reduce from 100ms to 80ms
-            .ease(d3.easeQuadOut) // Change to slightly faster easing
+            .ease(d3.easeCubicInOut) // Changed from easeQuadOut to easeCubicInOut for smoother movement
             .attr("x", targetX - rectWidth / 2)
             .attr("y", targetY - rectHeight / 2)
             .attr("fill", targetColor);
@@ -622,13 +583,13 @@
     } else if (stepId === "external-internal-sort") {
       // Define positions for the two piles on the right half of the screen
       const worldPilePosition = {
-        x: chartWidth * 0.75, // 75% of the screen width (right half)
-        y: chartHeight * 0.4, // 40% of the screen height
+        x: chartWidth * 0.75,
+        y: chartHeight * 0.3,
       };
 
       const youPilePosition = {
-        x: chartWidth * 0.75, // 75% of the screen width (right half)
-        y: chartHeight * 0.6, // 60% of the screen height
+        x: chartWidth * 0.75,
+        y: chartHeight * 0.7,
       };
 
       // Remove any existing category labels
@@ -638,7 +599,7 @@
       g.append("foreignObject")
         .attr("class", "category-label")
         .attr("x", worldPilePosition.x - 100)
-        .attr("y", worldPilePosition.y - 50)
+        .attr("y", worldPilePosition.y - 155)
         .attr("width", 200)
         .attr("height", 40)
         .html(
@@ -658,7 +619,7 @@
       g.append("foreignObject")
         .attr("class", "category-label")
         .attr("x", youPilePosition.x - 100)
-        .attr("y", youPilePosition.y - 50)
+        .attr("y", youPilePosition.y - 155)
         .attr("width", 200)
         .attr("height", 40)
         .html(
@@ -675,75 +636,96 @@
         )
         .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
 
-      // Prepare nodes for positioning
+      // Create ordered arrays of categories from right to left
+      const orderedSelfHelpCategories = [...selfHelpCategories].reverse();
+      const orderedOtherCategories = [...otherCategories].reverse();
+
+      // Prepare nodes for positioning with category information
       const nodes = [];
       g.selectAll("rect").each(function (d) {
-        if (!d) return; // Skip if no data
+        if (!d) return;
 
         const rect = d3.select(this);
         const currentFill = rect.attr("fill");
-
-        // Determine which pile this rectangle belongs to based on its color
         let targetPile;
+        let categoryIndex = -1;
+
         if (currentFill === "var(--color-teal)") {
           targetPile = "world";
+          if (d.key_cat_primary_agg) {
+            categoryIndex = orderedOtherCategories.indexOf(
+              d.key_cat_primary_agg
+            );
+          }
         } else if (currentFill === "var(--color-orange)") {
           targetPile = "you";
+          if (d.key_cat_primary_agg) {
+            categoryIndex = orderedSelfHelpCategories.indexOf(
+              d.key_cat_primary_agg
+            );
+          }
         } else {
-          // Skip rectangles that aren't teal or orange
           return;
         }
 
-        // Store node data
         nodes.push({
           pile: targetPile,
           element: this,
           x: parseFloat(rect.attr("x")) + rectWidth / 2,
           y: parseFloat(rect.attr("y")) + rectHeight / 2,
+          categoryIndex: categoryIndex,
         });
       });
 
-      // Apply positions with staggered movement in batches
+      // Sort nodes by category index (right to left)
+      nodes.sort((a, b) => a.categoryIndex - b.categoryIndex);
+
+      // Process nodes in category-based batches
       const batchSize = 200;
+      const categoryDelay = 800; // Increased from 500ms to 800ms for more spacing between category movements
 
-      // Process nodes in batches
-      for (
-        let batch = 0;
-        batch < Math.ceil(nodes.length / batchSize);
-        batch++
-      ) {
-        const start = batch * batchSize;
-        const end = Math.min(start + batchSize, nodes.length);
-
-        // Add a delay between batches
-        const batchDelay = batch * 70;
-
-        // Process this batch
-        for (let i = start; i < end; i++) {
-          const node = nodes[i];
-          const pos =
-            node.pile === "world" ? worldPilePosition : youPilePosition;
-
-          // Add random offset within the pile to create natural clustering
-          const offsetX = (Math.random() - 0.5) * 200;
-          const offsetY = (Math.random() - 0.5) * 100;
-
-          // Calculate target position
-          const targetX = pos.x + offsetX;
-          const targetY = pos.y + offsetY;
-
-          // Apply transition with delay
-          const withinBatchDelay = Math.random() * 130;
-
-          d3.select(node.element)
-            .transition()
-            .delay(batchDelay + withinBatchDelay)
-            .duration(80)
-            .ease(d3.easeQuadOut)
-            .attr("x", targetX - rectWidth / 2)
-            .attr("y", targetY - rectHeight / 2);
+      // Group nodes by category index
+      const nodesByCategory = {};
+      nodes.forEach((node) => {
+        const key = node.categoryIndex;
+        if (!nodesByCategory[key]) {
+          nodesByCategory[key] = [];
         }
-      }
+        nodesByCategory[key].push(node);
+      });
+
+      // Process each category group in sequence
+      Object.entries(nodesByCategory).forEach(
+        ([categoryIndex, categoryNodes], categoryOrder) => {
+          // Process nodes within this category
+          for (let i = 0; i < categoryNodes.length; i++) {
+            const node = categoryNodes[i];
+            const pos =
+              node.pile === "world" ? worldPilePosition : youPilePosition;
+
+            // Add random offset within the pile
+            const offsetX = (Math.random() - 0.5) * 500;
+            const offsetY = (Math.random() - 0.5) * 250;
+
+            // Calculate target position
+            const targetX = pos.x + offsetX;
+            const targetY = pos.y + offsetY;
+
+            // Apply transition with category-based delay
+            const withinCategoryDelay = Math.random() * 300; // Increased from 130ms to 300ms for more spread
+            const totalDelay =
+              categoryOrder * categoryDelay + withinCategoryDelay;
+
+            d3.select(node.element)
+              .transition()
+              .delay(totalDelay)
+              .duration(400) // Increased from 80ms to 400ms for slower movement
+              .ease(d3.easeCubicInOut)
+              .attr("x", targetX - rectWidth / 2)
+              .attr("y", targetY - rectHeight / 2);
+          }
+        }
+      );
     } else if (stepId === "goodreads-data") {
       // Remove our visualization when moving to the next section
       const chapter1Div = document.getElementById("chapter-1");

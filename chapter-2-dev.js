@@ -479,7 +479,7 @@
 
     ///////////////////////////////////////////////////////////// ! Color Scales
     // Color scale for origin
-    const originColors = ["var(--color-teal)", "var(--color-orange)"];
+    const originColors = ["var(--color-orange)", "var(--color-teal)"];
 
     // Extended color scale for categories
     color = d3
