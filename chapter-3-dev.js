@@ -18,6 +18,32 @@
     "Michelle Obama": "assets/authors/michelle-obama.jpg",
     "Gabor Maté": "assets/authors/gabor-mate.jpeg",
     "Rhonda Byrne": "assets/authors/rhonda-byrne.jpg",
+    "50 Cent": "assets/authors/50-cent.jpg",
+    "Arnold Schwarzenegger": "assets/authors/arnold-schwarzenegger.jpg",
+    "Cameron Diaz": "assets/authors/cameron-diaz.jpg",
+    "Brené Brown": "assets/authors/brene-brown.jpg",
+    "Demi Lovato": "assets/authors/demi-lovato.jpg",
+    "Donald J. Trump": "assets/authors/donald-j-trump.jpg",
+    "Eckhart Tolle": "assets/authors/eckhart-tolle.jpg",
+    "Esther Hicks": "assets/authors/esther-hicks.jpg",
+    "Gabrielle Bernstein": "assets/authors/gabrielle-bernstein.jpg",
+    "Gary Vaynerchuk": "assets/authors/gary-vaynerchuk.jpg",
+    "Gwyneth Paltrow": "assets/authors/gwyneth-paltrow.jpg",
+    "Jay Shetty": "assets/authors/jay-shetty.jpg",
+    "Jordan B. Peterson": "assets/authors/jordan-b-peterson.jpg",
+    "Jillian Michaels": "assets/authors/jillian-michaels.jpg",
+    "Marie Kondo": "assets/authors/marie-kondo.jpg",
+    "Mark Manson": "assets/authors/mark-manson.jpg",
+    "Matthew McConaughey": "assets/authors/matthew-mcconaughey.jpg",
+    "Mel Robbins": "assets/authors/mel-robbins.jpg",
+    "Oprah Winfrey": "assets/authors/oprah-winfrey.jpg",
+    "Rachel Hollis": "assets/authors/rachel-hollis.jpg",
+    "Russell Brand": "assets/authors/russell-brand.jpg",
+    "Phillip C. McGraw": "assets/authors/phillip-c-mcgraw.jpg",
+    "Stephen King": "assets/authors/stephen-king.jpg",
+    "Tim Ferriss": "assets/authors/tim-ferriss.jpg",
+    "Tony Robbins": "assets/authors/tony-robbins.jpg",
+    "Rich Roll": "assets/authors/rich-roll.jpg",
   };
 
   // Get the actual dimensions of the container
@@ -38,10 +64,39 @@
   function filterDataForStep(stepId) {
     if (!allAuthorData) return [];
 
-    // For authors-2 step, we'll mark Deepak Chopra for animation
-    if (stepId === "authors-2") {
+    // For authors-1 step, animate specific authors
+    if (stepId === "authors-1") {
       allAuthorData.forEach((d) => {
-        d.shouldAnimate = d.author_clean === "Deepak Chopra";
+        d.shouldAnimate =
+          // d.author_clean === "Deepak Chopra" ||
+          d.author_clean === "Matthew McConaughey" ||
+          d.author_clean === "Jay Shetty" ||
+          d.author_clean === "Rainn Wilson" ||
+          d.author_clean === "Demi Lovato" ||
+          d.author_clean === "Jillian Michaels" ||
+          d.author_clean === "50 Cent" ||
+          d.author_clean === "Michelle Obama";
+      });
+    } else if (stepId === "authors-2") {
+      // For authors-2 step, animate different set of authors
+      allAuthorData.forEach((d) => {
+        d.shouldAnimate =
+          d.author_clean === "Esther Hicks" ||
+          d.author_clean === "James Clear" ||
+          d.author_clean === "Brené Brown" ||
+          d.author_clean === "Michelle Obama" ||
+          d.author_clean === "Arnold Schwarzenegger" ||
+          d.author_clean === "Oprah Winfrey" ||
+          d.author_clean === "Matthew McConaughey";
+      });
+    } else if (stepId === "authors-3") {
+      // For authors-3 step, animate another set of authors
+      allAuthorData.forEach((d) => {
+        d.shouldAnimate =
+          d.author_clean === "Deepak Chopra" ||
+          d.author_clean === "Jen Sincero" ||
+          d.author_clean === "Donald J. Trump" ||
+          d.author_clean === "Phillip C. McGraw";
       });
     } else {
       allAuthorData.forEach((d) => {
@@ -57,8 +112,8 @@
   function displayAuthorData(data, stepId) {
     if (!data || data.length === 0) return;
 
-    // Clear existing SVG content first
-    svg.selectAll("*").remove();
+    // Instead of clearing everything, only clear axes and labels
+    svg.selectAll(".x-axis, .y-axis, .annotation").remove();
 
     ///////////////////////////////////////////////////////////// ! Data Processing
     // Parse numeric data
@@ -74,7 +129,7 @@
 
     // Uniform circle size
     const circleRadius = 5;
-    const featuredRadius = 30; // Larger radius for featured authors
+    const featuredRadius = 20; // Larger radius for featured authors
 
     ///////////////////////////////////////////////////////////// ! Scales Creation
     // Create scales
@@ -90,8 +145,8 @@
     const yScale = d3
       .scaleLog()
       .domain([
-        1, // Keeping minimum at 1 for log scale
-        d3.max(data, (d) => d.author_num_books),
+        70, // Minimum value for log scale
+        4000, // Fixed maximum value
       ])
       .nice()
       .range([height, 0]);
@@ -167,23 +222,21 @@
     const regularData = data.filter((d) => !d.isFeatured);
     const featuredData = data.filter((d) => d.isFeatured);
 
-    // Create groups for regular authors first
+    // Update regular points using data join
     const regularPoints = svg
       .selectAll(".regular-point")
-      .data(regularData)
+      .data(regularData, (d) => d.author_clean); // Use author name as key for stable transitions
+
+    // Remove old points
+    regularPoints.exit().remove();
+
+    // Add new points
+    const regularPointsEnter = regularPoints
       .enter()
       .append("g")
-      .attr("class", "data-point")
-      .attr(
-        "transform",
-        (d) =>
-          `translate(${xScale(d.avg_star_rating)},${yScale(
-            d.author_num_books
-          )})`
-      );
+      .attr("class", "regular-point data-point");
 
-    // Add circles for regular authors
-    regularPoints
+    regularPointsEnter
       .append("circle")
       .attr("r", circleRadius)
       .style("fill", "var(--color-base-darker)")
@@ -192,13 +245,9 @@
       .style("stroke-opacity", 0.3)
       .style("stroke-width", 1);
 
-    // Create groups for featured authors (will be drawn last/on top)
-    const featuredPoints = svg
-      .selectAll(".featured-point")
-      .data(featuredData)
-      .enter()
-      .append("g")
-      .attr("class", "data-point")
+    // Update all regular points
+    regularPoints
+      .merge(regularPointsEnter)
       .attr(
         "transform",
         (d) =>
@@ -207,8 +256,21 @@
           )})`
       );
 
-    // Add featured authors' circles with animation
-    featuredPoints
+    // Update featured points using data join
+    const featuredPoints = svg
+      .selectAll(".featured-point")
+      .data(featuredData, (d) => d.author_clean); // Use author name as key for stable transitions
+
+    // Remove old featured points
+    featuredPoints.exit().remove();
+
+    // Add new featured points
+    const featuredPointsEnter = featuredPoints
+      .enter()
+      .append("g")
+      .attr("class", "featured-point data-point");
+
+    featuredPointsEnter
       .append("circle")
       .attr("r", featuredRadius)
       .style(
@@ -219,12 +281,25 @@
       .style("opacity", 0.9)
       .style("stroke", "black")
       .style("stroke-opacity", 0.3)
-      .style("stroke-width", 1)
-      .transition() // Add transition
-      .duration(1000) // 1 second duration
+      .style("stroke-width", 1);
+
+    // Update all featured points with transitions
+    const allFeaturedPoints = featuredPoints.merge(featuredPointsEnter);
+
+    allFeaturedPoints.attr(
+      "transform",
+      (d) =>
+        `translate(${xScale(d.avg_star_rating)},${yScale(d.author_num_books)})`
+    );
+
+    // Update circle sizes with transitions
+    allFeaturedPoints
+      .select("circle")
+      .transition()
+      .duration(1000)
       .attr("r", (d) =>
-        d.shouldAnimate ? featuredRadius * 1.5 : featuredRadius
-      ); // Scale up if shouldAnimate is true
+        d.shouldAnimate ? featuredRadius * 3 : featuredRadius
+      );
 
     // Add mouseover and mouseout events to all points
     const allPoints = svg.selectAll(".data-point");
@@ -233,7 +308,8 @@
         .html(
           `<strong>${d.author_clean}</strong><br/>
            Books: ${d.author_num_books}<br/>
-           Rating: ${d.avg_star_rating.toFixed(2)}`
+           Rating: ${d.avg_star_rating.toFixed(2)}<br/>
+           Avg # Ratings: ${d.avg_num_ratings}`
         )
         .style("left", event.pageX + 10 + "px")
         .style("top", event.pageY - 28 + "px")
@@ -260,54 +336,33 @@
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Check if data is already preloaded in dataCache
-    if (window.dataCache && window.dataCache.authorData) {
-      allAuthorData = window.dataCache.authorData.filter(
-        (author) => author.author_num_books > 0
-      );
+    // Load author data once
+    d3.csv("data/sh_0415_author/author.csv", d3.autoType)
+      .then((data) => {
+        // Filter and store
+        allAuthorData = data.filter(
+          (author) =>
+            author.author_num_books > 10 && author.avg_num_ratings >= 3000
+        );
 
-      // Update Matthew McConaughey's and Michelle Obama's book counts
-      allAuthorData.forEach((author) => {
-        if (author.author_clean === "Matthew McConaughey") {
-          author.author_num_books = 15;
-        }
-        if (author.author_clean === "Michelle Obama") {
-          author.author_num_books = 60;
-        }
-      });
-
-      // Get initial step from URL if available
-      const urlParams = new URLSearchParams(window.location.search);
-      const currentStep = urlParams.get("step") || "all-authors";
-
-      displayAuthorData(filterDataForStep(currentStep), currentStep);
-    } else {
-      // Try loading data directly if not preloaded
-      d3.csv("data/sh_0415_author/author.csv")
-        .then((data) => {
-          // Filter out authors with zero books
-          allAuthorData = data.filter((author) => author.author_num_books > 0);
-
-          // Update Matthew McConaughey's and Michelle Obama's book counts
-          allAuthorData.forEach((author) => {
-            if (author.author_clean === "Matthew McConaughey") {
-              author.author_num_books = 15;
-            }
-            if (author.author_clean === "Michelle Obama") {
-              author.author_num_books = 60;
-            }
-          });
-
-          // Get initial step from URL if available
-          const urlParams = new URLSearchParams(window.location.search);
-          const currentStep = urlParams.get("step") || "all-authors";
-
-          displayAuthorData(filterDataForStep(currentStep), currentStep);
-        })
-        .catch((error) => {
-          console.error("Error loading data:", error);
+        // Manual overrides
+        allAuthorData.forEach((author) => {
+          if (author.author_clean === "Matthew McConaughey") {
+            author.author_num_books = 15;
+          }
+          if (author.author_clean === "Michelle Obama") {
+            author.author_num_books = 60;
+          }
         });
-    }
+
+        // Initial render
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialStep = urlParams.get("step") || "all-authors";
+        displayAuthorData(filterDataForStep(initialStep), initialStep);
+      })
+      .catch((error) => {
+        console.error("Error loading author data:", error);
+      });
   } catch (error) {
     console.error("Error in initialization:", error);
   }
