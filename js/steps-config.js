@@ -386,10 +386,37 @@ const stepsConfig = [
   },
 
   {
-    id: "systemic-problems",
-    text: "Some of these books contain researched, proven advice. But others are, unfortunately, capitalizing off our fears. There are authors who have something to gain by convincing you that your dead-end job is your fault and yours to fix; or that you’re depressed because you’re not doing enough squat jumps. When self-help suggests you’re not doing enough, it’s a smoke screen. It’s fear-mongering masquerading as advice.",
+    id: "blame-game-2",
+    text: "Some of these books contain researched, proven advice. But others are, unfortunately, capitalizing off our fears.",
+    fullwidth: true,
+    render: () => {
+      // Update the existing grid visualization
+      document.dispatchEvent(
+        new CustomEvent("gridVisualizationUpdate", {
+          detail: { step: "blame-game-2" },
+        })
+      );
+    },
+  },
+  {
+    id: "blame-game-3",
+    text: "There are authors who have something to gain by convincing you that your dead-end job is your fault and yours to fix; or that you're depressed because you're not doing enough squat jumps. When self-help suggests you're not doing enough, it's a smoke screen. It's fear-mongering masquerading as advice.",
     fullwidth: true,
     fadeOut: true,
+    render: () => {
+      // Update the existing grid visualization
+      document.dispatchEvent(
+        new CustomEvent("gridVisualizationUpdate", {
+          detail: { step: "blame-game-3" },
+        })
+      );
+    },
+  },
+  {
+    id: "systemic-problems",
+    text: "It detracts from my point: our anxieties are often the result of historical events outside of our control — and some authors point the blame at you for profit.",
+    fullwidth: true,
+    // customClass: "statement",
     render: () => {
       // Update the existing grid visualization
       document.dispatchEvent(
@@ -397,16 +424,6 @@ const stepsConfig = [
           detail: { step: "systemic-problems" },
         })
       );
-    },
-  },
-  {
-    id: "detracts-from-point",
-    text: "It detracts from my point: our anxieties are often the result of historical events outside of our control — and some authors point the blame at you for profit.",
-    fullwidth: true,
-    customClass: "statement",
-    render: () => {
-      const figure = d3.select("#figure-container");
-      figure.html("");
     },
   },
   {
@@ -722,7 +739,7 @@ const stepsConfig = [
     text: "On the other hand, you have authors like L. Ron Hubbard, the founder of Scientology, and Kevin Trudeau, a literal convicted felon because his self help series was actually a pyramid scheme, and PT Barnum, the showman who once sewed a monkey torso to a fish tail and convinced audiences it was a mermaid. He sold books about personal finance.",
     fullwidth: true,
     fadeIn: false,
-    fadeOut: false,
+    fadeOut: true,
     render: () => {
       // Simply update the visualization state
       document.dispatchEvent(
