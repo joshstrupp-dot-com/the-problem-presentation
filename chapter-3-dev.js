@@ -177,9 +177,9 @@
     svg
       .append("text")
       .attr("class", "annotation")
-      .attr("x", width / 2)
+      .attr("x", 0)
       .attr("y", yCenter + 100)
-      .style("text-anchor", "middle")
+      .style("text-anchor", "start")
       .text("Average Star Rating");
 
     ///////////////////////////////////////////////////////////// ! Tooltip Creation
@@ -274,8 +274,8 @@
            Rating: ${d.avg_star_rating.toFixed(2)}<br/>
            Avg # Ratings: ${d.avg_num_ratings}`
         )
-        .style("left", event.pageX + 10 + "px")
-        .style("top", event.pageY - 28 + "px")
+        .style("left", event.pageX + 30 + "px") // Increased from 10 to 20
+        .style("top", event.pageY - 35 + "px") // Increased from -28 to -35
         .style("opacity", 0.9);
     });
     nodeGroups.on("mouseout", function (event, d) {
