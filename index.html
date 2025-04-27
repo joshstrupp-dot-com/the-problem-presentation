@@ -17,6 +17,7 @@
     <main>
       <!-- Hero section with full viewport image -->
       <section id="hero">
+        <canvas id="background-canvas"></canvas>
         <canvas id="physics-canvas"></canvas>
         <div class="hero-ladder">
           <div class="ladder-step andale">THE</div>
@@ -25,11 +26,11 @@
           <div class="ladder-step andale">FIXING</div>
           <div class="ladder-step yourself">YOURSELF</div>
         </div>
-        <div class="body bottom-left">
-          By me, <a href="https://joshstrupp.com" target="_blank">Josh</a>.
+        <div class="body bottom-left andale">
+          BY ME, <a href="https://joshstrupp.com" target="_blank">JOSH</a>.
         </div>
-        <div class="body top-right">
-          Visualizing the impact of self-help literature on the American psyche.
+        <div class="body top-right andale">
+          VISUALIZING THE IMPACT OF SELF-HELP LITERATURE ON THE AMERICAN PSYCHE.
         </div>
       </section>
 
@@ -66,7 +67,9 @@
     <script src="https://unpkg.com/d3-interpolate-path/build/d3-interpolate-path.min.js"></script>
 
     <!-- Application Scripts -->
+    <script src="js/background-animation.js"></script>
     <script src="js/physics.js"></script>
+    <script src="js/cursor-trail.js"></script>
     <script src="js/steps-config.js"></script>
     <script src="js/scrolly-utils.js"></script>
     <script src="js/chapter-1-dev-b.js"></script>

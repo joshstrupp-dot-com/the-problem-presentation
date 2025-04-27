@@ -9,16 +9,52 @@ class PhysicsBall {
     window.addEventListener("resize", () => this.resizeCanvas());
 
     // Physics parameters
-    this.gravity = 0.5;
+    this.gravity = 0.2;
     this.friction = 0.99;
     this.restitution = 0.7;
 
+    // Author images array
+    this.authorImages = [
+      "tim-ferris.jpg",
+      "tony-robbins.jpg",
+      "russell-brand.jpg",
+      "stephen-king.jpg",
+      "rhonda-byrne.jpg",
+      "rich-roll.jpg",
+      "rachel-hollis.jpg",
+      "mel-robbins.jpg",
+      "michelle-obama.jpg",
+      "oprah-winfrey.jpg",
+      "phillip-c-mcgraw.jpg",
+      "marie-kondo.jpg",
+      "mark-manson.jpg",
+      "matthew-mcconaughey.jpg",
+      "jordan-b-peterson.jpg",
+      "jen-sincero.jpg",
+      "jillian-michaels.jpg",
+      "jay-shetty.jpg",
+      "gary-vaynerchuk.jpg",
+      "gwyneth-paltrow.jpg",
+      "esther-hicks.jpg",
+      "gabor-mate.jpeg",
+      "gabrielle-bernstein.jpg",
+      "donald-j-trump.jpg",
+      "eckhart-tolle.jpg",
+      "cameron-diaz.jpg",
+      "deepak-chopra.jpg",
+      "demi-lovato.jpg",
+      "50-cent.jpg",
+      "arnold-schwarzenegger.jpg",
+      "brene-brown.jpg",
+    ];
+    this.currentImageIndex = 0;
+
     // Ball properties
     this.ball = {
-      x: window.innerWidth * 0.3,
+      x: window.innerWidth * 0.35, // Shifted from 0.3 to 0.4
       y: -20,
-      radius: 10,
-      vx: 2,
+      radius: 30,
+      vx: 1.5,
       vy: 0,
       rotation: 0,
     };
@@ -58,7 +94,7 @@ class PhysicsBall {
     this.ball.y += this.ball.vy;
 
     // Update rotation based on horizontal velocity
-    this.ball.rotation += this.ball.vx * 0.1;
+    this.ball.rotation += this.ball.vx * 0.01;
 
     // Check collisions with platforms
     this.platforms.forEach((platform, index) => {
@@ -109,11 +145,16 @@ class PhysicsBall {
   }
 
   resetBall() {
-    this.ball.x = window.innerWidth * 0.3;
+    this.ball.x = window.innerWidth * 0.35; // Shifted from 0.3 to 0.4
     this.ball.y = -20;
     this.ball.vx = 2;
     this.ball.vy = 0;
     this.ball.rotation = 0;
+
+    // Cycle to the next author image
+    this.currentImageIndex =
+      (this.currentImageIndex + 1) % this.authorImages.length;
+    this.ballImage = null; // Reset the image so it will be reloaded with the new author
   }
 
   draw() {
@@ -124,18 +165,70 @@ class PhysicsBall {
     this.ctx.translate(this.ball.x, this.ball.y);
     this.ctx.rotate(this.ball.rotation);
 
-    // Ball body
+    // Create soft glow effect
+    this.ctx.shadowColor = "#bfbf1d";
+    this.ctx.shadowBlur = 20;
+    this.ctx.shadowOffsetX = 0;
+    this.ctx.shadowOffsetY = 0;
+
+    // Draw a transparent circle to create the glow
     this.ctx.beginPath();
     this.ctx.arc(0, 0, this.ball.radius, 0, Math.PI * 2);
-    this.ctx.fillStyle = "#000";
+    this.ctx.fillStyle = "rgba(0, 0, 0, 1)"; // Transparent fill
     this.ctx.fill();
 
-    // Ball line (to show rotation)
+    // Reset shadow for the actual ball
+    this.ctx.shadowColor = "transparent";
+    this.ctx.shadowBlur = 0;
+
+    // Create circular clipping path
     this.ctx.beginPath();
-    this.ctx.moveTo(0, 0);
-    this.ctx.lineTo(this.ball.radius, 0);
-    this.ctx.strokeStyle = "#fff";
-    this.ctx.stroke();
+    this.ctx.arc(0, 0, this.ball.radius, 0, Math.PI * 2);
+    this.ctx.clip();
+
+    // Draw image
+    if (!this.ballImage) {
+      this.ballImage = new Image();
+      this.ballImage.src = `assets/authors/${
+        this.authorImages[this.currentImageIndex]
+      }`;
+    }
+
+    // Calculate dimensions to fill the circle while maintaining aspect ratio
+    const imgWidth = this.ballImage.width;
+    const imgHeight = this.ballImage.height;
+    const aspectRatio = imgWidth / imgHeight;
+    const diameter = this.ball.radius * 2;
+
+    let drawWidth, drawHeight, offsetX, offsetY;
+
+    if (aspectRatio > 1) {
+      // Image is wider than tall
+      drawHeight = diameter;
+      drawWidth = drawHeight * aspectRatio;
+      offsetX = -(drawWidth - diameter) / 2;
+      offsetY = 0;
+    } else {
+      // Image is taller than wide
+      drawWidth = diameter;
+      drawHeight = drawWidth / aspectRatio;
+      offsetX = 0;
+      offsetY = -(drawHeight - diameter) / 2;
+    }
+
+    // Apply black and white filter
+    this.ctx.filter = "grayscale(100%)";
+
+    this.ctx.drawImage(
+      this.ballImage,
+      -this.ball.radius + offsetX,
+      -this.ball.radius + offsetY,
+      drawWidth,
+      drawHeight
+    );
+
+    // Reset filter
+    this.ctx.filter = "none";
 
     this.ctx.restore();
   }
@@ -149,5 +242,6 @@ class PhysicsBall {
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
+  new PhysicsBall();
   new PhysicsBall();
 });
