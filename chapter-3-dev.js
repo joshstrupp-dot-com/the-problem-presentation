@@ -11,6 +11,32 @@
   chapter3Div.style.overflow = "hidden";
   chapter3Div.style.position = "relative";
 
+  // Add pulsating animation style
+  const styleElement = document.createElement("style");
+  styleElement.textContent = `
+    @keyframes pulsate {
+      0% {
+        stroke-width: 10;
+        opacity: 0.3;
+      }
+      
+      70% {
+        stroke-width: 12;
+        opacity: 1;
+      }
+      
+      100% {
+        stroke-width: 10;
+        opacity: 0.3;
+      }
+    }
+    
+    .pulsate-stroke {
+      animation: pulsate 2s infinite;
+    }
+  `;
+  document.head.appendChild(styleElement);
+
   // Featured authors configuration
   const featuredAuthors = {
     "Deepak Chopra": "assets/authors/deepak-chopra.jpg",
@@ -40,7 +66,7 @@
     "Rachel Hollis": "assets/authors/rachel-hollis.jpg",
     "Russell Brand": "assets/authors/russell-brand.jpg",
     "Phillip C. McGraw": "assets/authors/phillip-c-mcgraw.jpg",
-    "Stephen King": "assets/authors/stephen-king.jpg",
+    // "Stephen King": "assets/authors/stephen-king.jpg",
     "Tim Ferriss": "assets/authors/tim-ferriss.jpg",
     "Tony Robbins": "assets/authors/tony-robbins.jpg",
     "Rich Roll": "assets/authors/rich-roll.jpg",
@@ -96,7 +122,8 @@
           // d.author_clean === "Deepak Chopra" ||
           d.author_clean === "Jen Sincero" ||
           d.author_clean === "Donald J. Trump" ||
-          d.author_clean === "Phillip C. McGraw";
+          d.author_clean === "Phillip C. McGraw" ||
+          d.author_clean === "Deepak Chopra";
       });
     } else {
       allAuthorData.forEach((d) => {
@@ -114,92 +141,54 @@
 
     // Instead of clearing everything, only clear axes and labels
     svg.selectAll(".x-axis, .y-axis, .annotation").remove();
+    svg.selectAll(".regular-point, .featured-point").remove(); // Remove old points for force layout
 
     ///////////////////////////////////////////////////////////// ! Data Processing
-    // Parse numeric data
     data.forEach((d) => {
       d.avg_star_rating = +d.avg_star_rating;
-      d.author_num_books = Math.max(1, +d.author_num_books); // Ensure minimum value of 1
+      d.author_num_books = Math.max(1, +d.author_num_books);
       d.avg_cred_score = +d.avg_cred_score;
       d.bt_count = +d.bt_count;
-
-      // Mark featured authors
       d.isFeatured = featuredAuthors.hasOwnProperty(d.author_clean);
     });
 
-    // Uniform circle size
-    const circleRadius = 5;
-    const featuredRadius = 20; // Larger radius for featured authors
+    const minBooks = d3.min(data, (d) => d.author_num_books);
+    const maxBooks = d3.max(data, (d) => d.author_num_books);
+    const sizeScale = d3
+      .scaleSqrt()
+      .domain([minBooks, maxBooks])
+      .range([8, 40]);
 
-    ///////////////////////////////////////////////////////////// ! Scales Creation
-    // Create scales
     const xScale = d3
       .scaleLinear()
-      .domain([
-        d3.min(data, (d) => d.avg_star_rating),
-        d3.max(data, (d) => d.avg_star_rating),
-      ])
+      .domain([3.2, d3.max(data, (d) => d.avg_star_rating)])
       .nice()
       .range([0, width]);
-
-    const yScale = d3
-      .scaleLog()
-      .domain([
-        70, // Minimum value for log scale
-        4000, // Fixed maximum value
-      ])
-      .nice()
-      .range([height, 0]);
+    const yCenter = height / 2;
 
     ///////////////////////////////////////////////////////////// ! Axes Creation
-    // Add X axis
     svg
       .append("g")
       .attr("class", "x-axis")
-      .attr("transform", `translate(0,${height})`)
+      .attr("transform", `translate(0,${yCenter + 60})`)
       .call(d3.axisBottom(xScale))
       .selectAll("text")
       .attr("class", "annotation");
-
-    // Add X axis label
     svg
       .append("text")
       .attr("class", "annotation")
-      .attr("x", width / 2)
-      .attr("y", height + margin.bottom - 50)
-      .style("text-anchor", "middle")
+      .attr("x", 0)
+      .attr("y", yCenter + 100)
+      .style("text-anchor", "start")
       .text("Average Star Rating");
 
-    // Add Y axis
-    svg
-      .append("g")
-      .attr("class", "y-axis")
-      .call(d3.axisLeft(yScale))
-      .selectAll("text")
-      .attr("class", "annotation");
-
-    // Add Y axis label
-    svg
-      .append("text")
-      .attr("class", "annotation")
-      .attr("transform", "rotate(-90)")
-      .attr("x", -height / 2)
-      .attr("y", -margin.left + 50)
-      .style("text-anchor", "middle")
-      .text("Number of Books");
-
     ///////////////////////////////////////////////////////////// ! Tooltip Creation
-    // Add tooltip
     const tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
     ///////////////////////////////////////////////////////////// ! Data Points Creation
-    // Create patterns for featured authors
     const defs = svg.append("defs");
-
-    // Create patterns for each featured author
     Object.entries(featuredAuthors).forEach(([author, imgUrl]) => {
       const patternId = `pattern-${author.toLowerCase().replace(/\s+/g, "-")}`;
-
       const pattern = defs
         .append("pattern")
         .attr("id", patternId)
@@ -207,7 +196,6 @@
         .attr("height", 1)
         .attr("patternUnits", "objectBoundingBox")
         .attr("patternContentUnits", "objectBoundingBox");
-
       pattern
         .append("image")
         .attr("width", 1)
@@ -218,173 +206,67 @@
         .attr("xlink:href", imgUrl);
     });
 
-    // Split data into categories based on current state and animation
-    const regularData = data.filter((d) => !d.isFeatured);
+    // Helper for highlight color
+    function getHighlightColor(d) {
+      return d.shouldAnimate ? "red" : null;
+    }
 
-    // Featured authors that were previously animated but aren't in current step
-    const previouslyAnimatedData = data.filter((d) => {
-      if (!d.isFeatured || d.shouldAnimate) return false;
+    // Prepare nodes for force simulation
+    const nodes = data.map((d) => Object.assign({}, d));
 
-      const author = d.author_clean;
-
-      // Authors from step 1 that should be featured in step 2 and 3
-      const step1Authors = [
-        "Matthew McConaughey",
-        "Jay Shetty",
-        "Rainn Wilson",
-        "Demi Lovato",
-        "Jillian Michaels",
-        "50 Cent",
-        "Michelle Obama",
-      ];
-
-      // Authors from step 2 that should be featured in step 3
-      const step2Authors = [
-        "Esther Hicks",
-        "James Clear",
-        "Brené Brown",
-        "Michelle Obama",
-        "Oprah Winfrey",
-        "Matthew McConaughey",
-      ];
-
-      if (stepId === "authors-2") {
-        return step1Authors.includes(author);
-      } else if (stepId === "authors-3") {
-        return step1Authors.includes(author) || step2Authors.includes(author);
-      }
-
-      return false;
-    });
-
-    // Currently animated featured authors
-    const animatedData = data.filter((d) => d.isFeatured && d.shouldAnimate);
-
-    // Featured authors that haven't been animated yet
-    const upcomingFeaturedData = data.filter(
-      (d) =>
-        d.isFeatured && !d.shouldAnimate && !previouslyAnimatedData.includes(d)
-    );
-
-    // First render regular points and upcoming featured points (as regular style)
-    const regularPoints = svg
-      .selectAll(".regular-point")
-      .data([...regularData, ...upcomingFeaturedData], (d) => d.author_clean);
-
-    // Remove old points
-    regularPoints.exit().remove();
-
-    // Add new points
-    const regularPointsEnter = regularPoints
+    // Create groups for each node
+    const nodeGroups = svg
+      .selectAll(".data-point")
+      .data(nodes, (d) => d.author_clean)
       .enter()
       .append("g")
-      .attr("class", "regular-point data-point");
+      .attr("class", (d) => {
+        if (d.isFeatured && d.shouldAnimate)
+          return "featured-point animated data-point";
+        if (d.isFeatured) return "featured-point data-point";
+        return "regular-point data-point";
+      });
 
-    regularPointsEnter
+    // Add stroke circle for animated authors
+    nodeGroups
+      .filter((d) => d.shouldAnimate)
       .append("circle")
-      .attr("r", circleRadius)
-      .style("fill", "var(--color-base-darker)") // All regular points start gray
-      .style("opacity", 0.9)
-      .style("stroke", "black")
-      .style("stroke-opacity", 0.3)
-      .style("stroke-width", 1);
+      .attr("r", (d) => sizeScale(d.author_num_books))
+      .style("fill", "none")
+      .style("stroke", "var(--color-yellow)")
+      .style("stroke-opacity", 0.9)
+      .style("stroke-width", 3)
+      .attr("class", "pulsate-stroke");
 
-    // Update all regular points
-    regularPoints
-      .merge(regularPointsEnter)
-      .attr(
-        "transform",
-        (d) =>
-          `translate(${xScale(d.avg_star_rating)},${yScale(
-            d.author_num_books
-          )})`
-      );
-
-    // Then render previously animated featured points
-    const previouslyFeaturedPoints = svg
-      .selectAll(".featured-point:not(.animated)")
-      .data(previouslyAnimatedData, (d) => d.author_clean);
-
-    // Remove old featured points
-    previouslyFeaturedPoints.exit().remove();
-
-    // Add new featured points
-    const previouslyFeaturedPointsEnter = previouslyFeaturedPoints
-      .enter()
-      .append("g")
-      .attr("class", "featured-point data-point");
-
-    previouslyFeaturedPointsEnter
+    // Add main circle with image or solid fill
+    nodeGroups
       .append("circle")
-      .attr("r", featuredRadius)
-      .style(
-        "fill",
-        (d) =>
-          `url(#pattern-${d.author_clean.toLowerCase().replace(/\s+/g, "-")})`
+      .attr("r", (d) => sizeScale(d.author_num_books))
+      .style("fill", (d) =>
+        d.isFeatured
+          ? `url(#pattern-${d.author_clean.toLowerCase().replace(/\s+/g, "-")})`
+          : "var(--color-base-darker)"
       )
       .style("opacity", 0.9)
       .style("stroke", "black")
-      .style("stroke-opacity", 0.3)
+      .style("stroke-opacity", 0.9)
       .style("stroke-width", 1);
 
-    // Update all previously featured points
-    const allPreviouslyFeaturedPoints = previouslyFeaturedPoints.merge(
-      previouslyFeaturedPointsEnter
-    );
+    // Add mouseover and mouseout events
+    nodeGroups.on("mouseover", function (event, d) {
+      // Move this element to the front by appending it to the end of its parent
+      this.parentNode.appendChild(this);
 
-    allPreviouslyFeaturedPoints.attr(
-      "transform",
-      (d) =>
-        `translate(${xScale(d.avg_star_rating)},${yScale(d.author_num_books)})`
-    );
+      // Only scale up if this is a featured author
+      if (d.isFeatured) {
+        d3.select(this)
+          .transition()
+          .duration(300)
+          .attr("transform", function (d) {
+            return `translate(${d.x},${d.y}) scale(5)`;
+          });
+      }
 
-    // Finally render currently animated featured points
-    const animatedPoints = svg
-      .selectAll(".featured-point.animated")
-      .data(animatedData, (d) => d.author_clean);
-
-    // Remove old animated points
-    animatedPoints.exit().remove();
-
-    // Add new animated points
-    const animatedPointsEnter = animatedPoints
-      .enter()
-      .append("g")
-      .attr("class", "featured-point animated data-point");
-
-    animatedPointsEnter
-      .append("circle")
-      .attr("r", circleRadius) // Start at regular size
-      .style("fill", "var(--color-base-darker)") // Start with regular style
-      .style("opacity", 0.9)
-      .style("stroke", "black")
-      .style("stroke-opacity", 0.3)
-      .style("stroke-width", 1);
-
-    // Update all animated points with transitions
-    const allAnimatedPoints = animatedPoints.merge(animatedPointsEnter);
-
-    allAnimatedPoints.attr(
-      "transform",
-      (d) =>
-        `translate(${xScale(d.avg_star_rating)},${yScale(d.author_num_books)})`
-    );
-
-    // Animate to large size and change to image
-    allAnimatedPoints
-      .select("circle")
-      .transition()
-      .duration(1000)
-      .attr("r", featuredRadius * 3)
-      .style(
-        "fill",
-        (d) =>
-          `url(#pattern-${d.author_clean.toLowerCase().replace(/\s+/g, "-")})`
-      );
-
-    // Add mouseover and mouseout events to all points
-    const allPoints = svg.selectAll(".data-point");
-    allPoints.on("mouseover", function (event, d) {
       tooltip
         .html(
           `<strong>${d.author_clean}</strong><br/>
@@ -392,14 +274,40 @@
            Rating: ${d.avg_star_rating.toFixed(2)}<br/>
            Avg # Ratings: ${d.avg_num_ratings}`
         )
-        .style("left", event.pageX + 10 + "px")
-        .style("top", event.pageY - 28 + "px")
+        .style("left", event.pageX + 30 + "px") // Increased from 10 to 20
+        .style("top", event.pageY - 35 + "px") // Increased from -28 to -35
         .style("opacity", 0.9);
     });
+    nodeGroups.on("mouseout", function (event, d) {
+      // Only scale back down if this is a featured author
+      if (d.isFeatured) {
+        d3.select(this)
+          .transition()
+          .duration(300)
+          .attr("transform", function (d) {
+            return `translate(${d.x},${d.y}) scale(1)`;
+          });
+      }
 
-    allPoints.on("mouseout", function () {
       tooltip.style("opacity", 0);
     });
+
+    // D3 force simulation
+    const simulation = d3
+      .forceSimulation(nodes)
+      .force("x", d3.forceX((d) => xScale(d.avg_star_rating)).strength(1))
+      .force("y", d3.forceY(yCenter).strength(0.08))
+      .force(
+        "collide",
+        d3.forceCollide((d) => sizeScale(d.author_num_books) + 2)
+      )
+      .stop();
+
+    // Run the simulation for a fixed number of ticks for static layout
+    for (let i = 0; i < 300; ++i) simulation.tick();
+
+    // Position nodes
+    nodeGroups.attr("transform", (d) => `translate(${d.x},${d.y})`);
 
     // Update current step
     currentStepId = stepId;
@@ -423,7 +331,8 @@
         // Filter and store
         allAuthorData = data.filter(
           (author) =>
-            author.author_num_books > 10 && author.avg_num_ratings >= 3000
+            featuredAuthors.hasOwnProperty(author.author_clean) ||
+            (author.author_num_books > 20 && author.avg_num_ratings >= 5000)
         );
 
         // Manual overrides

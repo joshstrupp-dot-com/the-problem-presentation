@@ -70,6 +70,19 @@
     .hotspot-pulse {
       animation: pulsate 2s infinite;
     }
+    
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    
+    .keyword-ticker {
+      display: inline-block;
+      animation: marquee 15s linear infinite;
+      min-width: 100%;
+      font-family: monospace;
+      font-size: 14px;
+    }
   `;
   document.head.appendChild(styleElement);
 
@@ -296,6 +309,14 @@
       : "Problem Origin by Year";
     titleText += showPercentage ? " (Percentage)" : " (Count)";
     svg.select(".chart-title").text(titleText);
+
+    // At the end of updateChart(), update overlay and hover line dimensions
+    // Update overlay and hover line dimensions
+    svg
+      .select(".hover-capture-rect")
+      .attr("width", width)
+      .attr("height", height);
+    svg.select(".hover-vertical-line").attr("y1", 0).attr("y2", height);
   }
 
   ///////////////////////////////////////////////////////////// ! Toggle Categories Function
@@ -431,6 +452,164 @@
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
+    // --- Universal Hover Line Setup ---
+    // Aggregate historical context by year
+    const historicalContextByYear = {};
+    const keywordsByYear = {}; // New object to store keywords by year
+    years.forEach((year) => {
+      // Get all historical_context entries for this year
+      const entries = filteredData.filter(
+        (d) =>
+          d.year_bin_5yr === year &&
+          d.historical_context &&
+          d.historical_context.trim() !== ""
+      );
+      let allEvents = [];
+      entries.forEach((d) => {
+        // Split by line (\n or \r\n)
+        const events = d.historical_context
+          .split(/\r?\n/)
+          .map((e) => e.trim())
+          .filter(Boolean);
+        allEvents = allEvents.concat(events);
+      });
+      // Count frequency
+      const freq = {};
+      allEvents.forEach((e) => {
+        freq[e] = (freq[e] || 0) + 1;
+      });
+      // Sort by frequency, then alphabetically
+      const sorted = Object.entries(freq).sort(
+        (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+      );
+      // Remove near-duplicates (case-insensitive, ignore punctuation/parentheses)
+      const uniqueEvents = [];
+      const seen = new Set();
+      sorted.forEach(([event]) => {
+        // Normalize: lowercase, remove punctuation, parentheses, and extra spaces
+        const norm = event
+          .toLowerCase()
+          .replace(/[^a-z0-9 ]/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (!seen.has(norm)) {
+          seen.add(norm);
+          uniqueEvents.push(event);
+        }
+      });
+      // Take top 3 unique
+      historicalContextByYear[year] = uniqueEvents.slice(0, 3);
+
+      // Collect keywords for this year
+      const keywordEntries = filteredData.filter(
+        (d) => d.year_bin_5yr === year && d.keywords && d.keywords.trim() !== ""
+      );
+      let allKeywords = [];
+      keywordEntries.forEach((d) => {
+        // Split by comma and trim each keyword
+        const keywords = d.keywords
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean);
+        allKeywords = allKeywords.concat(keywords);
+      });
+      // Store all keywords as a comma-separated string
+      keywordsByYear[year] = allKeywords.join(", ");
+    });
+
+    // Add a group for the hover line
+    const hoverLineGroup = svg.append("g").attr("class", "hover-line-group");
+    // Add the vertical line (initially hidden)
+    const hoverLine = hoverLineGroup
+      .append("line")
+      .attr("class", "hover-vertical-line")
+      .attr("y1", 0)
+      .attr("y2", height)
+      .attr("stroke", "var(--color-base-darker)")
+      .attr("stroke-width", 2)
+      .style("opacity", 0);
+    // Add a transparent rect overlay to capture mouse events
+    svg
+      .append("rect")
+      .attr("class", "hover-capture-rect")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("fill", "transparent")
+      .on("mousemove", onMouseMove)
+      .on("mouseleave", onMouseLeave);
+
+    // Mouse event handlers for universal hover
+    function onMouseMove(event) {
+      const [mouseX, mouseY] = d3.pointer(event, this);
+      // Find the closest year bin
+      const bandWidth = x.bandwidth();
+      let closestYear = years[0];
+      let minDist = Infinity;
+      years.slice(0, currentVisibleCount).forEach((year) => {
+        const yearX = x(year) + bandWidth / 2;
+        const dist = Math.abs(mouseX - yearX);
+        if (dist < minDist) {
+          minDist = dist;
+          closestYear = year;
+        }
+      });
+      // Get the x position for the closest year
+      const xPos = x(closestYear) + bandWidth / 2;
+      // Show and position the vertical line
+      hoverLine
+        .attr("x1", xPos)
+        .attr("x2", xPos)
+        .attr("y1", 0)
+        .attr("y2", height)
+        .style("opacity", 1);
+      // Tooltip for historical context
+      const contextArr = historicalContextByYear[closestYear] || [];
+      const keywords = keywordsByYear[closestYear] || "";
+      let tooltipHtml = "";
+      if (contextArr.length > 0 || keywords) {
+        // Determine which image to show based on the year
+        let imageHtml = "";
+        if (closestYear === "1920-1924") {
+          imageHtml = `<img src="assets/gasmask.png" style="width:100%; height:auto; margin-top:10px; display:block;" />`;
+        } else {
+          imageHtml = `<div style="width:100%; height:60px; background-color:#ccc; margin-top:10px;"></div>`;
+        }
+
+        // Create keyword ticker if keywords exist
+        let keywordTickerHtml = "";
+        if (keywords) {
+          // Use HTML marquee for keywords ticker
+          keywordTickerHtml = `
+            <marquee behavior="scroll" direction="left" scrollamount="5"
+              style="width:100%; height:60px; background-color:#f5f5f5; margin-top:10px; padding:15px 0; border:none; color:#333; font-family:monospace; font-size:14px;">
+              ${keywords}
+            </marquee>
+          `;
+        }
+
+        tooltipHtml =
+          `<div style='padding: 12px;'>` +
+          `<div style='font-weight:bold; margin-bottom:8px;'>HISTORICAL CONTEXT:</div>` +
+          contextArr
+            .map((e) => `<div style='margin-bottom:12px;'>${e}</div>`)
+            .join("") +
+          imageHtml +
+          keywordTickerHtml +
+          `</div>`;
+      }
+      tooltip
+        .html(tooltipHtml)
+        .style("left", event.pageX + 18 + "px")
+        .style("top", event.pageY - 30 + "px")
+        .transition()
+        .duration(100)
+        .style("opacity", tooltipHtml ? 0.95 : 0);
+    }
+    function onMouseLeave() {
+      hoverLine.style("opacity", 0);
+      tooltip.transition().duration(200).style("opacity", 0);
+    }
+
     ///////////////////////////////////////////////////////////// ! Scales Definition
     // Set up scales
     x = d3.scaleBand().domain(visibleYears).range([0, width]).padding(0.2);
@@ -542,16 +721,7 @@
 
     ///////////////////////////////////////////////////////////// ! Legend Creation
     // Add legend with background at top left
-    const legend = svg.append("g").attr("transform", `translate(10, -70)`); // Position at top left
-
-    // Add background rectangle for the legend
-    legend
-      .append("rect")
-      .attr("width", 300) // Wider to accommodate horizontal layout
-      .attr("height", 30) // Shorter for single row
-      .attr("fill", "var(--color-base)")
-      .attr("rx", 10) // Rounded corners
-      .attr("ry", 10);
+    const legend = svg.append("g").attr("transform", `translate(10, -70)`); //
 
     // Add legend title
     legend
@@ -582,6 +752,38 @@
         .attr("class", "annotation")
         .text(key);
     });
+
+    // Add BEST SELLER legend item (black circle, white fill, black stroke, r=5)
+    const bestSellerLegend = legend
+      .append("g")
+      .attr("class", "origin-legend best-seller-legend")
+      .attr("transform", `translate(${2 * 80 + 175 + 50}, 7.5)`); // Spaced after the others
+
+    bestSellerLegend
+      .append("circle")
+      .attr("cx", 7.5)
+      .attr("cy", 7.5)
+      .attr("r", 7)
+      .attr("fill", "none")
+      .attr("stroke", "var(--color-orange)")
+      .attr("stroke-width", 2);
+
+    // Add teal circle to the right of the orange circle
+    bestSellerLegend
+      .append("circle")
+      .attr("cx", 27.5) // 20px to the right of the orange circle
+      .attr("cy", 7.5)
+      .attr("r", 7)
+      .attr("fill", "none")
+      .attr("stroke", "var(--color-teal)")
+      .attr("stroke-width", 2);
+
+    bestSellerLegend
+      .append("text")
+      .attr("x", 45)
+      .attr("y", 12.5)
+      .attr("class", "annotation")
+      .text("BEST SELLER");
 
     // Add button click handler for expanding chart
     d3.select("#expand-chart").on("click", function () {
