@@ -163,7 +163,7 @@ body {
 
   padding: 1rem;
   min-height: 100vh;
-  margin-left: 2.6rem;
+  margin-left: 0rem;
 }
 
 #scrolly > * {
@@ -257,29 +257,24 @@ figure p {
 .step.statement,
 .step.header {
   border: none;
-  width: calc(100vw - 9rem);
+  width: 100vw;
   text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: "Libre Franklin", sans-serif;
-}
-
-.step.statement {
-  padding: 40vh 2rem;
   min-height: 100vh;
-  max-width: 100vw;
+  padding: 40vh 2rem;
   box-sizing: border-box;
-  display: flex;
-  align-items: center;
+  margin-left: -2.6rem;
 }
 
 /* Common styling for statement and header paragraphs */
 .step.statement p,
 .step.header p {
-  line-height: 1.3;
+  line-height: 1.9;
   text-align: center;
-  max-width: 80%;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 6rem;
   font-family: "Libre Franklin", sans-serif;
@@ -290,7 +285,7 @@ figure p {
   font-size: 45px;
   font-weight: normal;
   color: #000;
-  margin-top: 40vh;
+  margin-top: 0vh;
 }
 
 .step.emphasis-step {

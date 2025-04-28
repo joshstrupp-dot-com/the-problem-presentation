@@ -1,7 +1,8 @@
 const stepsConfig = [
   {
     id: "chapter-1",
-    text: "Life is hard. Advice can help. And there is no shortage of advice.",
+    text: `Life is hard. Advice can help. And there <video src="assets/videos/yt1.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video>  is no <video src="assets/videos/yt2.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> shortage 
+     of <video src="assets/videos/yt3.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> advice.`,
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -389,9 +390,9 @@ const stepsConfig = [
   },
   {
     id: "systemic-problems",
-    text: "It detracts from my point: our anxieties are often the result of historical events outside of our control — and some authors point the blame at you for profit.",
+    text: "Our anxieties are often the result of historical events outside of our control — and some authors point the blame at you for profit.",
     fullwidth: true,
-    // customClass: "statement",
+    customClass: "header",
     render: () => {
       // Update the existing grid visualization
       document.dispatchEvent(
