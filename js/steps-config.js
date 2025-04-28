@@ -1,7 +1,7 @@
 const stepsConfig = [
   {
     id: "chapter-1",
-    text: "Life can really suck. Advice can help. And there is no shortage of advice",
+    text: "Life is hard. Advice can help. And there is no shortage of advice.",
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -21,7 +21,7 @@ const stepsConfig = [
 
   {
     id: "quick-fixes",
-    text: "Life can really suck. Advice can help. And there is no shortage of advice.You're one Amazon order from never aging again. You're 8 minutes from knowing all of Wall Street's secrets.",
+    text: "You're one Amazon order from never aging again. You're 8 minutes from knowing all of Wall Street's secrets.",
     fullwidth: true,
     fadeIn: true,
     fadeOut: true,
@@ -81,56 +81,31 @@ const stepsConfig = [
         .append("ul")
         .style("margin", "0 0.625rem")
         .style("padding", "0")
-        .style("animation", "scrollUp 40s infinite"); // Doubled the animation duration to slow it down
+        .style("animation", "scrollUp 25s infinite"); // Doubled the animation duration to slow it down
 
       // Add the scrolling words
       const words = [
-        { text: "why do I feel stuck", color: "#000" },
+        { text: "am I a bad parent?", color: "#000" },
         { text: "how to stop overthinking", color: "#000" },
-        { text: "can people really change?", color: "#000" },
-        {
-          text: "how to be more confident",
-          color: "#000",
-        },
-        { text: "fix my relationship", color: "#000" },
-        { text: "IM SO ANXIOUS HALP", color: "#000" },
-        {
-          text: "I hate my job, now what?",
-          color: "#000",
-        },
-        {
-          text: "why am I always tired + unmotivated",
-          color: "#000",
-        },
-        { text: "make friends as an adult", color: "#000" },
-        {
-          text: "how to forgive someone who hurt me",
-          color: "#000",
-        },
-        { text: "best way to build new habits", color: "#000" },
-        { text: "how to stop comparing myself", color: "#000" },
-        { text: "what to do with my life", color: "#000" },
-        {
-          text: "how to believe in myself again",
-          color: "#000",
-        },
-        { text: "is therapy worth it", color: "#000" },
-        {
-          text: "how 2 stop being a people pleaser",
-          color: "#000",
-        },
-        {
-          text: "how to set boundaries without feeling guilty",
-          color: "#000",
-        },
-        { text: "how to start over in life", color: "#000" },
-        {
-          text: "how to heal from childhood trauma",
-          color: "#000",
-        },
-        { text: "how to stop self-sabotaging", color: "#000" },
+        { text: "why do I feel alone even with friends", color: "#000" },
+        { text: "how to deal with imposter syndrome", color: "#000" },
+        { text: "is it normal to hate my body?", color: "#000" },
+        { text: "ways to handle fear of failure", color: "#000" },
+        { text: "why can't I find love?", color: "#000" },
+        { text: "ways to get rich online", color: "#000" },
+        { text: "why do I procrastinate so much?", color: "#000" },
+        { text: "how to build self-confidence", color: "#000" },
+        { text: "why do I fear being alone?", color: "#000" },
+        { text: "how to cope with climate anxiety", color: "#000" },
+        { text: "how to stop comparing myself to others", color: "#000" },
+        { text: "why do I sabotage my own success?", color: "#000" },
+        { text: "how to deal with social anxiety", color: "#000" },
+        { text: "why do I feel unworthy of love?", color: "#000" },
+        { text: "how to forgive myself for past mistakes", color: "#000" },
+        { text: "why am I afraid to speak up?", color: "#000" },
+        { text: "how to overcome fear of change", color: "#000" },
+        { text: "Holistic healing for OCD", color: "#000" },
       ];
-
       words.forEach((word) => {
         wordsList
           .append("li")

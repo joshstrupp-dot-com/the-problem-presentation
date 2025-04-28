@@ -33,6 +33,11 @@
   position: relative;
   overflow: hidden;
   background-color: var(--color-base);
+  background-image: url("../assets/textures/paper-texture.jpg");
+  background-blend-mode: overlay;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.9;
 }
 
 #background-canvas {
@@ -227,7 +232,7 @@ figure p {
   /* Remove vertical positioning that pushed steps down */
   /* position: relative; */
   /* top: 50%; */
-  opacity: 0.4;
+  opacity: 0.9;
 }
 
 .step:last-child {
@@ -257,7 +262,7 @@ figure p {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Libre Caslon Display", serif;
+  font-family: "Libre Franklin", sans-serif;
 }
 
 .step.statement {
@@ -277,11 +282,12 @@ figure p {
   max-width: 80%;
   margin: 0 auto;
   padding: 0 6rem;
+  font-family: "Libre Franklin", sans-serif;
 }
 
 /* Specific styling for header paragraphs */
 .step.header p {
-  font-size: 65px;
+  font-size: 45px;
   font-weight: normal;
   color: #000;
   margin-top: 40vh;
