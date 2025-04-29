@@ -164,7 +164,7 @@ const stepsConfig = [
   {
     id: "self-help",
     text: "SELF HELP",
-    customClass: "statement",
+    customClass: "header",
     render: () => {
       const figure = d3.select("#figure-container");
       figure.html("");

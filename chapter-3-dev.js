@@ -166,6 +166,68 @@
       .range([0, width]);
     const yCenter = height / 2;
 
+    ///////////////////////////////////////////////////////////// ! Legend Creation
+    // Create a legend group in the top left corner
+    const legendGroup = svg
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", "translate(50, 50)");
+
+    // Create nested circles using actual data ranges
+    const midBooks = Math.round((minBooks + maxBooks) / 2);
+    const legendSizes = [
+      { size: sizeScale(maxBooks), label: `${maxBooks} books` },
+      { size: sizeScale(midBooks), label: `${midBooks} books` },
+      { size: sizeScale(minBooks), label: `${minBooks} books` },
+    ].sort((a, b) => b.size - a.size); // Sort by size descending
+
+    // Add circles
+    legendGroup
+      .selectAll(".legend-circle")
+      .data(legendSizes)
+      .enter()
+      .append("circle")
+      .attr("class", "legend-circle")
+      .attr("cx", 0)
+      .attr("cy", 0)
+      .attr("r", (d) => d.size)
+      .style("fill", "var(--color-base-darker)")
+      .style("opacity", 0.9)
+      .style("stroke", "black")
+      .style("stroke-width", 1);
+
+    // Add lines from circle edge to label
+    const labelGroup = legendGroup
+      .selectAll(".label-group")
+      .data(legendSizes)
+      .enter()
+      .append("g")
+      .attr("class", "label-group");
+
+    labelGroup
+      .append("line")
+      .attr("x1", (d) => d.size)
+      .attr("y1", 0)
+      .attr("x2", (d) => d.size + (d.size === sizeScale(minBooks) ? 30 : 20))
+      .attr("y2", 0)
+      .style("stroke", "black")
+      .style("stroke-width", 1);
+
+    // Add text labels
+    labelGroup
+      .append("text")
+      .attr("x", (d) => d.size + (d.size === sizeScale(minBooks) ? 35 : 25))
+      .attr("y", 0)
+      .attr("dy", "0.32em")
+      .style("font-size", "12px")
+      .text((d) => d.label);
+
+    // Position label groups at different angles
+    labelGroup.attr("transform", (d, i) => {
+      const angle = -60 + i * 60; // Spread labels on right side, more compact angle range
+      return `rotate(${angle})`;
+    });
+
     ///////////////////////////////////////////////////////////// ! Axes Creation
     svg
       .append("g")
@@ -187,6 +249,26 @@
 
     ///////////////////////////////////////////////////////////// ! Data Points Creation
     const defs = svg.append("defs");
+
+    // Add grain texture pattern
+    const grainPattern = defs
+      .append("pattern")
+      .attr("id", "grain-texture")
+      .attr("width", 1)
+      .attr("height", 1)
+      .attr("patternUnits", "objectBoundingBox")
+      .attr("patternContentUnits", "objectBoundingBox");
+
+    grainPattern
+      .append("image")
+      .attr("width", 1)
+      .attr("height", 1)
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("preserveAspectRatio", "xMidYMid slice")
+      .attr("xlink:href", "assets/textures/grain.webp");
+
+    // Create author image patterns
     Object.entries(featuredAuthors).forEach(([author, imgUrl]) => {
       const patternId = `pattern-${author.toLowerCase().replace(/\s+/g, "-")}`;
       const pattern = defs
@@ -196,6 +278,8 @@
         .attr("height", 1)
         .attr("patternUnits", "objectBoundingBox")
         .attr("patternContentUnits", "objectBoundingBox");
+
+      // Add author image
       pattern
         .append("image")
         .attr("width", 1)
@@ -204,6 +288,16 @@
         .attr("y", 0)
         .attr("preserveAspectRatio", "xMidYMid slice")
         .attr("xlink:href", imgUrl);
+
+      // Add grain texture on top with opacity
+      pattern
+        .append("rect")
+        .attr("width", 1)
+        .attr("height", 1)
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("fill", "url(#grain-texture)")
+        .style("opacity", 0.45);
     });
 
     // Helper for highlight color
@@ -247,7 +341,7 @@
           ? `url(#pattern-${d.author_clean.toLowerCase().replace(/\s+/g, "-")})`
           : "var(--color-base-darker)"
       )
-      .style("opacity", 0.9)
+      .style("opacity", 1)
       .style("stroke", "black")
       .style("stroke-opacity", 0.9)
       .style("stroke-width", 1);

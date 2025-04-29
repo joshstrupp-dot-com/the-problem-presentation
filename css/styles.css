@@ -185,8 +185,8 @@ figure {
   top: 1rem;
   margin: 0;
   transform: translate3d(0, 0, 0);
-  /* background-color: #8a8a8a; */
   z-index: 0;
+  /* pointer-events: none; */
 }
 
 figure.fullwidth {
@@ -195,6 +195,7 @@ figure.fullwidth {
   left: 0;
   right: 0;
   z-index: 0;
+  /* pointer-events: none; */
 }
 
 figure p {
@@ -412,9 +413,11 @@ figure p {
   color: #000;
 }
 
-.bottom-left {
+.body.bottom-left {
+  /* position: fixed; */
   bottom: 2rem;
   left: 2rem;
+  z-index: 1001;
 }
 
 .andale {

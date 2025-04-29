@@ -512,6 +512,7 @@
 
     // Create a map to store image elements for each year
     const yearImages = {};
+    const imageIndicators = {}; // Store indicators for each year
 
     // Define which years have images
     const yearsWithImages = [
@@ -550,19 +551,40 @@
       // Format: assets/chap-2-hover-imgs/year_YYYY_YYYY.webp
       const imagePath = `assets/chap-2-hover-imgs/year_${safeYearName}.webp`;
 
+      // Create a group for this year's image and indicator
+      const yearGroup = imageGroup
+        .append("g")
+        .attr("class", `hover-group-${safeYearName}`);
+
       // Create the image element
-      const yearImage = imageGroup
+      const yearImage = yearGroup
         .append("image")
         .attr("class", `hover-image-${safeYearName}`)
         .attr("xlink:href", imagePath)
-        .attr("width", 250)
+        .attr("width", 150)
         .attr("height", height)
         .attr("preserveAspectRatio", "xMidYMid slice")
         .style("opacity", 0)
         .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
 
-      // Store the image element in the map
+      // Create the indicator rectangle
+      const indicator = yearGroup
+        .append("rect")
+        .attr("class", `hover-indicator-${safeYearName}`)
+        .attr("width", 4) // Swapped with height
+        .attr("height", 20) // Reduced from 40 to 20 for a shorter vertical line
+        .attr("x", 73) // Center the 4px wide indicator on the 150px wide image (150/2 - 2)
+        .attr("y", height - 25) // Position near bottom with room for the height
+        .attr("rx", 1) // Border radius
+        .style("fill", "#F3F1EE")
+        .style("stroke", "#000")
+        .style("stroke-width", 1)
+        .style("filter", "drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.2))")
+        .style("opacity", 0);
+
+      // Store both elements in their respective maps
       yearImages[year] = yearImage;
+      imageIndicators[year] = indicator;
     });
 
     // Add the grain texture overlay
@@ -570,7 +592,7 @@
       .append("image")
       .attr("class", "grain-overlay")
       .attr("xlink:href", "assets/textures/grain.webp")
-      .attr("width", 250)
+      .attr("width", 150)
       .attr("height", height)
       .attr("preserveAspectRatio", "xMidYMid slice")
       .style("opacity", 0)
@@ -584,7 +606,17 @@
     const yearLabel = yearLabelGroup
       .append("text")
       .attr("class", "annotation")
+      .attr("font-size", "14px")
       .attr("text-anchor", "middle")
+      .style("opacity", 0);
+
+    // Add book count text below the year label
+    const bookCountLabel = yearLabelGroup
+      .append("text")
+      .attr("class", "annotation")
+      .style("font-size", "12px")
+      .attr("text-anchor", "middle")
+      .attr("dy", "1.5em") // Position below the year label
       .style("opacity", 0);
 
     // Add a transparent rect overlay to capture mouse events
@@ -620,12 +652,16 @@
 
       // If we're on a hotspot, hide all universal hover elements
       if (isOnHotspot) {
-        // Interrupt any ongoing transitions and hide all images
+        // Interrupt any ongoing transitions and hide all images and indicators
         Object.values(yearImages).forEach((img) => {
           img.interrupt().style("opacity", 0);
         });
+        Object.values(imageIndicators).forEach((indicator) => {
+          indicator.interrupt().style("opacity", 0);
+        });
         grainOverlay.interrupt().style("opacity", 0);
         yearLabel.interrupt().style("opacity", 0);
+        bookCountLabel.interrupt().style("opacity", 0);
         return;
       }
 
@@ -636,25 +672,42 @@
         yearLabelGroup.attr("transform", `translate(${xPos}, 20)`);
         yearLabel.interrupt().text(closestYear).style("opacity", 1);
 
-        // Position the image group
-        imageGroup.attr("transform", `translate(${xPos - 125}, 0)`);
+        // Calculate total books for this year
+        const yearData = chartData.find((d) => d.year === closestYear);
+        const totalBooks = yearData ? yearData.INTERNAL + yearData.EXTERNAL : 0;
 
-        // First hide all images immediately
+        // Update and show the book count label with proper singular/plural form
+        const bookText = totalBooks === 1 ? "book" : "books";
+        bookCountLabel
+          .interrupt()
+          .text(`${totalBooks} ${bookText} published`)
+          .style("opacity", 1);
+
+        // Position the image group
+        imageGroup.attr("transform", `translate(${xPos - 75}, 0)`);
+
+        // First hide all images and indicators immediately
         Object.entries(yearImages).forEach(([year, img]) => {
           if (year !== closestYear) {
             img.interrupt().style("opacity", 0);
+            imageIndicators[year].interrupt().style("opacity", 0);
           }
         });
 
-        // Then show only the current year's image
+        // Then show only the current year's image and indicator
         yearImages[closestYear].interrupt().style("opacity", 0.4);
+        imageIndicators[closestYear].interrupt().style("opacity", 1);
         grainOverlay.interrupt().style("opacity", 0.5);
       } else {
         // Hide all hover effects if there's no image for this year
         yearLabel.interrupt().style("opacity", 0);
+        bookCountLabel.interrupt().style("opacity", 0);
         grainOverlay.interrupt().style("opacity", 0);
         Object.values(yearImages).forEach((img) => {
           img.interrupt().style("opacity", 0);
+        });
+        Object.values(imageIndicators).forEach((indicator) => {
+          indicator.interrupt().style("opacity", 0);
         });
       }
     }
@@ -664,7 +717,11 @@
       Object.values(yearImages).forEach((img) => {
         img.interrupt().style("opacity", 0);
       });
+      Object.values(imageIndicators).forEach((indicator) => {
+        indicator.interrupt().style("opacity", 0);
+      });
       yearLabel.interrupt().style("opacity", 0);
+      bookCountLabel.interrupt().style("opacity", 0);
       grainOverlay.interrupt().style("opacity", 0);
     }
 
