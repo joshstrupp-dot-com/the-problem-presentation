@@ -209,6 +209,14 @@
         .attr("stop-color", color(origin))
         .attr("stop-opacity", 1);
 
+      // Before applying the filter, first remove any existing filters
+      svg.select(`.line-${origin}`).style("filter", null);
+
+      // Then apply the new filter
+      svg
+        .select(`.line-${origin}`)
+        .style("filter", "drop-shadow(0px 5px 5px rgba(0,0,0,0.1))");
+
       // Update the actual data line
       svg
         .select(`.line-${origin}`)
@@ -236,24 +244,6 @@
         .attr("stroke", color(origin))
         .attr("stroke-width", 1.5)
         .style("opacity", 0.0)
-        // .on("mouseover", (event, d) => {
-        //   const customTooltips = {
-        //     "1890-1894": "custom text!",
-        //     // Add more year-bin keys as needed
-        //   };
-        //   const content =
-        //     origin === "INTERNAL" && d.year === "1900-1904"
-        //       ? '<img src="assets/image-test.png" style="max-width:150px; display:block;" />'
-        //       : customTooltips[d.year] || d.names.slice(0, 3).join("<br>");
-        //   tooltip.transition().duration(100).style("opacity", 0.9);
-        //   tooltip
-        //     .html(content)
-        //     .style("left", event.pageX + 10 + "px")
-        //     .style("top", event.pageY - 10 + "px");
-        // })
-        // .on("mouseout", () => {
-        //   tooltip.transition().duration(200).style("opacity", 0);
-        // })
         .merge(hotspots)
         .transition()
         .duration(500)
@@ -517,41 +507,70 @@
       keywordsByYear[year] = allKeywords.join(", ");
     });
 
-    // Add a group for the hover line
-    const hoverLineGroup = svg.append("g").attr("class", "hover-line-group");
-
-    // Add the vertical line (initially hidden)
-    const hoverLine = hoverLineGroup
-      .append("line")
-      .attr("class", "hover-vertical-line")
-      .attr("y1", 0)
-      .attr("y2", height)
-      .attr("stroke", "var(--color-base-darker)")
-      .attr("stroke-width", 100)
-      .style("opacity", 0);
-
     // Create a group for the image and its overlay
-    const imageGroup = hoverLineGroup
-      .append("g")
-      .attr("class", "hover-image-group");
+    const imageGroup = svg.append("g").attr("class", "hover-image-group");
 
-    // Add the main image
-    const hoverImage = imageGroup
-      .append("image")
-      .attr("class", "hover-image")
-      .attr("xlink:href", "assets/ww1.webp")
-      .attr("width", 150)
-      .attr("height", height)
-      .attr("preserveAspectRatio", "xMidYMid slice")
-      .style("opacity", 0)
-      .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
+    // Create a map to store image elements for each year
+    const yearImages = {};
+
+    // Define which years have images
+    const yearsWithImages = [
+      "1855-1859",
+      "1905-1909",
+      "1910-1914",
+      "1915-1919",
+      "1920-1924",
+      "1925-1929",
+      "1930-1934",
+      "1935-1939",
+      "1940-1944",
+      "1945-1949",
+      "1950-1954",
+      "1955-1959",
+      "1960-1964",
+      "1965-1969",
+      "1970-1974",
+      "1975-1979",
+      "1980-1984",
+      "1985-1989",
+      "1990-1994",
+      "1995-1999",
+      "2000-2004",
+      "2005-2009",
+      "2010-2014",
+      "2015-2019",
+    ];
+
+    // Create image elements only for years that have images
+    yearsWithImages.forEach((year) => {
+      // Create a safe filename from the year (replace hyphens with underscores)
+      const safeYearName = year.replace(/-/g, "_");
+
+      // Use a consistent naming pattern for the image files
+      // Format: assets/chap-2-hover-imgs/year_YYYY_YYYY.webp
+      const imagePath = `assets/chap-2-hover-imgs/year_${safeYearName}.webp`;
+
+      // Create the image element
+      const yearImage = imageGroup
+        .append("image")
+        .attr("class", `hover-image-${safeYearName}`)
+        .attr("xlink:href", imagePath)
+        .attr("width", 250)
+        .attr("height", height)
+        .attr("preserveAspectRatio", "xMidYMid slice")
+        .style("opacity", 0)
+        .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
+
+      // Store the image element in the map
+      yearImages[year] = yearImage;
+    });
 
     // Add the grain texture overlay
     const grainOverlay = imageGroup
       .append("image")
       .attr("class", "grain-overlay")
       .attr("xlink:href", "assets/textures/grain.webp")
-      .attr("width", 150)
+      .attr("width", 250)
       .attr("height", height)
       .attr("preserveAspectRatio", "xMidYMid slice")
       .style("opacity", 0)
@@ -596,76 +615,57 @@
       // Get the x position for the closest year
       const xPos = x(closestYear) + bandWidth / 2;
 
-      // Show and position the vertical line and image
-      hoverLine
-        .attr("x1", xPos)
-        .attr("x2", xPos)
-        .attr("y1", 0)
-        .attr("y2", height)
-        .style("opacity", 1);
+      // Check if we're hovering over a hotspot
+      const isOnHotspot = d3.select(event.target).classed("hotspot");
 
-      // Position and show the year label
-      yearLabelGroup.attr("transform", `translate(${xPos}, 20)`);
-      yearLabel.text(closestYear).style("opacity", 1);
+      // If we're on a hotspot, hide all universal hover elements
+      if (isOnHotspot) {
+        // Interrupt any ongoing transitions and hide all images
+        Object.values(yearImages).forEach((img) => {
+          img.interrupt().style("opacity", 0);
+        });
+        grainOverlay.interrupt().style("opacity", 0);
+        yearLabel.interrupt().style("opacity", 0);
+        return;
+      }
 
-      if (closestYear === "1920-1924") {
-        imageGroup.attr("transform", `translate(${xPos - 75}, 0)`);
-        hoverImage.style("opacity", 0.65);
-        grainOverlay.style("opacity", 0.6);
+      // Handle universal hover if not on a hotspot
+      const hasImage = yearImages[closestYear] !== undefined;
+      if (hasImage) {
+        // Position and show the year label
+        yearLabelGroup.attr("transform", `translate(${xPos}, 20)`);
+        yearLabel.interrupt().text(closestYear).style("opacity", 1);
+
+        // Position the image group
+        imageGroup.attr("transform", `translate(${xPos - 125}, 0)`);
+
+        // First hide all images immediately
+        Object.entries(yearImages).forEach(([year, img]) => {
+          if (year !== closestYear) {
+            img.interrupt().style("opacity", 0);
+          }
+        });
+
+        // Then show only the current year's image
+        yearImages[closestYear].interrupt().style("opacity", 0.4);
+        grainOverlay.interrupt().style("opacity", 0.5);
       } else {
-        hoverImage.style("opacity", 0);
-        grainOverlay.style("opacity", 0);
+        // Hide all hover effects if there's no image for this year
+        yearLabel.interrupt().style("opacity", 0);
+        grainOverlay.interrupt().style("opacity", 0);
+        Object.values(yearImages).forEach((img) => {
+          img.interrupt().style("opacity", 0);
+        });
       }
-
-      // Tooltip for historical context
-      const contextArr = historicalContextByYear[closestYear] || [];
-      const keywords = keywordsByYear[closestYear] || "";
-      let tooltipHtml = "";
-      if (contextArr.length > 0 || keywords) {
-        // Determine which image to show based on the year
-        let imageHtml = "";
-        if (closestYear === "1920-1924") {
-          imageHtml = `<img src="assets/gasmask.png" style="width:100%; height:auto; margin-top:10px; display:block;" />`;
-        } else {
-          imageHtml = `<div style="width:100%; height:60px; background-color:#ccc; margin-top:10px;"></div>`;
-        }
-
-        // Create keyword ticker if keywords exist
-        let keywordTickerHtml = "";
-        if (keywords) {
-          // Use HTML marquee for keywords ticker
-          keywordTickerHtml = `
-            <marquee behavior="scroll" direction="left" scrollamount="5"
-              style="width:100%; height:60px; background-color:#f5f5f5; margin-top:10px; padding:15px 0; border:none; color:#333; font-family:monospace; font-size:14px;">
-              ${keywords}
-            </marquee>
-          `;
-        }
-
-        tooltipHtml =
-          `<div style='padding: 12px;'>` +
-          `<div style='font-weight:bold; margin-bottom:8px;'>HISTORICAL CONTEXT:</div>` +
-          contextArr
-            .map((e) => `<div style='margin-bottom:12px;'>${e}</div>`)
-            .join("") +
-          imageHtml +
-          keywordTickerHtml +
-          `</div>`;
-      }
-      tooltip
-        .html(tooltipHtml)
-        .style("left", event.pageX + 18 + "px")
-        .style("top", event.pageY - 30 + "px")
-        .transition()
-        .duration(100)
-        .style("opacity", tooltipHtml ? 0.0 : 0);
     }
+
     function onMouseLeave() {
-      hoverLine.style("opacity", 0);
-      hoverImage.style("opacity", 0);
-      grainOverlay.style("opacity", 0);
-      yearLabel.style("opacity", 0);
-      tooltip.transition().duration(200).style("opacity", 0);
+      // Interrupt any ongoing transitions and hide all elements
+      Object.values(yearImages).forEach((img) => {
+        img.interrupt().style("opacity", 0);
+      });
+      yearLabel.interrupt().style("opacity", 0);
+      grainOverlay.interrupt().style("opacity", 0);
     }
 
     ///////////////////////////////////////////////////////////// ! Scales Definition
