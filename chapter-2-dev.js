@@ -558,6 +558,16 @@
       .style("mix-blend-mode", "overlay")
       .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
 
+    // Create a top-level group for the year label to ensure it's always on top
+    const yearLabelGroup = svg.append("g").attr("class", "year-label-group");
+
+    // Add year label text
+    const yearLabel = yearLabelGroup
+      .append("text")
+      .attr("class", "annotation")
+      .attr("text-anchor", "middle")
+      .style("opacity", 0);
+
     // Add a transparent rect overlay to capture mouse events
     svg
       .append("rect")
@@ -587,20 +597,22 @@
       const xPos = x(closestYear) + bandWidth / 2;
 
       // Show and position the vertical line and image
+      hoverLine
+        .attr("x1", xPos)
+        .attr("x2", xPos)
+        .attr("y1", 0)
+        .attr("y2", height)
+        .style("opacity", 1);
+
+      // Position and show the year label
+      yearLabelGroup.attr("transform", `translate(${xPos}, 20)`);
+      yearLabel.text(closestYear).style("opacity", 1);
+
       if (closestYear === "1920-1924") {
-        hoverLine
-          .attr("x1", xPos)
-          .attr("x2", xPos)
-          .attr("y1", 0)
-          .attr("y2", height)
-          .style("opacity", 1);
-
-        imageGroup.attr("transform", `translate(${xPos - 50}, 0)`);
-
+        imageGroup.attr("transform", `translate(${xPos - 75}, 0)`);
         hoverImage.style("opacity", 0.65);
         grainOverlay.style("opacity", 0.6);
       } else {
-        hoverLine.style("opacity", 0);
         hoverImage.style("opacity", 0);
         grainOverlay.style("opacity", 0);
       }
@@ -651,6 +663,8 @@
     function onMouseLeave() {
       hoverLine.style("opacity", 0);
       hoverImage.style("opacity", 0);
+      grainOverlay.style("opacity", 0);
+      yearLabel.style("opacity", 0);
       tooltip.transition().duration(200).style("opacity", 0);
     }
 
