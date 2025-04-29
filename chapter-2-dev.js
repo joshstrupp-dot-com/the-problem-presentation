@@ -519,6 +519,7 @@
 
     // Add a group for the hover line
     const hoverLineGroup = svg.append("g").attr("class", "hover-line-group");
+
     // Add the vertical line (initially hidden)
     const hoverLine = hoverLineGroup
       .append("line")
@@ -526,15 +527,43 @@
       .attr("y1", 0)
       .attr("y2", height)
       .attr("stroke", "var(--color-base-darker)")
-      .attr("stroke-width", 2)
+      .attr("stroke-width", 100)
       .style("opacity", 0);
+
+    // Create a group for the image and its overlay
+    const imageGroup = hoverLineGroup
+      .append("g")
+      .attr("class", "hover-image-group");
+
+    // Add the main image
+    const hoverImage = imageGroup
+      .append("image")
+      .attr("class", "hover-image")
+      .attr("xlink:href", "assets/ww1.webp")
+      .attr("width", 150)
+      .attr("height", height)
+      .attr("preserveAspectRatio", "xMidYMid slice")
+      .style("opacity", 0)
+      .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
+
+    // Add the grain texture overlay
+    const grainOverlay = imageGroup
+      .append("image")
+      .attr("class", "grain-overlay")
+      .attr("xlink:href", "assets/textures/grain.webp")
+      .attr("width", 150)
+      .attr("height", height)
+      .attr("preserveAspectRatio", "xMidYMid slice")
+      .style("opacity", 0)
+      .style("mix-blend-mode", "overlay")
+      .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
+
     // Add a transparent rect overlay to capture mouse events
     svg
       .append("rect")
       .attr("class", "hover-capture-rect")
       .attr("width", width)
       .attr("height", height)
-      .attr("fill", "transparent")
       .on("mousemove", onMouseMove)
       .on("mouseleave", onMouseLeave);
 
@@ -553,15 +582,29 @@
           closestYear = year;
         }
       });
+
       // Get the x position for the closest year
       const xPos = x(closestYear) + bandWidth / 2;
-      // Show and position the vertical line
-      hoverLine
-        .attr("x1", xPos)
-        .attr("x2", xPos)
-        .attr("y1", 0)
-        .attr("y2", height)
-        .style("opacity", 1);
+
+      // Show and position the vertical line and image
+      if (closestYear === "1920-1924") {
+        hoverLine
+          .attr("x1", xPos)
+          .attr("x2", xPos)
+          .attr("y1", 0)
+          .attr("y2", height)
+          .style("opacity", 1);
+
+        imageGroup.attr("transform", `translate(${xPos - 50}, 0)`);
+
+        hoverImage.style("opacity", 0.65);
+        grainOverlay.style("opacity", 0.6);
+      } else {
+        hoverLine.style("opacity", 0);
+        hoverImage.style("opacity", 0);
+        grainOverlay.style("opacity", 0);
+      }
+
       // Tooltip for historical context
       const contextArr = historicalContextByYear[closestYear] || [];
       const keywords = keywordsByYear[closestYear] || "";
@@ -603,10 +646,11 @@
         .style("top", event.pageY - 30 + "px")
         .transition()
         .duration(100)
-        .style("opacity", tooltipHtml ? 0.95 : 0);
+        .style("opacity", tooltipHtml ? 0.0 : 0);
     }
     function onMouseLeave() {
       hoverLine.style("opacity", 0);
+      hoverImage.style("opacity", 0);
       tooltip.transition().duration(200).style("opacity", 0);
     }
 
@@ -835,7 +879,8 @@
           .style("stroke-opacity", 0.7)
           .style("opacity", 1) // Make hotspot fully visible
           .attr("r", 8) // Increase the radius to make it more visible
-          .style("fill-opacity", 0.8); // Increase fill opacity for visibility
+          .style("fill-opacity", 0.8) // Increase fill opacity for visibility
+          .style("pointer-events", "all"); // Ensure this specific hotspot can receive events
 
         // Get position of the hotspot for image placement
         const hotspotNode = hotspot.node();
@@ -850,13 +895,14 @@
             .append("image")
             .attr("id", "smiles-image")
             .attr("xlink:href", "assets/smiles.jpg")
-            .attr("x", imageX) // Position to the right of the hotspot
-            .attr("y", imageY) // Position centered vertically with the hotspot, adjusted for larger size
+            .attr("x", imageX)
+            .attr("y", imageY)
             .attr("transform", "rotate(10)")
             .attr("width", 250)
             .attr("height", 250)
             .style("opacity", 0)
-            .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))") // Add drop shadow
+            .style("pointer-events", "all") // Ensure image can receive events
+            .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))")
             .transition()
             .duration(1000)
             .style("opacity", 0.85);
@@ -875,12 +921,13 @@
             .style("stroke", color("EXTERNAL"))
             .style("stroke-width", 1.5)
             .style("stroke-opacity", 0)
+            .style("pointer-events", "all") // Ensure connector can receive events
             .style("stroke-dasharray", "5,3")
             .transition()
             .duration(1000)
             .style("stroke-opacity", 0.6);
         }
-      }, 600); // Small delay to ensure chart has updated
+      }, 600);
     } else if (stepId === "post-20s") {
       // Show years through post-1920s
       currentVisibleCount = 16;
@@ -909,6 +956,7 @@
         .attr("height", 300) // Set appropriate size
         .style("opacity", 0) // Start invisible for fade-in
         .style("z-index", "1")
+        .style("display", "none")
         .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
 
       // Then fade it in (this is the existing code)
@@ -916,50 +964,6 @@
         .transition()
         .duration(1000)
         .style("opacity", 1);
-
-      // // Create a video element with low opacity
-      // const videoBackground = figure
-      //   .append("video")
-      //   .attr("id", "depression-video")
-      //   .attr("src", "assets/depression.mp4")
-      //   .attr("playsinline", "")
-      //   .attr("loop", "")
-      //   .attr("muted", "")
-      //   .property("muted", true) // Ensure muted property is set
-      //   .style("position", "absolute")
-      //   .style("bottom", "0")
-      //   .style("left", "-10")
-      //   .style("width", "120%")
-      //   .style("height", "120%")
-      //   .style("object-fit", "cover")
-      //   .style("z-index", "-1")
-      //   .style("opacity", "0") // Start with opacity 0 for fade-in
-      //   .transition() // Add transition for fade-in effect
-      //   .duration(1000) // 1 second fade-in
-      //   .style("opacity", "0.08");
-
-      // // Set video to play without requiring user interaction
-      // // This uses the fact that muted videos can autoplay
-      // const videoElement = videoBackground.node();
-      // videoElement.defaultMuted = true;
-
-      // // Try different methods to start the video
-      // videoElement.load();
-
-      // // Use a promise to handle the play attempt
-      // const playPromise = videoElement.play();
-      // if (playPromise !== undefined) {
-      //   playPromise
-      //     .then(() => {
-      //       // Video playback started successfully
-      //       console.log("Video playing successfully");
-      //     })
-      //     .catch((error) => {
-      //       // Auto-play was prevented
-      //       console.log("Video autoplay prevented:", error);
-      //       // We'll still show the video, it just won't autoplay
-      //     });
-      // }
 
       // Add hover effect to INTERNAL hotspots for 1900-1904, 1920-1924, and 1935-1939
       setTimeout(() => {

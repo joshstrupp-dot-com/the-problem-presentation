@@ -13,6 +13,11 @@
         .then(function (data) {
           window.dataCache.timeData = data;
           console.log("Time data preloaded:", data.length, "records");
+
+          // If this is the first data loaded, display it immediately
+          if (!window.dataCache.authorData) {
+            displayData(data);
+          }
         })
         .catch(function (error) {
           console.error("Error preloading time data:", error);
@@ -26,6 +31,11 @@
         .then(function (data) {
           window.dataCache.authorData = data;
           console.log("Author data preloaded:", data.length, "records");
+
+          // If time data is already loaded, display it now
+          if (window.dataCache.timeData) {
+            displayData(window.dataCache.timeData);
+          }
         })
         .catch(function (error) {
           console.error("Error preloading author data:", error);
@@ -153,49 +163,53 @@
       // Calculate how many records we can display
       const recordsToDisplay = Math.min(data.length, totalRectangles);
 
-      // // Sort data by key_cat_primary_agg before displaying
-      // data = data.sort((a, b) => {
-      //   if (!a.key_cat_primary_agg) return 1;
-      //   if (!b.key_cat_primary_agg) return -1;
-      //   return a.key_cat_primary_agg.localeCompare(b.key_cat_primary_agg);
-      // });
-
       // Add tooltip div to body
       const tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
-      // Create rectangles for each record
+      // Create rectangles for each record - optimized for performance
+      const rects = [];
+
+      // Pre-calculate positions for all rectangles
       for (let i = 0; i < recordsToDisplay; i++) {
         const row = Math.floor(i / rectsPerRow);
         const col = i % rectsPerRow;
-
         const x = col * totalRectWidth + spacing;
         const y = row * totalRectHeight + spacing;
 
-        g.append("rect")
-          .attr("x", x)
-          .attr("y", y)
-          .attr("width", rectWidth)
-          .attr("height", rectHeight)
-          .attr("fill", "var(--color-base-darker)")
-          .attr("stroke", "rgba(0, 0, 0, 0.05)")
-          .attr("rx", 1) // Add 1px rounded corner
-          .datum(data[i])
-          .style("opacity", 0)
-          .on("mouseover", function (event, d) {
-            // Show tooltip with book name
-            tooltip
-              .html(`<strong>${d.name || "Unnamed Record"}</strong>`)
-              .style("opacity", 0.9)
-              .style("left", event.pageX + 10 + "px")
-              .style("top", event.pageY - 28 + "px");
-          })
-          .on("mouseout", function () {
-            // Hide tooltip
-            tooltip.style("opacity", 0);
-          });
+        rects.push({
+          x: x,
+          y: y,
+          data: data[i],
+        });
       }
 
-      // Add info text about visualization
+      // Batch create rectangles for better performance
+      const rectElements = g
+        .selectAll("rect")
+        .data(rects)
+        .enter()
+        .append("rect")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight)
+        .attr("fill", "var(--color-base-darker)")
+        .attr("stroke", "rgba(0, 0, 0, 0.1)")
+        .attr("rx", 1)
+        .datum((d) => d.data)
+        .style("opacity", 0)
+        .on("mouseover", function (event, d) {
+          // Show tooltip with book name
+          tooltip
+            .html(`<strong>${d.name || "Unnamed Record"}</strong>`)
+            .style("opacity", 0.9)
+            .style("left", event.pageX + 10 + "px")
+            .style("top", event.pageY - 28 + "px");
+        })
+        .on("mouseout", function () {
+          // Hide tooltip
+          tooltip.style("opacity", 0);
+        });
 
       // Add click handler to background to zoom out
       svg.on("click", function (event) {
@@ -213,9 +227,6 @@
             );
 
           zoomedIn = false;
-
-          // Reset all rectangle colors
-          // g.selectAll("rect").attr("fill", "var(--color-base-darker)");
         }
       });
     }
@@ -233,9 +244,14 @@
 
     // Otherwise, fall back to loading data directly
     try {
+      console.log("Loading time data directly");
       d3.csv("data/sh_0415_time/sh_0415_time.csv")
-        .then(displayData)
+        .then((data) => {
+          console.log("Time data loaded:", data.length, "records");
+          displayData(data);
+        })
         .catch(() => {
+          console.log("Falling back to fetch method");
           // Alternative fetch method if d3.csv fails
           fetch("data/sh_0415_time/sh_0415_time.csv")
             .then((response) => response.text())
@@ -250,11 +266,20 @@
                 });
                 return obj;
               });
+              console.log(
+                "Time data loaded via fetch:",
+                parsedData.length,
+                "records"
+              );
               displayData(parsedData);
             })
-            .catch(useHardcodedData);
+            .catch((error) => {
+              console.error("Error loading data:", error);
+              useHardcodedData();
+            });
         });
     } catch (error) {
+      console.error("Error in loadData:", error);
       useHardcodedData();
     }
   }
@@ -299,14 +324,14 @@
         )
         .style("opacity", 0);
 
-      // Fade in rectangles row by row
+      // Fade in rectangles row by row with doubled speed
       for (let row = 0; row < rectsPerColumn; row++) {
         g.selectAll("rect")
           .filter((d, i) => Math.floor(i / rectsPerRow) === row)
           .transition()
-          .delay(row * 100) // Delay each row by 100ms
-          .duration(300)
-          .ease(d3.easeCubicInOut) // Changed from easeLinear to easeCubicInOut for smoother fade-in
+          .delay(row * 50) // Reduced from 100ms to 50ms per row
+          .duration(200) // Reduced from 300ms to 200ms for faster fade-in
+          .ease(d3.easeCubicInOut)
           .style("opacity", 1);
       }
 

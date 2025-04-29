@@ -728,9 +728,9 @@ const stepsConfig = [
 
   {
     id: "conclusion",
-    text: "To wrap it up: in an effort to address my disillusionment with self-help, I wrote a thesis about self help, which, in a way, ended up kinda being self help. I feel it’s turned the genre into two genres: books about “solutions” and books about “clarity.” A broken arm is a broken arm. A persistent fear of failure — less clear. I think “the problem with fixing yourself,” is that you can’t. And thats ok.My hope is that this thesis can serve as self help in and of itself, to others like me.",
+    text: "The problem with fixing yourself.",
     fullwidth: true,
-    customClass: "statement",
+    customClass: "header",
     render: () => {
       const figure = d3.select("#figure-container");
       figure.html("");

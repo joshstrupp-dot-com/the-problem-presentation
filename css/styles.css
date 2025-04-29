@@ -232,7 +232,7 @@ figure p {
   /* Remove vertical positioning that pushed steps down */
   /* position: relative; */
   /* top: 50%; */
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 .step:last-child {
@@ -253,39 +253,60 @@ figure p {
   line-height: 25px;
 }
 
+/* Add font-face declaration for Big Caslon */
+@font-face {
+  font-family: "Big Caslon";
+  src: url("../assets/fonts/big-caslon-regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Common styling for statement and header steps */
 .step.statement,
 .step.header {
   border: none;
   width: 100vw;
+  height: 100vh;
   text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Libre Franklin", sans-serif;
-  min-height: 100vh;
-  padding: 40vh 2rem;
+  font-family: "Big Caslon", serif;
+  font-weight: 800;
   box-sizing: border-box;
   margin-left: -2.6rem;
+  background: url(../assets/paper.eps) lightgray 0% 0% / 154.22531366348267px
+      154.22531366348267px repeat,
+    radial-gradient(
+      151.92% 127.02% at 15.32% 21.04%,
+      rgba(246, 244, 238, 0.95) 0%,
+      rgba(246, 244, 238, 0.95) 77.08%,
+      rgba(245, 243, 237, 0.95) 100%
+    );
+  background-blend-mode: overlay, normal;
+  backdrop-filter: blur(20px);
+  opacity: 0.95;
 }
 
 /* Common styling for statement and header paragraphs */
 .step.statement p,
 .step.header p {
-  line-height: 1.9;
+  line-height: 1.2;
   text-align: center;
-  max-width: 100%;
+  max-width: 80%;
   margin: 0 auto;
   padding: 0 6rem;
-  font-family: "Libre Franklin", sans-serif;
+  font-family: "Big Caslon", serif;
+  color: #000;
+}
+
+.step.statement p {
+  font-size: 100px;
 }
 
 /* Specific styling for header paragraphs */
 .step.header p {
-  font-size: 45px;
-  font-weight: normal;
-  color: #000;
-  margin-top: 0vh;
+  font-size: 50px;
 }
 
 .step.emphasis-step {
@@ -440,4 +461,43 @@ figure p {
 
 .shuffle-effect {
   animation: shufflePulse 0.5s ease-in-out;
+}
+
+.hover-line-group {
+  pointer-events: none;
+}
+
+.hover-capture-rect {
+  pointer-events: all;
+  fill: transparent;
+}
+
+.hover-image {
+  pointer-events: none;
+}
+
+/* Ensure hotspots don't interfere with hover except in specific steps */
+.hotspot {
+  pointer-events: none;
+}
+
+/* Allow pointer events on pulsing hotspots */
+.hotspot-pulse {
+  pointer-events: all !important;
+}
+
+/* More specific selector for images to not interfere with hover area */
+#chapter-2 image:not(.hover-image):not(#smiles-image) {
+  pointer-events: none;
+}
+
+/* Ensure smiles-image and its connector maintain interaction */
+#smiles-image,
+#smiles-connector {
+  pointer-events: all;
+}
+
+/* Specific step-related images should maintain pointer events */
+[id$="-image"][id^="smiles"] {
+  pointer-events: all !important;
 }
