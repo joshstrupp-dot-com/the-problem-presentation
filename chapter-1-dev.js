@@ -622,7 +622,7 @@
             text-overflow: ellipsis;
           ">${category}</div>`
           )
-          .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
+          .attr("filter", "drop-shadow(0 0 30px rgba(0, 0, 0, 0.1))");
       });
     } else if (stepId === "external-internal") {
       console.log("external-internal step is now combined with intro-2");
@@ -653,8 +653,8 @@
           `<div style="
           width: 100%;
           text-align: center;
-          font-family: 'Libre Franklin', sans-serif;
-          font-size: 100px;
+          font-family: 'Big Caslon', sans-serif;
+          font-size: 50px;
           font-style: normal;
           font-weight: 800;
           line-height: 100px;
@@ -678,8 +678,8 @@
           `<div style="
           width: 100%;
           text-align: center;
-          font-family: 'Libre Franklin', sans-serif;
-          font-size: 100px;
+          font-family: 'Big Caslon', sans-serif;
+          font-size: 50px;
           font-style: normal;
           font-weight: 800;
           line-height: 100px;

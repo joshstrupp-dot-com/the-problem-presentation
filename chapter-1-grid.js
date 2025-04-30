@@ -171,7 +171,7 @@
         img.src = d.image_url;
         img.style.width = "70px";
         img.style.height = "auto";
-        img.style.boxShadow = "0 3px 6px rgba(0,0,0,0.2)";
+        img.style.boxShadow = "0 0 30px rgba(0, 0, 0, 0.1)";
         img.style.opacity = "0";
         img.style.pointerEvents = "none";
         img.dataset.index = i;

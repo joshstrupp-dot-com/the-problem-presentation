@@ -1,7 +1,7 @@
 const stepsConfig = [
   {
     id: "chapter-1",
-    text: `Life is hard. Advice can help. And there <video src="assets/videos/yt1.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video>  is no <video src="assets/videos/yt2.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> shortage 
+    text: `<span style="opacity: 0.4">Life is hard. Advice can help.</span> And there <video src="assets/videos/yt1.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video>  is no <video src="assets/videos/yt2.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> shortage 
      of <video src="assets/videos/yt3.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> advice.`,
     fullwidth: true,
     customClass: "header",
@@ -38,8 +38,8 @@ const stepsConfig = [
         .style("margin-right", "6em")
         .style("display", "flex")
         .style("align-items", "center")
-        .style("padding", "8px 8px")
-        .style("box-shadow", "0px 0px 20px rgba(0, 0, 0, 0.1)");
+        .style("padding", "10px 20px")
+        .style("box-shadow", "0 0 30px rgba(0, 0, 0, 0.1)");
       // Add the search icon
       searchBarContainer
         .append("img")
@@ -55,7 +55,7 @@ const stepsConfig = [
         .style("display", "flex")
         .style("align-items", "center")
         .style("font-size", "1.5rem")
-        .style("font-weight", "600")
+        .style("font-weight", "100")
         .style("font-family", "Andale Mono, monospace");
 
       // Create the scrolling words box
@@ -194,7 +194,7 @@ const stepsConfig = [
   },
   {
     id: "systemic-problems",
-    text: "Our anxieties are often the result of historical events outside of our control — and some authors point the blame at you for profit.",
+    text: "<span style='opacity: 0.4'>If it suggests you're not enough,</span> it's a smoke screen.",
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -406,7 +406,7 @@ const stepsConfig = [
   },
   {
     id: "chapter-3",
-    text: "The point is this: context matters. Many authors see fire and fan flames. Others see fire and wonder what caused it. Let’s see who’s who",
+    text: "Context matters. Many authors see fire and fan flames. Others see fire and wonder what caused it.",
     fullwidth: true,
     fadeIn: true,
     fadeOut: true,
