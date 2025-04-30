@@ -324,15 +324,21 @@
         )
         .style("opacity", 0);
 
-      // Fade in rectangles row by row with doubled speed
+      // Batch transitions for better performance
+      const transitions = [];
       for (let row = 0; row < rectsPerColumn; row++) {
-        g.selectAll("rect")
-          .filter((d, i) => Math.floor(i / rectsPerRow) === row)
-          .transition()
-          .delay(row * 50) // Reduced from 100ms to 50ms per row
-          .duration(200) // Reduced from 300ms to 200ms for faster fade-in
-          .ease(d3.easeCubicInOut)
-          .style("opacity", 1);
+        const rowRects = g
+          .selectAll("rect")
+          .filter((d, i) => Math.floor(i / rectsPerRow) === row);
+
+        transitions.push(
+          rowRects
+            .transition()
+            .delay(row * 30) // Further reduced delay for smoother appearance
+            .duration(150) // Shorter duration for snappier feel
+            .ease(d3.easeCubicInOut)
+            .style("opacity", 1)
+        );
       }
 
       // Remove any category labels
@@ -513,7 +519,7 @@
 
       // Apply positions with more heavily staggered movement in batches
       const batchSize = 200; // Increase batch size from 50 to 100
-      const totalTime = 1500; // Reduce total time from 2000 to 700ms
+      const totalTime = 500; // Reduce total time from 2000 to 700ms
 
       // Process nodes in batches
       for (
@@ -608,62 +614,72 @@
     } else if (stepId === "external-internal-sort") {
       // Define positions for the two piles on the right half of the screen
       const worldPilePosition = {
-        x: chartWidth * 0.75,
+        x: chartWidth * 0.25,
         y: chartHeight * 0.3,
       };
 
       const youPilePosition = {
-        x: chartWidth * 0.75,
+        x: chartWidth * 0.25,
         y: chartHeight * 0.7,
       };
 
       // Remove any existing category labels
       g.selectAll(".category-label").remove();
 
-      // Add labels for the two piles
+      // Add labels for the two piles with fade-in animation
       g.append("foreignObject")
         .attr("class", "category-label")
-        .attr("x", worldPilePosition.x - 100)
-        .attr("y", worldPilePosition.y - 155)
-        .attr("width", 200)
-        .attr("height", 40)
+        .attr("x", chartWidth * 0.2)
+        .attr("y", worldPilePosition.y - 50)
+        .attr("width", chartWidth * 1)
+        .attr("height", 150)
+        .style("opacity", 0)
         .html(
           `<div style="
           width: 100%;
           text-align: center;
-          font-family: 'Andale Mono', monospace;
-          font-weight: 200;
-          font-size: 16px;
+          font-family: 'Libre Franklin', sans-serif;
+          font-size: 100px;
+          font-style: normal;
+          font-weight: 800;
+          line-height: 100px;
+          text-transform: uppercase;
           color: #000;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          white-space: nowrap;
         ">THE WORLD</div>`
         )
-        .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
+        .transition()
+        .duration(1500)
+        .style("opacity", 1);
 
       g.append("foreignObject")
         .attr("class", "category-label")
-        .attr("x", youPilePosition.x - 100)
-        .attr("y", youPilePosition.y - 155)
-        .attr("width", 200)
-        .attr("height", 40)
+        .attr("x", chartWidth * 0.2)
+        .attr("y", youPilePosition.y - 50)
+        .attr("width", chartWidth * 1)
+        .attr("height", 150)
+        .style("opacity", 0)
         .html(
           `<div style="
           width: 100%;
           text-align: center;
-          font-family: 'Andale Mono', monospace;
-          font-weight: 200;
-          font-size: 16px;
+          font-family: 'Libre Franklin', sans-serif;
+          font-size: 100px;
+          font-style: normal;
+          font-weight: 800;
+          line-height: 100px;
+          text-transform: uppercase;
           color: #000;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          white-space: nowrap;
         ">YOU</div>`
         )
-        .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
+        .transition()
+        .duration(1500)
+        .style("opacity", 1);
 
-      // Create ordered arrays of categories from right to left
-      const orderedSelfHelpCategories = [...selfHelpCategories].reverse();
-      const orderedOtherCategories = [...otherCategories].reverse();
+      // Create ordered arrays of categories from left to right
+      const orderedSelfHelpCategories = [...selfHelpCategories];
+      const orderedOtherCategories = [...otherCategories];
 
       // Prepare nodes for positioning with category information
       const nodes = [];
@@ -702,12 +718,12 @@
         });
       });
 
-      // Sort nodes by category index (right to left)
+      // Sort nodes by category index (left to right)
       nodes.sort((a, b) => a.categoryIndex - b.categoryIndex);
 
       // Process nodes in category-based batches
       const batchSize = 200;
-      const categoryDelay = 800; // Increased from 500ms to 800ms for more spacing between category movements
+      const categoryDelay = 400; // Reduced from 800ms to 400ms for faster category transitions
 
       // Group nodes by category index
       const nodesByCategory = {};

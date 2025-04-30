@@ -848,17 +848,20 @@
       .text("Problem Origin:");
 
     // Add origins to legend in a horizontal layout
-    ["YOU", "THE WORLD"].forEach((key, i) => {
+    ["THE WORLD", "YOU"].forEach((key, i) => {
       const legendRow = legend
         .append("g")
-        .attr("class", "origin-legend")
-        .attr("transform", `translate(${i * 80 + 175}, 7.5)`); // Horizontal positioning, shifted right 20px
+        .attr("class", `origin-legend ${key.toLowerCase().replace(" ", "-")}`)
+        .attr("transform", `translate(${i * 150 + 170}, 7.5)`); // Increased spacing between items from 110 to 150
 
       legendRow
         .append("rect")
         .attr("width", 15)
         .attr("height", 15)
-        .attr("fill", color(key));
+        .attr(
+          "fill",
+          key === "THE WORLD" ? "var(--color-teal)" : "var(--color-orange)"
+        );
 
       legendRow
         .append("text")
@@ -866,13 +869,27 @@
         .attr("y", 12.5)
         .attr("class", "annotation")
         .text(key);
+
+      // Add "vs." between the labels
+      if (i === 0) {
+        legend
+          .append("text")
+          .attr("class", "vs-text annotation")
+          .attr("x", 300) // Moved left
+          .attr("y", 20)
+          .style("font-family", "Andale Mono")
+          .style("font-size", "12px")
+          .style("opacity", 0.5)
+          .style("text-anchor", "middle")
+          .text("vs.");
+      }
     });
 
     // Add BEST SELLER legend item (black circle, white fill, black stroke, r=5)
     const bestSellerLegend = legend
       .append("g")
       .attr("class", "origin-legend best-seller-legend")
-      .attr("transform", `translate(${2 * 80 + 175 + 50}, 7.5)`); // Spaced after the others
+      .attr("transform", `translate(${2 * 110 + 195}, 7.5)`); // Adjusted spacing to match new layout
 
     bestSellerLegend
       .append("circle")
@@ -1341,6 +1358,9 @@
       // remove connector lines
       d3.selectAll(".connector-line").remove();
 
+      // Animate the legend swap
+      setTimeout(animateLegendSwap, 600);
+
       // Set up images with connectors on hover
       setTimeout(() => {
         // First, set all hotspots to opacity 0
@@ -1498,4 +1518,28 @@
       }, 600);
     }
   });
+
+  // Function to animate legend items
+  function animateLegendSwap() {
+    // Animate "YOU" to the left position
+    d3.select(".you")
+      .transition()
+      .duration(1000)
+      .ease(d3.easeCubicInOut)
+      .attr("transform", "translate(170, 7.5)");
+
+    // Animate "THE WORLD" to the right position
+    d3.select(".the-world")
+      .transition()
+      .duration(1000)
+      .ease(d3.easeCubicInOut)
+      .attr("transform", "translate(275, 7.5)");
+
+    // Animate "vs." to the left
+    d3.select(".vs-text")
+      .transition()
+      .duration(1000)
+      .ease(d3.easeCubicInOut)
+      .attr("x", 250); // Move slightly to the left
+  }
 })();

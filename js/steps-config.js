@@ -10,15 +10,6 @@ const stepsConfig = [
       figure.html("");
     },
   },
-  // {
-  //   id: "intro",
-  //   text: "Life can really suck. Advice can help. And there is no shortage of advice.",
-  //   fullwidth: true,
-  //   customClass: "statement",
-  //   render: () => {
-  //     const figure = d3.select("#figure-container");
-  //     figure.html("");
-  //   },
 
   {
     id: "quick-fixes",
@@ -88,24 +79,10 @@ const stepsConfig = [
       const words = [
         { text: "am I a bad parent?", color: "#000" },
         { text: "how to stop overthinking", color: "#000" },
-        { text: "why do I feel alone even with friends", color: "#000" },
-        { text: "how to deal with imposter syndrome", color: "#000" },
-        { text: "is it normal to hate my body?", color: "#000" },
-        { text: "ways to handle fear of failure", color: "#000" },
-        { text: "why can't I find love?", color: "#000" },
-        { text: "ways to get rich online", color: "#000" },
-        { text: "why do I procrastinate so much?", color: "#000" },
-        { text: "how to build self-confidence", color: "#000" },
-        { text: "why do I fear being alone?", color: "#000" },
-        { text: "how to cope with climate anxiety", color: "#000" },
-        { text: "how to stop comparing myself to others", color: "#000" },
-        { text: "why do I sabotage my own success?", color: "#000" },
-        { text: "how to deal with social anxiety", color: "#000" },
-        { text: "why do I feel unworthy of love?", color: "#000" },
-        { text: "how to forgive myself for past mistakes", color: "#000" },
-        { text: "why am I afraid to speak up?", color: "#000" },
-        { text: "how to overcome fear of change", color: "#000" },
-        { text: "Holistic healing for OCD", color: "#000" },
+        { text: "why do I feel alone?", color: "#000" },
+        { text: "how to handle imposter syndrome", color: "#000" },
+        { text: "six pack abs in 30 days", color: "#000" },
+        { text: 'What is "Self-Help?"', color: "#000" },
       ];
       words.forEach((word) => {
         wordsList
@@ -127,208 +104,35 @@ const stepsConfig = [
             transform: translateY(0%);
           }
           10%, 18% {
-            transform: translateY(-5%);
+            transform: translateY(-16.67%);
           }
           20%, 28% {
-            transform: translateY(-10%);
+            transform: translateY(-33.33%);
           }
           30%, 38% {
-            transform: translateY(-15%);
+            transform: translateY(-50%);
           }
           40%, 48% {
-            transform: translateY(-20%);
+            transform: translateY(-66.67%);
           }
-          50%, 58% {
-            transform: translateY(-25%);
-          }
-          60%, 68% {
-            transform: translateY(-30%);
-          }
-          70%, 78% {
-            transform: translateY(-35%);
-          }
-          80%, 88% {
-            transform: translateY(-40%);
-          }
-          90%, 98% {
-            transform: translateY(-45%);
-          }
-          100% {
-            transform: translateY(0%);
+          50%, 100% {
+            transform: translateY(-83.33%);
           }
         }
       `;
       document.head.appendChild(styleSheet);
     },
   },
-  {
-    id: "self-help",
-    text: "SELF HELP",
-    customClass: "header",
-    render: () => {
-      const figure = d3.select("#figure-container");
-      figure.html("");
-    },
-  },
   // {
-  //   id: "self-help-growth",
-  //   text: "Self-help literature is the fastest growing nonfiction genre since 2013.",
-  //   fullwidth: true,
-  //   fadeIn: true,
-  //   fadeOut: true,
+  //   id: "self-help",
+  //   text: "SELF HELP",
+  //   customClass: "header",
   //   render: () => {
   //     const figure = d3.select("#figure-container");
   //     figure.html("");
-
-  //     // Create SVG for the exponential growth line
-  //     const width = figure.node().getBoundingClientRect().width;
-  //     const height = figure.node().getBoundingClientRect().height;
-  //     const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-
-  //     const svg = figure
-  //       .append("svg")
-  //       .attr("width", width)
-  //       .attr("height", height)
-  //       .style("overflow", "visible");
-
-  //     // Create the exponential curve path
-  //     const generateExponentialPoints = () => {
-  //       const points = [];
-  //       const numPoints = 100;
-  //       for (let i = 0; i < numPoints; i++) {
-  //         const x = i / (numPoints - 1);
-  //         // Exponential function: y = e^(ax) - 1 (normalized)
-  //         const y = Math.exp(3 * x) - 1;
-  //         points.push([
-  //           margin.left + x * (width - margin.left - margin.right),
-  //           height -
-  //             margin.bottom -
-  //             (y * (height - margin.top - margin.bottom)) / (Math.exp(3) - 1),
-  //         ]);
-  //       }
-  //       return points;
-  //     };
-
-  //     const points = generateExponentialPoints();
-  //     const lineGenerator = d3.line();
-
-  //     // Create path element
-  //     const path = svg
-  //       .append("path")
-  //       .attr("d", lineGenerator(points))
-  //       .attr("fill", "none")
-  //       .attr("stroke", "#333")
-  //       .attr("stroke-width", 2)
-  //       .attr("stroke-dasharray", function () {
-  //         return this.getTotalLength();
-  //       })
-  //       .attr("stroke-dashoffset", function () {
-  //         return this.getTotalLength();
-  //       });
-
-  //     // Animate the path drawing
-  //     path
-  //       .transition()
-  //       .duration(2000)
-  //       .ease(d3.easeQuadInOut)
-  //       .attr("stroke-dashoffset", 0);
-
-  //     // Get the total length of the path for animation calculations
-  //     const pathLength = path.node().getTotalLength();
-
-  //     // Create a second path for the text to follow, offset from the main path
-  //     const generateOffsetPoints = () => {
-  //       const offsetPoints = [];
-  //       const numPoints = 100;
-  //       for (let i = 0; i < numPoints; i++) {
-  //         const x = i / (numPoints - 1);
-  //         // Exponential function: y = e^(ax) - 1 (normalized)
-  //         const y = Math.exp(3 * x) - 1;
-  //         offsetPoints.push([
-  //           margin.left + x * (width - margin.left - margin.right) - 5, // 5 pixels to the left
-  //           height -
-  //             margin.bottom -
-  //             (y * (height - margin.top - margin.bottom)) / (Math.exp(3) - 1) -
-  //             20, // 20 pixels higher
-  //         ]);
-  //       }
-  //       return offsetPoints;
-  //     };
-
-  //     const offsetPoints = generateOffsetPoints();
-
-  //     // Create marquee text effect along the path (only on one side)
-  //     // Create a defs element for the path
-  //     const defs = svg.append("defs");
-
-  //     // Create a path for the text to follow
-  //     const textPath = defs
-  //       .append("path")
-  //       .attr("id", "textPath-marquee")
-  //       .attr("d", lineGenerator(offsetPoints));
-
-  //     // Load self-help book titles from CSV
-  //     d3.csv("data/sh_0415_time/sh_0415_time.csv")
-  //       .then((data) => {
-  //         // Take the first 50 book titles
-  //         const bookTitles = data.slice(0, 20).map((d) => d.name);
-
-  //         // Create a text element
-  //         const text = svg
-  //           .append("text")
-  //           .attr("font-family", "Andale Mono, monospace")
-  //           .attr("font-size", "25px")
-  //           .attr("fill", "#333");
-
-  //         // Join all titles with a separator
-  //         const allTitlesText = bookTitles.join(" • ");
-  //         const textWidth = allTitlesText.length * 5; // Approximate width in pixels
-
-  //         // Create textPath for the titles
-  //         const textPath = text
-  //           .append("textPath")
-  //           .attr("href", "#textPath-marquee")
-  //           .attr("startOffset", "0%")
-  //           .text(allTitlesText);
-
-  //         // Animate the text element - moving along the path
-  //         function animateMarquee() {
-  //           text
-  //             .attr("data-offset", 0)
-  //             .transition()
-  //             .duration(50000) // Longer duration for the longer text
-  //             .ease(d3.easeLinear)
-  //             .attrTween("data-offset", function () {
-  //               return function (t) {
-  //                 // Calculate the offset to create a continuous scrolling effect
-  //                 const offset = (100 * t) % 100;
-  //                 textPath.attr("startOffset", `${-offset}%`);
-  //                 return t * 100;
-  //               };
-  //             })
-  //             .on("end", animateMarquee);
-  //         }
-
-  //         animateMarquee();
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error loading CSV file:", error);
-
-  //         // Fallback in case the CSV fails to load
-  //         const text = svg
-  //           .append("text")
-  //           .attr("font-family", "Andale Mono, monospace")
-  //           .attr("font-size", "12px")
-  //           .attr("fill", "#333");
-
-  //         text
-  //           .append("textPath")
-  //           .attr("href", "#textPath-marquee")
-  //           .attr("startOffset", "0%")
-  //           .text("Self-help literature growth");
-  //       });
   //   },
   // },
+
   {
     id: "blame-game",
     text: "Self-help literature is the fastest growing nonfiction genre since 2013. ",
@@ -476,18 +280,18 @@ const stepsConfig = [
       );
     },
   },
-  {
-    id: "chapter-2",
-    text: "Chapter 2",
-    fullwidth: true,
-    fadeIn: true,
-    fadeOut: true,
-    customClass: "header",
-    render: () => {
-      const figure = d3.select("#figure-container");
-      figure.html("");
-    },
-  },
+  // {
+  //   id: "chapter-2",
+  //   text: "Chapter 2",
+  //   fullwidth: true,
+  //   fadeIn: true,
+  //   fadeOut: true,
+  //   customClass: "header",
+  //   render: () => {
+  //     const figure = d3.select("#figure-container");
+  //     figure.html("");
+  //   },
+  // },
   {
     id: "samuel-smiles",
     text: "The very first Self Help book was a response to poor working conditions.",
