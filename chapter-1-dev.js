@@ -201,7 +201,22 @@
         .on("mouseover", function (event, d) {
           // Show tooltip with book name
           tooltip
-            .html(`<strong>${d.name || "Unnamed Record"}</strong>`)
+            .html(
+              `
+              <span style="
+                color: #000;
+                font-family: 'Andale Mono';
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: 30px;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                opacity: 0.5;
+              ">TITLE:</span>
+              <strong>${d.name || "Unnamed Record"}</strong>
+            `
+            )
             .style("opacity", 0.9)
             .style("left", event.pageX + 10 + "px")
             .style("top", event.pageY - 28 + "px");

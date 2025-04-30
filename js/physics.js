@@ -4,12 +4,17 @@ class PhysicsBall {
     this.ctx = this.canvas.getContext("2d");
     this.words = document.querySelectorAll(".ladder-step");
 
+    // Set initial opacity for all words
+    this.words.forEach((word) => {
+      word.style.opacity = "0.3";
+    });
+
     // Set canvas size
     this.resizeCanvas();
     window.addEventListener("resize", () => this.resizeCanvas());
 
     // Physics parameters
-    this.gravity = 0.2;
+    this.gravity = 0.1;
     this.friction = 0.99;
     this.restitution = 0.7;
 
@@ -51,7 +56,7 @@ class PhysicsBall {
 
     // Ball properties
     this.ball = {
-      x: window.innerWidth * 0.35, // Shifted from 0.3 to 0.4
+      x: window.innerWidth * 0.25, // Shifted from 0.35 to 0.3
       y: -20,
       radius: 30,
       vx: 1.5,
@@ -109,6 +114,7 @@ class PhysicsBall {
 
         // Trigger word animation
         this.words[index].style.transform = "scale(1.05)";
+        this.words[index].style.opacity = "1"; // Set opacity to 1 on collision
         setTimeout(() => {
           this.words[index].style.transform = "scale(1)";
         }, 150);
@@ -145,7 +151,7 @@ class PhysicsBall {
   }
 
   resetBall() {
-    this.ball.x = window.innerWidth * 0.35; // Shifted from 0.3 to 0.4
+    this.ball.x = window.innerWidth * 0.25; // Shifted from 0.35 to 0.3
     this.ball.y = -20;
     this.ball.vx = 2;
     this.ball.vy = 0;
