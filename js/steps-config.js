@@ -1,7 +1,8 @@
 const stepsConfig = [
   {
     id: "chapter-1",
-    text: "Life can really suck. Advice can help. And there is no shortage of advice",
+    text: `Life is hard. Advice can help. And there <video src="assets/videos/yt1.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video>  is no <video src="assets/videos/yt2.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> shortage 
+     of <video src="assets/videos/yt3.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> advice.`,
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -9,19 +10,10 @@ const stepsConfig = [
       figure.html("");
     },
   },
-  // {
-  //   id: "intro",
-  //   text: "Life can really suck. Advice can help. And there is no shortage of advice.",
-  //   fullwidth: true,
-  //   customClass: "statement",
-  //   render: () => {
-  //     const figure = d3.select("#figure-container");
-  //     figure.html("");
-  //   },
 
   {
     id: "quick-fixes",
-    text: "Life can really suck. Advice can help. And there is no shortage of advice.You're one Amazon order from never aging again. You're 8 minutes from knowing all of Wall Street's secrets.",
+    text: "You're one Amazon order from never aging again. You're 8 minutes from knowing all of Wall Street's secrets.",
     fullwidth: true,
     fadeIn: true,
     fadeOut: true,
@@ -81,56 +73,17 @@ const stepsConfig = [
         .append("ul")
         .style("margin", "0 0.625rem")
         .style("padding", "0")
-        .style("animation", "scrollUp 40s infinite"); // Doubled the animation duration to slow it down
+        .style("animation", "scrollUp 25s infinite"); // Doubled the animation duration to slow it down
 
       // Add the scrolling words
       const words = [
-        { text: "why do I feel stuck", color: "#000" },
+        { text: "am I a bad parent?", color: "#000" },
         { text: "how to stop overthinking", color: "#000" },
-        { text: "can people really change?", color: "#000" },
-        {
-          text: "how to be more confident",
-          color: "#000",
-        },
-        { text: "fix my relationship", color: "#000" },
-        { text: "IM SO ANXIOUS HALP", color: "#000" },
-        {
-          text: "I hate my job, now what?",
-          color: "#000",
-        },
-        {
-          text: "why am I always tired + unmotivated",
-          color: "#000",
-        },
-        { text: "make friends as an adult", color: "#000" },
-        {
-          text: "how to forgive someone who hurt me",
-          color: "#000",
-        },
-        { text: "best way to build new habits", color: "#000" },
-        { text: "how to stop comparing myself", color: "#000" },
-        { text: "what to do with my life", color: "#000" },
-        {
-          text: "how to believe in myself again",
-          color: "#000",
-        },
-        { text: "is therapy worth it", color: "#000" },
-        {
-          text: "how 2 stop being a people pleaser",
-          color: "#000",
-        },
-        {
-          text: "how to set boundaries without feeling guilty",
-          color: "#000",
-        },
-        { text: "how to start over in life", color: "#000" },
-        {
-          text: "how to heal from childhood trauma",
-          color: "#000",
-        },
-        { text: "how to stop self-sabotaging", color: "#000" },
+        { text: "why do I feel alone?", color: "#000" },
+        { text: "handling imposter syndrome", color: "#000" },
+        { text: "six pack abs in 30 days", color: "#000" },
+        { text: 'What is "Self-Help?"', color: "#000" },
       ];
-
       words.forEach((word) => {
         wordsList
           .append("li")
@@ -151,208 +104,35 @@ const stepsConfig = [
             transform: translateY(0%);
           }
           10%, 18% {
-            transform: translateY(-5%);
+            transform: translateY(-16.67%);
           }
           20%, 28% {
-            transform: translateY(-10%);
+            transform: translateY(-33.33%);
           }
           30%, 38% {
-            transform: translateY(-15%);
+            transform: translateY(-50%);
           }
           40%, 48% {
-            transform: translateY(-20%);
+            transform: translateY(-66.67%);
           }
-          50%, 58% {
-            transform: translateY(-25%);
-          }
-          60%, 68% {
-            transform: translateY(-30%);
-          }
-          70%, 78% {
-            transform: translateY(-35%);
-          }
-          80%, 88% {
-            transform: translateY(-40%);
-          }
-          90%, 98% {
-            transform: translateY(-45%);
-          }
-          100% {
-            transform: translateY(0%);
+          50%, 100% {
+            transform: translateY(-83.33%);
           }
         }
       `;
       document.head.appendChild(styleSheet);
     },
   },
-  {
-    id: "self-help",
-    text: "SELF HELP",
-    customClass: "statement",
-    render: () => {
-      const figure = d3.select("#figure-container");
-      figure.html("");
-    },
-  },
   // {
-  //   id: "self-help-growth",
-  //   text: "Self-help literature is the fastest growing nonfiction genre since 2013.",
-  //   fullwidth: true,
-  //   fadeIn: true,
-  //   fadeOut: true,
+  //   id: "self-help",
+  //   text: "SELF HELP",
+  //   customClass: "header",
   //   render: () => {
   //     const figure = d3.select("#figure-container");
   //     figure.html("");
-
-  //     // Create SVG for the exponential growth line
-  //     const width = figure.node().getBoundingClientRect().width;
-  //     const height = figure.node().getBoundingClientRect().height;
-  //     const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-
-  //     const svg = figure
-  //       .append("svg")
-  //       .attr("width", width)
-  //       .attr("height", height)
-  //       .style("overflow", "visible");
-
-  //     // Create the exponential curve path
-  //     const generateExponentialPoints = () => {
-  //       const points = [];
-  //       const numPoints = 100;
-  //       for (let i = 0; i < numPoints; i++) {
-  //         const x = i / (numPoints - 1);
-  //         // Exponential function: y = e^(ax) - 1 (normalized)
-  //         const y = Math.exp(3 * x) - 1;
-  //         points.push([
-  //           margin.left + x * (width - margin.left - margin.right),
-  //           height -
-  //             margin.bottom -
-  //             (y * (height - margin.top - margin.bottom)) / (Math.exp(3) - 1),
-  //         ]);
-  //       }
-  //       return points;
-  //     };
-
-  //     const points = generateExponentialPoints();
-  //     const lineGenerator = d3.line();
-
-  //     // Create path element
-  //     const path = svg
-  //       .append("path")
-  //       .attr("d", lineGenerator(points))
-  //       .attr("fill", "none")
-  //       .attr("stroke", "#333")
-  //       .attr("stroke-width", 2)
-  //       .attr("stroke-dasharray", function () {
-  //         return this.getTotalLength();
-  //       })
-  //       .attr("stroke-dashoffset", function () {
-  //         return this.getTotalLength();
-  //       });
-
-  //     // Animate the path drawing
-  //     path
-  //       .transition()
-  //       .duration(2000)
-  //       .ease(d3.easeQuadInOut)
-  //       .attr("stroke-dashoffset", 0);
-
-  //     // Get the total length of the path for animation calculations
-  //     const pathLength = path.node().getTotalLength();
-
-  //     // Create a second path for the text to follow, offset from the main path
-  //     const generateOffsetPoints = () => {
-  //       const offsetPoints = [];
-  //       const numPoints = 100;
-  //       for (let i = 0; i < numPoints; i++) {
-  //         const x = i / (numPoints - 1);
-  //         // Exponential function: y = e^(ax) - 1 (normalized)
-  //         const y = Math.exp(3 * x) - 1;
-  //         offsetPoints.push([
-  //           margin.left + x * (width - margin.left - margin.right) - 5, // 5 pixels to the left
-  //           height -
-  //             margin.bottom -
-  //             (y * (height - margin.top - margin.bottom)) / (Math.exp(3) - 1) -
-  //             20, // 20 pixels higher
-  //         ]);
-  //       }
-  //       return offsetPoints;
-  //     };
-
-  //     const offsetPoints = generateOffsetPoints();
-
-  //     // Create marquee text effect along the path (only on one side)
-  //     // Create a defs element for the path
-  //     const defs = svg.append("defs");
-
-  //     // Create a path for the text to follow
-  //     const textPath = defs
-  //       .append("path")
-  //       .attr("id", "textPath-marquee")
-  //       .attr("d", lineGenerator(offsetPoints));
-
-  //     // Load self-help book titles from CSV
-  //     d3.csv("data/sh_0415_time/sh_0415_time.csv")
-  //       .then((data) => {
-  //         // Take the first 50 book titles
-  //         const bookTitles = data.slice(0, 20).map((d) => d.name);
-
-  //         // Create a text element
-  //         const text = svg
-  //           .append("text")
-  //           .attr("font-family", "Andale Mono, monospace")
-  //           .attr("font-size", "25px")
-  //           .attr("fill", "#333");
-
-  //         // Join all titles with a separator
-  //         const allTitlesText = bookTitles.join(" • ");
-  //         const textWidth = allTitlesText.length * 5; // Approximate width in pixels
-
-  //         // Create textPath for the titles
-  //         const textPath = text
-  //           .append("textPath")
-  //           .attr("href", "#textPath-marquee")
-  //           .attr("startOffset", "0%")
-  //           .text(allTitlesText);
-
-  //         // Animate the text element - moving along the path
-  //         function animateMarquee() {
-  //           text
-  //             .attr("data-offset", 0)
-  //             .transition()
-  //             .duration(50000) // Longer duration for the longer text
-  //             .ease(d3.easeLinear)
-  //             .attrTween("data-offset", function () {
-  //               return function (t) {
-  //                 // Calculate the offset to create a continuous scrolling effect
-  //                 const offset = (100 * t) % 100;
-  //                 textPath.attr("startOffset", `${-offset}%`);
-  //                 return t * 100;
-  //               };
-  //             })
-  //             .on("end", animateMarquee);
-  //         }
-
-  //         animateMarquee();
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error loading CSV file:", error);
-
-  //         // Fallback in case the CSV fails to load
-  //         const text = svg
-  //           .append("text")
-  //           .attr("font-family", "Andale Mono, monospace")
-  //           .attr("font-size", "12px")
-  //           .attr("fill", "#333");
-
-  //         text
-  //           .append("textPath")
-  //           .attr("href", "#textPath-marquee")
-  //           .attr("startOffset", "0%")
-  //           .text("Self-help literature growth");
-  //       });
   //   },
   // },
+
   {
     id: "blame-game",
     text: "Self-help literature is the fastest growing nonfiction genre since 2013. ",
@@ -414,9 +194,9 @@ const stepsConfig = [
   },
   {
     id: "systemic-problems",
-    text: "It detracts from my point: our anxieties are often the result of historical events outside of our control — and some authors point the blame at you for profit.",
+    text: "Our anxieties are often the result of historical events outside of our control — and some authors point the blame at you for profit.",
     fullwidth: true,
-    // customClass: "statement",
+    customClass: "header",
     render: () => {
       // Update the existing grid visualization
       document.dispatchEvent(
@@ -500,18 +280,18 @@ const stepsConfig = [
       );
     },
   },
-  {
-    id: "chapter-2",
-    text: "Chapter 2",
-    fullwidth: true,
-    fadeIn: true,
-    fadeOut: true,
-    customClass: "header",
-    render: () => {
-      const figure = d3.select("#figure-container");
-      figure.html("");
-    },
-  },
+  // {
+  //   id: "chapter-2",
+  //   text: "Chapter 2",
+  //   fullwidth: true,
+  //   fadeIn: true,
+  //   fadeOut: true,
+  //   customClass: "header",
+  //   render: () => {
+  //     const figure = d3.select("#figure-container");
+  //     figure.html("");
+  //   },
+  // },
   {
     id: "samuel-smiles",
     text: "The very first Self Help book was a response to poor working conditions.",
@@ -752,9 +532,9 @@ const stepsConfig = [
 
   {
     id: "conclusion",
-    text: "To wrap it up: in an effort to address my disillusionment with self-help, I wrote a thesis about self help, which, in a way, ended up kinda being self help. I feel it’s turned the genre into two genres: books about “solutions” and books about “clarity.” A broken arm is a broken arm. A persistent fear of failure — less clear. I think “the problem with fixing yourself,” is that you can’t. And thats ok.My hope is that this thesis can serve as self help in and of itself, to others like me.",
+    text: "The problem with fixing yourself.",
     fullwidth: true,
-    customClass: "statement",
+    customClass: "header",
     render: () => {
       const figure = d3.select("#figure-container");
       figure.html("");

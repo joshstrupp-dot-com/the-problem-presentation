@@ -33,6 +33,11 @@
   position: relative;
   overflow: hidden;
   background-color: var(--color-base);
+  background-image: url("../assets/textures/paper-texture.jpg");
+  background-blend-mode: overlay;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.9;
 }
 
 #background-canvas {
@@ -158,7 +163,7 @@ body {
 
   padding: 1rem;
   min-height: 100vh;
-  margin-left: 2.6rem;
+  margin-left: 0rem;
 }
 
 #scrolly > * {
@@ -180,8 +185,8 @@ figure {
   top: 1rem;
   margin: 0;
   transform: translate3d(0, 0, 0);
-  /* background-color: #8a8a8a; */
   z-index: 0;
+  /* pointer-events: none; */
 }
 
 figure.fullwidth {
@@ -190,6 +195,7 @@ figure.fullwidth {
   left: 0;
   right: 0;
   z-index: 0;
+  /* pointer-events: none; */
 }
 
 figure p {
@@ -227,7 +233,7 @@ figure p {
   /* Remove vertical positioning that pushed steps down */
   /* position: relative; */
   /* top: 50%; */
-  opacity: 0.4;
+  opacity: 0.8;
 }
 
 .step:last-child {
@@ -248,43 +254,60 @@ figure p {
   line-height: 25px;
 }
 
+/* Add font-face declaration for Big Caslon */
+@font-face {
+  font-family: "Big Caslon";
+  src: url("../assets/fonts/big-caslon-regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Common styling for statement and header steps */
 .step.statement,
 .step.header {
   border: none;
-  width: calc(100vw - 9rem);
+  width: 100vw;
+  height: 100vh;
   text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Libre Caslon Display", serif;
-}
-
-.step.statement {
-  padding: 40vh 2rem;
-  min-height: 100vh;
-  max-width: 100vw;
+  font-family: "Big Caslon", serif;
+  font-weight: 800;
   box-sizing: border-box;
-  display: flex;
-  align-items: center;
+  margin-left: -2.6rem;
+  background: url(../assets/paper.eps) lightgray 0% 0% / 154.22531366348267px
+      154.22531366348267px repeat,
+    radial-gradient(
+      151.92% 127.02% at 15.32% 21.04%,
+      rgba(246, 244, 238, 0.95) 0%,
+      rgba(246, 244, 238, 0.95) 77.08%,
+      rgba(245, 243, 237, 0.95) 100%
+    );
+  background-blend-mode: overlay, normal;
+  backdrop-filter: blur(20px);
+  opacity: 0.95;
 }
 
 /* Common styling for statement and header paragraphs */
 .step.statement p,
 .step.header p {
-  line-height: 1.3;
+  line-height: 1.2;
   text-align: center;
   max-width: 80%;
   margin: 0 auto;
   padding: 0 6rem;
+  font-family: "Big Caslon", serif;
+  color: #000;
+}
+
+.step.statement p {
+  font-size: 100px;
 }
 
 /* Specific styling for header paragraphs */
 .step.header p {
-  font-size: 65px;
-  font-weight: normal;
-  color: #000;
-  margin-top: 40vh;
+  font-size: 50px;
 }
 
 .step.emphasis-step {
@@ -354,7 +377,7 @@ figure p {
 
 .ladder-step {
   font-size: 35px;
-  line-height: 1.4;
+  line-height: 1.8;
   margin-left: 0;
 }
 
@@ -390,9 +413,11 @@ figure p {
   color: #000;
 }
 
-.bottom-left {
+.body.bottom-left {
+  /* position: fixed; */
   bottom: 2rem;
   left: 2rem;
+  z-index: 1001;
 }
 
 .andale {
@@ -439,4 +464,63 @@ figure p {
 
 .shuffle-effect {
   animation: shufflePulse 0.5s ease-in-out;
+}
+
+.hover-line-group {
+  pointer-events: none;
+}
+
+.hover-capture-rect {
+  pointer-events: all;
+  fill: transparent;
+}
+
+.hover-image {
+  pointer-events: none;
+}
+
+/* Ensure hotspots don't interfere with hover except in specific steps */
+.hotspot {
+  pointer-events: none;
+}
+
+/* Allow pointer events on pulsing hotspots */
+.hotspot-pulse {
+  pointer-events: all !important;
+}
+
+/* More specific selector for images to not interfere with hover area */
+#chapter-2 image:not(.hover-image):not(#smiles-image) {
+  pointer-events: none;
+}
+
+/* Ensure smiles-image and its connector maintain interaction */
+#smiles-image,
+#smiles-connector {
+  pointer-events: all;
+}
+
+/* Specific step-related images should maintain pointer events */
+[id$="-image"][id^="smiles"] {
+  pointer-events: all !important;
+}
+
+.year-label-group {
+  pointer-events: none;
+  z-index: 1000;
+  background: white;
+}
+
+.year-label-group text {
+  font-family: "Andale Mono", monospace;
+  font-size: 14px;
+  fill: #ffffff;
+  dominant-baseline: middle;
+  z-index: 1001;
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.hover-image-group {
+  z-index: 900;
 }

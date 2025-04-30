@@ -152,9 +152,9 @@
       document.head.appendChild(styleSheet);
 
       // Calculate total animation time for all books
-      const lastBookDelay = (covers.length - 1) * 0.05; // Delay for the last book
-      const singleAnimDuration = 0.7; // Duration of a single animation
-      const totalAnimTime = lastBookDelay + singleAnimDuration + 0.5; // Add 0.5s buffer
+      const lastBookDelay = (covers.length - 1) * 0.035; // Reduced from 0.05 to 0.02
+      const singleAnimDuration = 0.6; // Reduced from 0.7 to 0.4
+      const totalAnimTime = lastBookDelay + singleAnimDuration + 0.4; // Reduced buffer from 0.5 to 0.3
 
       // Create placeholders in the grid
       covers.forEach((d, i) => {
@@ -181,7 +181,7 @@
         bookElements.push(img);
 
         // Add the initial animation
-        img.style.animation = `fadeInUp 0.7s ease-out forwards ${i * 0.05}s`;
+        img.style.animation = `fadeInUp 0.5s ease-out forwards ${i * 0.03}s`; // Reduced from 0.7s to 0.4s and from 0.05s to 0.02s
 
         // Position it over its placeholder initially
         const placeholder = gridContainer.querySelector(

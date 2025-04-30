@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return array;
   }
 
-  // Shuffle the book covers
+  // Shuffle the book covers once on page load
   let shuffledCovers = shuffleArray([...BOOK_COVERS]);
 
   // How many cursors to create - now only 5
@@ -44,6 +44,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Flag to track if cursor is in hero section
   let isInHeroSection = false;
+
+  // Flag to track if cursor is in the author div
+  let isInAuthorDiv = false;
 
   // Function to create cursors
   function createCursors(positions = null) {
@@ -77,62 +80,48 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initial creation of cursors
   createCursors();
 
-  // Function to shuffle cursors on click
-  function shuffleCursors() {
-    // Only shuffle if in hero section
-    if (!isInHeroSection) return;
-
-    // Store current positions before shuffling
-    currentPositions = cursors.map((cursor) => {
-      const transform = cursor.style.transform;
-      const match = transform.match(/translate\(([^,]+)px,\s*([^)]+)px\)/);
-      if (match) {
-        return { x: parseFloat(match[1]), y: parseFloat(match[2]) };
-      }
-      return { x: 0, y: 0 };
-    });
-
-    // Shuffle the covers again
-    shuffledCovers = shuffleArray([...BOOK_COVERS]);
-
-    // Recreate the cursors with new shuffled images at their current positions
-    createCursors(currentPositions);
-
-    // Add a visual feedback effect
-    cursors.forEach((cursor) => {
-      cursor.classList.add("shuffle-effect");
-      setTimeout(() => {
-        cursor.classList.remove("shuffle-effect");
-      }, 500);
-    });
-  }
-
-  // Add click event listener to shuffle cursors
-  document.addEventListener("click", shuffleCursors);
-
-  // Function to check if cursor is in hero section
-  function checkIfInHeroSection(event) {
+  // Function to check if cursor is in hero section or author div
+  function checkCursorPosition(event) {
     const heroSection = document.getElementById("hero");
-    const rect = heroSection.getBoundingClientRect();
+    const heroRect = heroSection.getBoundingClientRect();
 
+    // Check if cursor is in hero section
     const isInHero =
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom;
+      event.clientX >= heroRect.left &&
+      event.clientX <= heroRect.right &&
+      event.clientY >= heroRect.top &&
+      event.clientY <= heroRect.bottom;
 
-    // If state changed, update visibility
+    // Check if cursor is in author div
+    const authorDiv = document.querySelector(".body.bottom-left.andale");
+    let isInAuthor = false;
+
+    if (authorDiv) {
+      const authorRect = authorDiv.getBoundingClientRect();
+      isInAuthor =
+        event.clientX >= authorRect.left &&
+        event.clientX <= authorRect.right &&
+        event.clientY >= authorRect.top &&
+        event.clientY <= authorRect.bottom;
+    }
+
+    // If state changed for hero section, update visibility
     if (isInHero !== isInHeroSection) {
       isInHeroSection = isInHero;
+    }
 
-      // Show/hide cursor trail based on whether we're in hero section
-      if (isInHeroSection) {
-        cursorParent.style.display = "block";
-        document.body.style.cursor = "none";
-      } else {
-        cursorParent.style.display = "none";
-        document.body.style.cursor = "auto";
-      }
+    // If state changed for author div, update visibility
+    if (isInAuthor !== isInAuthorDiv) {
+      isInAuthorDiv = isInAuthor;
+    }
+
+    // Show/hide cursor trail based on whether we're in hero section and not in author div
+    if (isInHeroSection && !isInAuthorDiv) {
+      cursorParent.style.display = "block";
+      document.body.style.cursor = "none";
+    } else {
+      cursorParent.style.display = "none";
+      document.body.style.cursor = "auto";
     }
   }
 
@@ -140,11 +129,11 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener(
     "mousemove",
     function (event) {
-      // Check if cursor is in hero section
-      checkIfInHeroSection(event);
+      // Check cursor position
+      checkCursorPosition(event);
 
-      // Only update cursor positions if in hero section
-      if (!isInHeroSection) return;
+      // Only update cursor positions if in hero section and not in author div
+      if (!isInHeroSection || isInAuthorDiv) return;
 
       // The position we want
       const x = event.clientX + IMAGE_OFFSET[0];
@@ -166,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener(
     "mousemove",
     function (event) {
-      checkIfInHeroSection(event);
+      checkCursorPosition(event);
     },
     { once: true }
   );

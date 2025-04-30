@@ -13,6 +13,11 @@
         .then(function (data) {
           window.dataCache.timeData = data;
           console.log("Time data preloaded:", data.length, "records");
+
+          // If this is the first data loaded, display it immediately
+          if (!window.dataCache.authorData) {
+            displayData(data);
+          }
         })
         .catch(function (error) {
           console.error("Error preloading time data:", error);
@@ -26,6 +31,11 @@
         .then(function (data) {
           window.dataCache.authorData = data;
           console.log("Author data preloaded:", data.length, "records");
+
+          // If time data is already loaded, display it now
+          if (window.dataCache.timeData) {
+            displayData(window.dataCache.timeData);
+          }
         })
         .catch(function (error) {
           console.error("Error preloading author data:", error);
@@ -153,49 +163,53 @@
       // Calculate how many records we can display
       const recordsToDisplay = Math.min(data.length, totalRectangles);
 
-      // // Sort data by key_cat_primary_agg before displaying
-      // data = data.sort((a, b) => {
-      //   if (!a.key_cat_primary_agg) return 1;
-      //   if (!b.key_cat_primary_agg) return -1;
-      //   return a.key_cat_primary_agg.localeCompare(b.key_cat_primary_agg);
-      // });
-
       // Add tooltip div to body
       const tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
-      // Create rectangles for each record
+      // Create rectangles for each record - optimized for performance
+      const rects = [];
+
+      // Pre-calculate positions for all rectangles
       for (let i = 0; i < recordsToDisplay; i++) {
         const row = Math.floor(i / rectsPerRow);
         const col = i % rectsPerRow;
-
         const x = col * totalRectWidth + spacing;
         const y = row * totalRectHeight + spacing;
 
-        g.append("rect")
-          .attr("x", x)
-          .attr("y", y)
-          .attr("width", rectWidth)
-          .attr("height", rectHeight)
-          .attr("fill", "var(--color-base-darker)")
-          .attr("stroke", "rgba(0, 0, 0, 0.05)")
-          .attr("rx", 1) // Add 1px rounded corner
-          .datum(data[i])
-          .style("opacity", 0)
-          .on("mouseover", function (event, d) {
-            // Show tooltip with book name
-            tooltip
-              .html(`<strong>${d.name || "Unnamed Record"}</strong>`)
-              .style("opacity", 0.9)
-              .style("left", event.pageX + 10 + "px")
-              .style("top", event.pageY - 28 + "px");
-          })
-          .on("mouseout", function () {
-            // Hide tooltip
-            tooltip.style("opacity", 0);
-          });
+        rects.push({
+          x: x,
+          y: y,
+          data: data[i],
+        });
       }
 
-      // Add info text about visualization
+      // Batch create rectangles for better performance
+      const rectElements = g
+        .selectAll("rect")
+        .data(rects)
+        .enter()
+        .append("rect")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight)
+        .attr("fill", "var(--color-base-darker)")
+        .attr("stroke", "rgba(0, 0, 0, 0.1)")
+        .attr("rx", 1)
+        .datum((d) => d.data)
+        .style("opacity", 0)
+        .on("mouseover", function (event, d) {
+          // Show tooltip with book name
+          tooltip
+            .html(`<strong>${d.name || "Unnamed Record"}</strong>`)
+            .style("opacity", 0.9)
+            .style("left", event.pageX + 10 + "px")
+            .style("top", event.pageY - 28 + "px");
+        })
+        .on("mouseout", function () {
+          // Hide tooltip
+          tooltip.style("opacity", 0);
+        });
 
       // Add click handler to background to zoom out
       svg.on("click", function (event) {
@@ -213,9 +227,6 @@
             );
 
           zoomedIn = false;
-
-          // Reset all rectangle colors
-          // g.selectAll("rect").attr("fill", "var(--color-base-darker)");
         }
       });
     }
@@ -233,9 +244,14 @@
 
     // Otherwise, fall back to loading data directly
     try {
+      console.log("Loading time data directly");
       d3.csv("data/sh_0415_time/sh_0415_time.csv")
-        .then(displayData)
+        .then((data) => {
+          console.log("Time data loaded:", data.length, "records");
+          displayData(data);
+        })
         .catch(() => {
+          console.log("Falling back to fetch method");
           // Alternative fetch method if d3.csv fails
           fetch("data/sh_0415_time/sh_0415_time.csv")
             .then((response) => response.text())
@@ -250,11 +266,20 @@
                 });
                 return obj;
               });
+              console.log(
+                "Time data loaded via fetch:",
+                parsedData.length,
+                "records"
+              );
               displayData(parsedData);
             })
-            .catch(useHardcodedData);
+            .catch((error) => {
+              console.error("Error loading data:", error);
+              useHardcodedData();
+            });
         });
     } catch (error) {
+      console.error("Error in loadData:", error);
       useHardcodedData();
     }
   }
@@ -299,15 +324,21 @@
         )
         .style("opacity", 0);
 
-      // Fade in rectangles row by row
+      // Batch transitions for better performance
+      const transitions = [];
       for (let row = 0; row < rectsPerColumn; row++) {
-        g.selectAll("rect")
-          .filter((d, i) => Math.floor(i / rectsPerRow) === row)
-          .transition()
-          .delay(row * 100) // Delay each row by 100ms
-          .duration(300)
-          .ease(d3.easeCubicInOut) // Changed from easeLinear to easeCubicInOut for smoother fade-in
-          .style("opacity", 1);
+        const rowRects = g
+          .selectAll("rect")
+          .filter((d, i) => Math.floor(i / rectsPerRow) === row);
+
+        transitions.push(
+          rowRects
+            .transition()
+            .delay(row * 30) // Further reduced delay for smoother appearance
+            .duration(150) // Shorter duration for snappier feel
+            .ease(d3.easeCubicInOut)
+            .style("opacity", 1)
+        );
       }
 
       // Remove any category labels
@@ -487,8 +518,8 @@
       });
 
       // Apply positions with more heavily staggered movement in batches
-      const batchSize = 200; // Increase batch size from 50 to 100
-      const totalTime = 1500; // Reduce total time from 2000 to 700ms
+      const batchSize = 400; // Increase batch size from 50 to 100
+      const totalTime = 500; // Reduce total time from 2000 to 700ms
 
       // Process nodes in batches
       for (
@@ -583,62 +614,72 @@
     } else if (stepId === "external-internal-sort") {
       // Define positions for the two piles on the right half of the screen
       const worldPilePosition = {
-        x: chartWidth * 0.75,
+        x: chartWidth * 0.25,
         y: chartHeight * 0.3,
       };
 
       const youPilePosition = {
-        x: chartWidth * 0.75,
+        x: chartWidth * 0.25,
         y: chartHeight * 0.7,
       };
 
       // Remove any existing category labels
       g.selectAll(".category-label").remove();
 
-      // Add labels for the two piles
+      // Add labels for the two piles with fade-in animation
       g.append("foreignObject")
         .attr("class", "category-label")
-        .attr("x", worldPilePosition.x - 100)
-        .attr("y", worldPilePosition.y - 155)
-        .attr("width", 200)
-        .attr("height", 40)
+        .attr("x", chartWidth * 0.2)
+        .attr("y", worldPilePosition.y - 50)
+        .attr("width", chartWidth * 1)
+        .attr("height", 150)
+        .style("opacity", 0)
         .html(
           `<div style="
           width: 100%;
           text-align: center;
-          font-family: 'Andale Mono', monospace;
-          font-weight: 200;
-          font-size: 16px;
+          font-family: 'Libre Franklin', sans-serif;
+          font-size: 100px;
+          font-style: normal;
+          font-weight: 800;
+          line-height: 100px;
+          text-transform: uppercase;
           color: #000;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          white-space: nowrap;
         ">THE WORLD</div>`
         )
-        .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
+        .transition()
+        .duration(1500)
+        .style("opacity", 1);
 
       g.append("foreignObject")
         .attr("class", "category-label")
-        .attr("x", youPilePosition.x - 100)
-        .attr("y", youPilePosition.y - 155)
-        .attr("width", 200)
-        .attr("height", 40)
+        .attr("x", chartWidth * 0.2)
+        .attr("y", youPilePosition.y - 50)
+        .attr("width", chartWidth * 1)
+        .attr("height", 150)
+        .style("opacity", 0)
         .html(
           `<div style="
           width: 100%;
           text-align: center;
-          font-family: 'Andale Mono', monospace;
-          font-weight: 200;
-          font-size: 16px;
+          font-family: 'Libre Franklin', sans-serif;
+          font-size: 100px;
+          font-style: normal;
+          font-weight: 800;
+          line-height: 100px;
+          text-transform: uppercase;
           color: #000;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          white-space: nowrap;
         ">YOU</div>`
         )
-        .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
+        .transition()
+        .duration(1500)
+        .style("opacity", 1);
 
-      // Create ordered arrays of categories from right to left
-      const orderedSelfHelpCategories = [...selfHelpCategories].reverse();
-      const orderedOtherCategories = [...otherCategories].reverse();
+      // Create ordered arrays of categories from left to right
+      const orderedSelfHelpCategories = [...selfHelpCategories];
+      const orderedOtherCategories = [...otherCategories];
 
       // Prepare nodes for positioning with category information
       const nodes = [];
@@ -677,12 +718,12 @@
         });
       });
 
-      // Sort nodes by category index (right to left)
+      // Sort nodes by category index (left to right)
       nodes.sort((a, b) => a.categoryIndex - b.categoryIndex);
 
       // Process nodes in category-based batches
       const batchSize = 200;
-      const categoryDelay = 800; // Increased from 500ms to 800ms for more spacing between category movements
+      const categoryDelay = 400; // Reduced from 800ms to 400ms for faster category transitions
 
       // Group nodes by category index
       const nodesByCategory = {};

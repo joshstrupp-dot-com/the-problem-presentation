@@ -209,6 +209,14 @@
         .attr("stop-color", color(origin))
         .attr("stop-opacity", 1);
 
+      // Before applying the filter, first remove any existing filters
+      svg.select(`.line-${origin}`).style("filter", null);
+
+      // Then apply the new filter
+      svg
+        .select(`.line-${origin}`)
+        .style("filter", "drop-shadow(0px 5px 5px rgba(0,0,0,0.1))");
+
       // Update the actual data line
       svg
         .select(`.line-${origin}`)
@@ -236,24 +244,6 @@
         .attr("stroke", color(origin))
         .attr("stroke-width", 1.5)
         .style("opacity", 0.0)
-        // .on("mouseover", (event, d) => {
-        //   const customTooltips = {
-        //     "1890-1894": "custom text!",
-        //     // Add more year-bin keys as needed
-        //   };
-        //   const content =
-        //     origin === "INTERNAL" && d.year === "1900-1904"
-        //       ? '<img src="assets/image-test.png" style="max-width:150px; display:block;" />'
-        //       : customTooltips[d.year] || d.names.slice(0, 3).join("<br>");
-        //   tooltip.transition().duration(100).style("opacity", 0.9);
-        //   tooltip
-        //     .html(content)
-        //     .style("left", event.pageX + 10 + "px")
-        //     .style("top", event.pageY - 10 + "px");
-        // })
-        // .on("mouseout", () => {
-        //   tooltip.transition().duration(200).style("opacity", 0);
-        // })
         .merge(hotspots)
         .transition()
         .duration(500)
@@ -517,24 +507,124 @@
       keywordsByYear[year] = allKeywords.join(", ");
     });
 
-    // Add a group for the hover line
-    const hoverLineGroup = svg.append("g").attr("class", "hover-line-group");
-    // Add the vertical line (initially hidden)
-    const hoverLine = hoverLineGroup
-      .append("line")
-      .attr("class", "hover-vertical-line")
-      .attr("y1", 0)
-      .attr("y2", height)
-      .attr("stroke", "var(--color-base-darker)")
-      .attr("stroke-width", 2)
+    // Create a group for the image and its overlay
+    const imageGroup = svg.append("g").attr("class", "hover-image-group");
+
+    // Create a map to store image elements for each year
+    const yearImages = {};
+    const imageIndicators = {}; // Store indicators for each year
+
+    // Define which years have images
+    const yearsWithImages = [
+      "1855-1859",
+      "1905-1909",
+      "1910-1914",
+      "1915-1919",
+      "1920-1924",
+      "1925-1929",
+      "1930-1934",
+      "1935-1939",
+      "1940-1944",
+      "1945-1949",
+      "1950-1954",
+      "1955-1959",
+      "1960-1964",
+      "1965-1969",
+      "1970-1974",
+      "1975-1979",
+      "1980-1984",
+      "1985-1989",
+      "1990-1994",
+      "1995-1999",
+      "2000-2004",
+      "2005-2009",
+      "2010-2014",
+      "2015-2019",
+    ];
+
+    // Create image elements only for years that have images
+    yearsWithImages.forEach((year) => {
+      // Create a safe filename from the year (replace hyphens with underscores)
+      const safeYearName = year.replace(/-/g, "_");
+
+      // Use a consistent naming pattern for the image files
+      // Format: assets/chap-2-hover-imgs/year_YYYY_YYYY.webp
+      const imagePath = `assets/chap-2-hover-imgs/year_${safeYearName}.webp`;
+
+      // Create a group for this year's image and indicator
+      const yearGroup = imageGroup
+        .append("g")
+        .attr("class", `hover-group-${safeYearName}`);
+
+      // Create the image element
+      const yearImage = yearGroup
+        .append("image")
+        .attr("class", `hover-image-${safeYearName}`)
+        .attr("xlink:href", imagePath)
+        .attr("width", 150)
+        .attr("height", height)
+        .attr("preserveAspectRatio", "xMidYMid slice")
+        .style("opacity", 0)
+        .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
+
+      // Create the indicator rectangle
+      const indicator = yearGroup
+        .append("rect")
+        .attr("class", `hover-indicator-${safeYearName}`)
+        .attr("width", 4) // Swapped with height
+        .attr("height", 20) // Reduced from 40 to 20 for a shorter vertical line
+        .attr("x", 73) // Center the 4px wide indicator on the 150px wide image (150/2 - 2)
+        .attr("y", height - 25) // Position near bottom with room for the height
+        .attr("rx", 1) // Border radius
+        .style("fill", "#F3F1EE")
+        .style("stroke", "#000")
+        .style("stroke-width", 1)
+        .style("filter", "drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.2))")
+        .style("opacity", 0);
+
+      // Store both elements in their respective maps
+      yearImages[year] = yearImage;
+      imageIndicators[year] = indicator;
+    });
+
+    // Add the grain texture overlay
+    const grainOverlay = imageGroup
+      .append("image")
+      .attr("class", "grain-overlay")
+      .attr("xlink:href", "assets/textures/grain.webp")
+      .attr("width", 150)
+      .attr("height", height)
+      .attr("preserveAspectRatio", "xMidYMid slice")
+      .style("opacity", 0)
+      .style("mix-blend-mode", "overlay")
+      .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
+
+    // Create a top-level group for the year label to ensure it's always on top
+    const yearLabelGroup = svg.append("g").attr("class", "year-label-group");
+
+    // Add year label text
+    const yearLabel = yearLabelGroup
+      .append("text")
+      .attr("class", "annotation")
+      .attr("font-size", "14px")
+      .attr("text-anchor", "middle")
       .style("opacity", 0);
+
+    // Add book count text below the year label
+    const bookCountLabel = yearLabelGroup
+      .append("text")
+      .attr("class", "annotation")
+      .style("font-size", "12px")
+      .attr("text-anchor", "middle")
+      .attr("dy", "1.5em") // Position below the year label
+      .style("opacity", 0);
+
     // Add a transparent rect overlay to capture mouse events
     svg
       .append("rect")
       .attr("class", "hover-capture-rect")
       .attr("width", width)
       .attr("height", height)
-      .attr("fill", "transparent")
       .on("mousemove", onMouseMove)
       .on("mouseleave", onMouseLeave);
 
@@ -553,61 +643,86 @@
           closestYear = year;
         }
       });
+
       // Get the x position for the closest year
       const xPos = x(closestYear) + bandWidth / 2;
-      // Show and position the vertical line
-      hoverLine
-        .attr("x1", xPos)
-        .attr("x2", xPos)
-        .attr("y1", 0)
-        .attr("y2", height)
-        .style("opacity", 1);
-      // Tooltip for historical context
-      const contextArr = historicalContextByYear[closestYear] || [];
-      const keywords = keywordsByYear[closestYear] || "";
-      let tooltipHtml = "";
-      if (contextArr.length > 0 || keywords) {
-        // Determine which image to show based on the year
-        let imageHtml = "";
-        if (closestYear === "1920-1924") {
-          imageHtml = `<img src="assets/gasmask.png" style="width:100%; height:auto; margin-top:10px; display:block;" />`;
-        } else {
-          imageHtml = `<div style="width:100%; height:60px; background-color:#ccc; margin-top:10px;"></div>`;
-        }
 
-        // Create keyword ticker if keywords exist
-        let keywordTickerHtml = "";
-        if (keywords) {
-          // Use HTML marquee for keywords ticker
-          keywordTickerHtml = `
-            <marquee behavior="scroll" direction="left" scrollamount="5"
-              style="width:100%; height:60px; background-color:#f5f5f5; margin-top:10px; padding:15px 0; border:none; color:#333; font-family:monospace; font-size:14px;">
-              ${keywords}
-            </marquee>
-          `;
-        }
+      // Check if we're hovering over a hotspot
+      const isOnHotspot = d3.select(event.target).classed("hotspot");
 
-        tooltipHtml =
-          `<div style='padding: 12px;'>` +
-          `<div style='font-weight:bold; margin-bottom:8px;'>HISTORICAL CONTEXT:</div>` +
-          contextArr
-            .map((e) => `<div style='margin-bottom:12px;'>${e}</div>`)
-            .join("") +
-          imageHtml +
-          keywordTickerHtml +
-          `</div>`;
+      // If we're on a hotspot, hide all universal hover elements
+      if (isOnHotspot) {
+        // Interrupt any ongoing transitions and hide all images and indicators
+        Object.values(yearImages).forEach((img) => {
+          img.interrupt().style("opacity", 0);
+        });
+        Object.values(imageIndicators).forEach((indicator) => {
+          indicator.interrupt().style("opacity", 0);
+        });
+        grainOverlay.interrupt().style("opacity", 0);
+        yearLabel.interrupt().style("opacity", 0);
+        bookCountLabel.interrupt().style("opacity", 0);
+        return;
       }
-      tooltip
-        .html(tooltipHtml)
-        .style("left", event.pageX + 18 + "px")
-        .style("top", event.pageY - 30 + "px")
-        .transition()
-        .duration(100)
-        .style("opacity", tooltipHtml ? 0.95 : 0);
+
+      // Handle universal hover if not on a hotspot
+      const hasImage = yearImages[closestYear] !== undefined;
+      if (hasImage) {
+        // Position and show the year label
+        yearLabelGroup.attr("transform", `translate(${xPos}, 20)`);
+        yearLabel.interrupt().text(closestYear).style("opacity", 1);
+
+        // Calculate total books for this year
+        const yearData = chartData.find((d) => d.year === closestYear);
+        const totalBooks = yearData ? yearData.INTERNAL + yearData.EXTERNAL : 0;
+
+        // Update and show the book count label with proper singular/plural form
+        const bookText = totalBooks === 1 ? "book" : "books";
+        bookCountLabel
+          .interrupt()
+          .text(`${totalBooks} ${bookText} published`)
+          .style("opacity", 1);
+
+        // Position the image group
+        imageGroup.attr("transform", `translate(${xPos - 75}, 0)`);
+
+        // First hide all images and indicators immediately
+        Object.entries(yearImages).forEach(([year, img]) => {
+          if (year !== closestYear) {
+            img.interrupt().style("opacity", 0);
+            imageIndicators[year].interrupt().style("opacity", 0);
+          }
+        });
+
+        // Then show only the current year's image and indicator
+        yearImages[closestYear].interrupt().style("opacity", 0.4);
+        imageIndicators[closestYear].interrupt().style("opacity", 1);
+        grainOverlay.interrupt().style("opacity", 0.5);
+      } else {
+        // Hide all hover effects if there's no image for this year
+        yearLabel.interrupt().style("opacity", 0);
+        bookCountLabel.interrupt().style("opacity", 0);
+        grainOverlay.interrupt().style("opacity", 0);
+        Object.values(yearImages).forEach((img) => {
+          img.interrupt().style("opacity", 0);
+        });
+        Object.values(imageIndicators).forEach((indicator) => {
+          indicator.interrupt().style("opacity", 0);
+        });
+      }
     }
+
     function onMouseLeave() {
-      hoverLine.style("opacity", 0);
-      tooltip.transition().duration(200).style("opacity", 0);
+      // Interrupt any ongoing transitions and hide all elements
+      Object.values(yearImages).forEach((img) => {
+        img.interrupt().style("opacity", 0);
+      });
+      Object.values(imageIndicators).forEach((indicator) => {
+        indicator.interrupt().style("opacity", 0);
+      });
+      yearLabel.interrupt().style("opacity", 0);
+      bookCountLabel.interrupt().style("opacity", 0);
+      grainOverlay.interrupt().style("opacity", 0);
     }
 
     ///////////////////////////////////////////////////////////// ! Scales Definition
@@ -733,17 +848,20 @@
       .text("Problem Origin:");
 
     // Add origins to legend in a horizontal layout
-    ["YOU", "THE WORLD"].forEach((key, i) => {
+    ["THE WORLD", "YOU"].forEach((key, i) => {
       const legendRow = legend
         .append("g")
-        .attr("class", "origin-legend")
-        .attr("transform", `translate(${i * 80 + 175}, 7.5)`); // Horizontal positioning, shifted right 20px
+        .attr("class", `origin-legend ${key.toLowerCase().replace(" ", "-")}`)
+        .attr("transform", `translate(${i * 150 + 170}, 7.5)`); // Increased spacing between items from 110 to 150
 
       legendRow
         .append("rect")
         .attr("width", 15)
         .attr("height", 15)
-        .attr("fill", color(key));
+        .attr(
+          "fill",
+          key === "THE WORLD" ? "var(--color-teal)" : "var(--color-orange)"
+        );
 
       legendRow
         .append("text")
@@ -751,13 +869,27 @@
         .attr("y", 12.5)
         .attr("class", "annotation")
         .text(key);
+
+      // Add "vs." between the labels
+      if (i === 0) {
+        legend
+          .append("text")
+          .attr("class", "vs-text annotation")
+          .attr("x", 300) // Moved left
+          .attr("y", 20)
+          .style("font-family", "Andale Mono")
+          .style("font-size", "12px")
+          .style("opacity", 0.5)
+          .style("text-anchor", "middle")
+          .text("vs.");
+      }
     });
 
     // Add BEST SELLER legend item (black circle, white fill, black stroke, r=5)
     const bestSellerLegend = legend
       .append("g")
       .attr("class", "origin-legend best-seller-legend")
-      .attr("transform", `translate(${2 * 80 + 175 + 50}, 7.5)`); // Spaced after the others
+      .attr("transform", `translate(${2 * 110 + 195}, 7.5)`); // Adjusted spacing to match new layout
 
     bestSellerLegend
       .append("circle")
@@ -835,7 +967,8 @@
           .style("stroke-opacity", 0.7)
           .style("opacity", 1) // Make hotspot fully visible
           .attr("r", 8) // Increase the radius to make it more visible
-          .style("fill-opacity", 0.8); // Increase fill opacity for visibility
+          .style("fill-opacity", 0.8) // Increase fill opacity for visibility
+          .style("pointer-events", "all"); // Ensure this specific hotspot can receive events
 
         // Get position of the hotspot for image placement
         const hotspotNode = hotspot.node();
@@ -850,13 +983,14 @@
             .append("image")
             .attr("id", "smiles-image")
             .attr("xlink:href", "assets/smiles.jpg")
-            .attr("x", imageX) // Position to the right of the hotspot
-            .attr("y", imageY) // Position centered vertically with the hotspot, adjusted for larger size
+            .attr("x", imageX)
+            .attr("y", imageY)
             .attr("transform", "rotate(10)")
             .attr("width", 250)
             .attr("height", 250)
             .style("opacity", 0)
-            .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))") // Add drop shadow
+            .style("pointer-events", "all") // Ensure image can receive events
+            .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))")
             .transition()
             .duration(1000)
             .style("opacity", 0.85);
@@ -875,12 +1009,13 @@
             .style("stroke", color("EXTERNAL"))
             .style("stroke-width", 1.5)
             .style("stroke-opacity", 0)
+            .style("pointer-events", "all") // Ensure connector can receive events
             .style("stroke-dasharray", "5,3")
             .transition()
             .duration(1000)
             .style("stroke-opacity", 0.6);
         }
-      }, 600); // Small delay to ensure chart has updated
+      }, 600);
     } else if (stepId === "post-20s") {
       // Show years through post-1920s
       currentVisibleCount = 16;
@@ -909,6 +1044,7 @@
         .attr("height", 300) // Set appropriate size
         .style("opacity", 0) // Start invisible for fade-in
         .style("z-index", "1")
+        .style("display", "none")
         .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
 
       // Then fade it in (this is the existing code)
@@ -916,50 +1052,6 @@
         .transition()
         .duration(1000)
         .style("opacity", 1);
-
-      // // Create a video element with low opacity
-      // const videoBackground = figure
-      //   .append("video")
-      //   .attr("id", "depression-video")
-      //   .attr("src", "assets/depression.mp4")
-      //   .attr("playsinline", "")
-      //   .attr("loop", "")
-      //   .attr("muted", "")
-      //   .property("muted", true) // Ensure muted property is set
-      //   .style("position", "absolute")
-      //   .style("bottom", "0")
-      //   .style("left", "-10")
-      //   .style("width", "120%")
-      //   .style("height", "120%")
-      //   .style("object-fit", "cover")
-      //   .style("z-index", "-1")
-      //   .style("opacity", "0") // Start with opacity 0 for fade-in
-      //   .transition() // Add transition for fade-in effect
-      //   .duration(1000) // 1 second fade-in
-      //   .style("opacity", "0.08");
-
-      // // Set video to play without requiring user interaction
-      // // This uses the fact that muted videos can autoplay
-      // const videoElement = videoBackground.node();
-      // videoElement.defaultMuted = true;
-
-      // // Try different methods to start the video
-      // videoElement.load();
-
-      // // Use a promise to handle the play attempt
-      // const playPromise = videoElement.play();
-      // if (playPromise !== undefined) {
-      //   playPromise
-      //     .then(() => {
-      //       // Video playback started successfully
-      //       console.log("Video playing successfully");
-      //     })
-      //     .catch((error) => {
-      //       // Auto-play was prevented
-      //       console.log("Video autoplay prevented:", error);
-      //       // We'll still show the video, it just won't autoplay
-      //     });
-      // }
 
       // Add hover effect to INTERNAL hotspots for 1900-1904, 1920-1924, and 1935-1939
       setTimeout(() => {
@@ -1266,6 +1358,9 @@
       // remove connector lines
       d3.selectAll(".connector-line").remove();
 
+      // Animate the legend swap
+      setTimeout(animateLegendSwap, 600);
+
       // Set up images with connectors on hover
       setTimeout(() => {
         // First, set all hotspots to opacity 0
@@ -1423,4 +1518,28 @@
       }, 600);
     }
   });
+
+  // Function to animate legend items
+  function animateLegendSwap() {
+    // Animate "YOU" to the left position
+    d3.select(".you")
+      .transition()
+      .duration(1000)
+      .ease(d3.easeCubicInOut)
+      .attr("transform", "translate(170, 7.5)");
+
+    // Animate "THE WORLD" to the right position
+    d3.select(".the-world")
+      .transition()
+      .duration(1000)
+      .ease(d3.easeCubicInOut)
+      .attr("transform", "translate(275, 7.5)");
+
+    // Animate "vs." to the left
+    d3.select(".vs-text")
+      .transition()
+      .duration(1000)
+      .ease(d3.easeCubicInOut)
+      .attr("x", 250); // Move slightly to the left
+  }
 })();
