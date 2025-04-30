@@ -17,6 +17,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize utils with DOM references
   initScrollyUtils(figure, stepsContainer, scroller, scrolly);
 
+  // Preload chapter-1 data early
+  window.dataCache = window.dataCache || {};
+  d3.csv("data/sh_0415_time/sh_0415_time.csv").then((data) => {
+    window.dataCache.timeData = data;
+  });
+  d3.csv("data/sh_0415_author/author.csv").then((data) => {
+    window.dataCache.authorData = data;
+  });
+
   // Generic window resize listener event
   function handleResize() {
     // Get current step elements
