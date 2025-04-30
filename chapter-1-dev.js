@@ -518,7 +518,7 @@
       });
 
       // Apply positions with more heavily staggered movement in batches
-      const batchSize = 200; // Increase batch size from 50 to 100
+      const batchSize = 400; // Increase batch size from 50 to 100
       const totalTime = 500; // Reduce total time from 2000 to 700ms
 
       // Process nodes in batches

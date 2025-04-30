@@ -80,7 +80,7 @@ const stepsConfig = [
         { text: "am I a bad parent?", color: "#000" },
         { text: "how to stop overthinking", color: "#000" },
         { text: "why do I feel alone?", color: "#000" },
-        // { text: "how to handle imposter syndrome", color: "#000" },
+        { text: "handling imposter syndrome", color: "#000" },
         { text: "six pack abs in 30 days", color: "#000" },
         { text: 'What is "Self-Help?"', color: "#000" },
       ];
