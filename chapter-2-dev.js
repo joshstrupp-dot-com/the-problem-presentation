@@ -680,7 +680,7 @@
         const bookText = totalBooks === 1 ? "book" : "books";
         bookCountLabel
           .interrupt()
-          .text(`${totalBooks} ${bookText} published`)
+          .text(`${totalBooks} ${bookText}`)
           .style("opacity", 1);
 
         // Position the image group
@@ -693,36 +693,62 @@
             imageIndicators[year].interrupt().style("opacity", 0);
           }
         });
-
-        // Then show only the current year's image and indicator
-        yearImages[closestYear].interrupt().style("opacity", 0.4);
-        imageIndicators[closestYear].interrupt().style("opacity", 1);
-        grainOverlay.interrupt().style("opacity", 0.5);
-      } else {
-        // Hide all hover effects if there's no image for this year
-        yearLabel.interrupt().style("opacity", 0);
-        bookCountLabel.interrupt().style("opacity", 0);
+        // Also reset the grain overlay so it starts hidden each hover
         grainOverlay.interrupt().style("opacity", 0);
+
+        // Then show only the current year's image and indicator with fade
+        yearImages[closestYear]
+          .interrupt()
+          .transition()
+          .duration(1000)
+          .style("opacity", 0.4);
+        imageIndicators[closestYear]
+          .interrupt()
+          .transition()
+          .duration(1000)
+          .style("opacity", 1);
+        grainOverlay
+          .interrupt()
+          .transition()
+          .duration(1000)
+          .style("opacity", 0.5);
+      } else {
+        // Hide all hover effects with fade if there's no image
+        yearLabel.interrupt().transition().duration(1000).style("opacity", 0);
+        bookCountLabel
+          .interrupt()
+          .transition()
+          .duration(1000)
+          .style("opacity", 0);
+        grainOverlay
+          .interrupt()
+          .transition()
+          .duration(1000)
+          .style("opacity", 0);
         Object.values(yearImages).forEach((img) => {
-          img.interrupt().style("opacity", 0);
+          img.interrupt().transition().duration(1000).style("opacity", 0);
         });
         Object.values(imageIndicators).forEach((indicator) => {
-          indicator.interrupt().style("opacity", 0);
+          indicator.interrupt().transition().duration(1000).style("opacity", 0);
         });
       }
     }
 
     function onMouseLeave() {
-      // Interrupt any ongoing transitions and hide all elements
+      // Interrupt any ongoing transitions and hide all elements with fade
       Object.values(yearImages).forEach((img) => {
-        img.interrupt().style("opacity", 0);
+        img.interrupt().transition().duration(1000).style("opacity", 0);
       });
+      grainOverlay.interrupt().transition().duration(1000).style("opacity", 0);
       Object.values(imageIndicators).forEach((indicator) => {
-        indicator.interrupt().style("opacity", 0);
+        indicator.interrupt().transition().duration(1000).style("opacity", 0);
       });
-      yearLabel.interrupt().style("opacity", 0);
-      bookCountLabel.interrupt().style("opacity", 0);
-      grainOverlay.interrupt().style("opacity", 0);
+      yearLabel.interrupt().transition().duration(1000).style("opacity", 0);
+      bookCountLabel
+        .interrupt()
+        .transition()
+        .duration(1000)
+        .style("opacity", 0);
     }
 
     ///////////////////////////////////////////////////////////// ! Scales Definition
