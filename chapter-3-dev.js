@@ -297,7 +297,7 @@
         .attr("x", 0)
         .attr("y", 0)
         .attr("fill", "url(#grain-texture)")
-        .style("opacity", 0.45);
+        .style("opacity", 0.33);
     });
 
     // Helper for highlight color
@@ -363,10 +363,25 @@
 
       tooltip
         .html(
-          `<strong>${d.author_clean}</strong><br/>
-           Books: ${d.author_num_books}<br/>
-           Rating: ${d.avg_star_rating.toFixed(2)}<br/>
-           Avg # Ratings: ${d.avg_num_ratings}`
+          `<span style="
+            color: #000;
+            font-family: 'Andale Mono';
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 30px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.5;
+          ">AUTHOR:</span>
+          <strong>${d.author_clean}</strong><br/>
+           <span class="andale">Books: ${d.author_num_books}</span><br/>
+           <span class="andale">Rating: ${d.avg_star_rating.toFixed(
+             2
+           )}</span><br/>
+           <span class="andale">Avg # Ratings: ${Math.round(
+             d.avg_num_ratings
+           )}</span>`
         )
         .style("left", event.pageX + 30 + "px") // Increased from 10 to 20
         .style("top", event.pageY - 35 + "px") // Increased from -28 to -35

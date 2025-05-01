@@ -852,7 +852,7 @@
       const legendRow = legend
         .append("g")
         .attr("class", `origin-legend ${key.toLowerCase().replace(" ", "-")}`)
-        .attr("transform", `translate(${i * 150 + 170}, 7.5)`); // Increased spacing between items from 110 to 150
+        .attr("transform", `translate(${i * 150 + 150}, 7.5)`); // Moved left by reducing from 170 to 150
 
       legendRow
         .append("rect")
@@ -875,7 +875,7 @@
         legend
           .append("text")
           .attr("class", "vs-text annotation")
-          .attr("x", 300) // Moved left
+          .attr("x", 270) // Moved left by reducing from 290 to 270
           .attr("y", 20)
           .style("font-family", "Andale Mono")
           .style("font-size", "12px")

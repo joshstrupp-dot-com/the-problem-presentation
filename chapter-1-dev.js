@@ -201,7 +201,22 @@
         .on("mouseover", function (event, d) {
           // Show tooltip with book name
           tooltip
-            .html(`<strong>${d.name || "Unnamed Record"}</strong>`)
+            .html(
+              `
+              <span style="
+                color: #000;
+                font-family: 'Andale Mono';
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: 30px;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                opacity: 0.5;
+              ">TITLE:</span>
+              <strong>${d.name || "Unnamed Record"}</strong>
+            `
+            )
             .style("opacity", 0.9)
             .style("left", event.pageX + 10 + "px")
             .style("top", event.pageY - 28 + "px");
@@ -607,7 +622,7 @@
             text-overflow: ellipsis;
           ">${category}</div>`
           )
-          .attr("filter", "drop-shadow(1px 1px 2px var(--color-base-darker))");
+          .attr("filter", "drop-shadow(0 0 30px rgba(0, 0, 0, 0.1))");
       });
     } else if (stepId === "external-internal") {
       console.log("external-internal step is now combined with intro-2");
@@ -638,8 +653,8 @@
           `<div style="
           width: 100%;
           text-align: center;
-          font-family: 'Libre Franklin', sans-serif;
-          font-size: 100px;
+          font-family: 'Big Caslon', sans-serif;
+          font-size: 50px;
           font-style: normal;
           font-weight: 800;
           line-height: 100px;
@@ -663,8 +678,8 @@
           `<div style="
           width: 100%;
           text-align: center;
-          font-family: 'Libre Franklin', sans-serif;
-          font-size: 100px;
+          font-family: 'Big Caslon', sans-serif;
+          font-size: 50px;
           font-style: normal;
           font-weight: 800;
           line-height: 100px;
