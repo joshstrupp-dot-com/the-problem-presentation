@@ -62,26 +62,22 @@ const stepsConfig = [
       const scrollingBox = scrollingContainer
         .append("div")
         .attr("class", "scrolling-words-box")
-        .style("height", "3rem") // Increased height by 10px (from 3rem to 3.625rem)
+        .style("height", "3rem")
         .style("margin", "auto")
         .style("overflow", "hidden");
-      // .style("border", "1px solid black")
-      // .style("border-radius", "100px");
 
       // Create the list of scrolling words
       const wordsList = scrollingBox
         .append("ul")
         .style("margin", "0 0.625rem")
         .style("padding", "0")
-        .style("animation", "scrollUp 25s infinite"); // Doubled the animation duration to slow it down
+        .style("animation", "scrollUp 14s forwards"); // Changed to forwards instead of infinite
 
       // Add the scrolling words
       const words = [
         { text: "am I a bad parent?", color: "#000" },
-        { text: "how to stop overthinking", color: "#000" },
         { text: "why do I feel alone?", color: "#000" },
-        { text: "handling imposter syndrome", color: "#000" },
-        { text: "six pack abs in 30 days", color: "#000" },
+        { text: "how to get six pack in 30 days?", color: "#000" },
         { text: 'What is "Self-Help?"', color: "#000" },
       ];
       words.forEach((word) => {
@@ -100,23 +96,17 @@ const stepsConfig = [
       const styleSheet = document.createElement("style");
       styleSheet.textContent = `
         @keyframes scrollUp {
-          0%, 8% {
+          0%, 12% {
             transform: translateY(0%);
           }
-          10%, 18% {
-            transform: translateY(-16.67%);
+          15%, 27% {
+            transform: translateY(-25%);
           }
-          20%, 28% {
-            transform: translateY(-33.33%);
-          }
-          30%, 38% {
+          30%, 42% {
             transform: translateY(-50%);
           }
-          40%, 48% {
-            transform: translateY(-66.67%);
-          }
-          50%, 100% {
-            transform: translateY(-83.33%);
+          45%, 100% {
+            transform: translateY(-75%);
           }
         }
       `;
