@@ -573,30 +573,32 @@ figure p {
 .year-label-group {
   pointer-events: none;
   z-index: 1000;
-  background: white;
+  background: black;
 }
 
 .year-label-group text {
-  fill: var(--color-base);
+  fill: black;
   dominant-baseline: middle;
   z-index: 1001;
-  text-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 10px rgba(242, 239, 233, 0.9);
 }
 
 .year-label-group text:first-child {
   font-family: "Big Caslon";
-  font-size: 18px;
+  font-size: 22px;
   font-style: normal;
   font-weight: 500;
   line-height: 22px;
+  margin-bottom: 8px; /* Add space below first text */
 }
 
 .year-label-group text:last-child {
   font-family: "Andale Mono", "Menlo", "Monaco", "Consolas", monospace;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  opacity: 0.2;
 }
 
 .hover-image-group {
