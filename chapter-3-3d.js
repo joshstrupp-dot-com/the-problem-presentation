@@ -106,20 +106,50 @@
         plot_bgcolor: "#f2efe9",
         scene: {
           xaxis: {
-            title: "Number of Books",
+            title: {
+              text: "Number of Books",
+              font: {
+                family: "Andale Mono",
+                size: 12,
+                color: "rgba(0, 0, 0, 0.5)",
+              },
+            },
             type: "log",
-            titlefont: { family: "Andale Mono", size: 15, color: "#000" },
-            tickfont: { family: "Andale Mono", size: 15, color: "#000" },
+            tickfont: {
+              family: "Andale Mono",
+              size: 12,
+              color: "rgba(0, 0, 0, 0.5)",
+            },
           },
           yaxis: {
-            title: "Avg Star Rating",
-            titlefont: { family: "Andale Mono", size: 15, color: "#000" },
-            tickfont: { family: "Andale Mono", size: 15, color: "#000" },
+            title: {
+              text: "Avg Star Rating",
+              font: {
+                family: "Andale Mono",
+                size: 12,
+                color: "rgba(0, 0, 0, 0.5)",
+              },
+            },
+            tickfont: {
+              family: "Andale Mono",
+              size: 12,
+              color: "rgba(0, 0, 0, 0.5)",
+            },
           },
           zaxis: {
-            title: "Avg Cred Score",
-            titlefont: { family: "Andale Mono", size: 15, color: "#000" },
-            tickfont: { family: "Andale Mono", size: 15, color: "#000" },
+            title: {
+              text: "Avg Cred Score",
+              font: {
+                family: "Andale Mono",
+                size: 12,
+                color: "rgba(0, 0, 0, 0.5)",
+              },
+            },
+            tickfont: {
+              family: "Andale Mono",
+              size: 12,
+              color: "rgba(0, 0, 0, 0.5)",
+            },
           },
           bgcolor: "#f2efe9",
         },
@@ -136,19 +166,22 @@
       // Use the same camera position for all steps
       layout.scene.camera = {
         center: {
-          x: 0.3487183886806972,
-          y: 0.2648659619748207,
-          z: -0.133097816787365,
+          x: 0.09281848656308971,
+          y: -0.05135192301665359,
+          z: -0.043104787934012755,
         },
         eye: {
-          x: -1.2115474570501374,
-          y: 1.8512747823703717,
-          z: 1.3530130180083257,
+          x: 1.276767997665493,
+          y: 1.477562186328202,
+          z: 1.5313871016951325,
         },
         up: {
-          x: 0.338273785959222,
-          y: -0.444374857260449,
-          z: 0.8295190365311517,
+          x: -0.001886770895421225,
+          y: 0.002537092842318987,
+          z: 0.9999959016081094,
+        },
+        projection: {
+          type: "perspective",
         },
       };
 
