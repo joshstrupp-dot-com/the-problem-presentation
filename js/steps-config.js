@@ -170,7 +170,7 @@ const stepsConfig = [
   },
   {
     id: "blame-game-3",
-    text: "There are authors who have something to gain by convincing you that your dead-end job is your fault and yours to fix; or that you're depressed because you're not doing enough squat jumps. When self-help suggests you're not doing enough, it's a smoke screen. It's fear-mongering masquerading as advice.",
+    text: "There are authors who have something to gain by convincing you that your dead-end job is your fault and yours to fix; or that you're depressed because you're not doing enough squat jumps. ",
     fullwidth: true,
     fadeOut: true,
     render: () => {
@@ -194,6 +194,72 @@ const stepsConfig = [
           detail: { step: "systemic-problems" },
         })
       );
+      // Remove any existing overlay to avoid duplicates
+      d3.select("#background-images").remove();
+
+      // Create a container for background images at the top level
+      const bgContainer = d3
+        .select("body")
+        .append("div")
+        .attr("id", "background-images")
+        .style("position", "fixed")
+        .style("top", "0")
+        .style("left", "0")
+        .style("width", "100vw")
+        .style("height", "100vh")
+        .style("pointer-events", "none")
+        .style("z-index", "2000"); // High z-index to be above all content
+
+      // Function to create and animate a single image
+      const createAnimatedImage = () => {
+        // Get random image from the directory
+        const images = Array.from(
+          document.querySelectorAll("#background-images img")
+        );
+        const availableImages = [
+          "year_1855_1859.webp",
+          "year_1900_1904.webp",
+          "year_1950_1954.webp",
+          "year_1970_1974.webp",
+          "year_2000_2004.webp",
+          "year_2015_2019.webp",
+        ];
+        const randomImage =
+          availableImages[Math.floor(Math.random() * availableImages.length)];
+
+        // Create image element
+        const img = bgContainer
+          .append("img")
+          .attr("src", `assets/chap-2-hover-imgs/${randomImage}`)
+          .style("position", "absolute")
+          .style("width", "150px")
+          .style("height", "auto")
+          .style("opacity", "0")
+          .style("transition", "opacity 2s ease-in-out")
+          .style("z-index", "2001"); // Increased z-index for each image
+
+        // Random position
+        const x = Math.random() * (window.innerWidth - 150);
+        const y = Math.random() * (window.innerHeight - 150);
+        img.style("left", `${x}px`).style("top", `${y}px`);
+
+        // Fade in and out
+        setTimeout(() => {
+          img.style("opacity", "0.3");
+          setTimeout(() => {
+            img.style("opacity", "0");
+            setTimeout(() => {
+              img.remove();
+            }, 2000);
+          }, 3000);
+        }, 100);
+
+        // Schedule next image
+        setTimeout(createAnimatedImage, 2000);
+      };
+
+      // Start the animation after 3 seconds
+      setTimeout(createAnimatedImage, 3000);
     },
   },
   {
