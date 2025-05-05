@@ -170,7 +170,7 @@ const stepsConfig = [
   },
   {
     id: "blame-game-3",
-    text: "There are authors who have something to gain by convincing you that your dead-end job is your fault and yours to fix; or that you're depressed because you're not doing enough squat jumps. When self-help suggests you're not doing enough, it's a smoke screen. It's fear-mongering masquerading as advice.",
+    text: "There are authors who have something to gain by convincing you that your dead-end job is your fault and yours to fix; or that you're depressed because you're not doing enough squat jumps. ",
     fullwidth: true,
     fadeOut: true,
     render: () => {
@@ -194,6 +194,145 @@ const stepsConfig = [
           detail: { step: "systemic-problems" },
         })
       );
+      // Remove any existing overlay to avoid duplicates
+      d3.select("#background-images").remove();
+
+      // Create a container for background images at the top level
+      const bgContainer = d3
+        .select("body")
+        .append("div")
+        .attr("id", "background-images")
+        .style("position", "fixed")
+        .style("top", "0")
+        .style("left", "0")
+        .style("width", "100vw")
+        .style("height", "100vh")
+        .style("pointer-events", "none")
+        .style("z-index", "2000");
+
+      // Get all PNG files from the directory
+      fetch("assets/smoke-screen-images/")
+        .then((response) => response.text())
+        .then((data) => {
+          // Parse HTML response to get all PNG files
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(data, "text/html");
+          const files = Array.from(doc.querySelectorAll("a"))
+            .map((a) => a.href)
+            .filter((href) => href.endsWith(".png"));
+
+          let remainingImages = [...files];
+          let lastQuadrant = null;
+
+          // Define quadrants
+          const quadrants = [
+            { name: "top", yRange: [0, 0.25] },
+            { name: "right", yRange: [0.25, 0.75], xRange: [0.75, 1] },
+            { name: "bottom", yRange: [0.75, 1] },
+            { name: "left", yRange: [0.25, 0.75], xRange: [0, 0.25] },
+          ];
+
+          // Function to get next random image
+          const getNextImage = () => {
+            if (remainingImages.length === 0) {
+              remainingImages = [...files];
+            }
+            const randomIndex = Math.floor(
+              Math.random() * remainingImages.length
+            );
+            return remainingImages.splice(randomIndex, 1)[0];
+          };
+
+          // Function to get random position in a quadrant
+          const getQuadrantPosition = (quadrant) => {
+            let x, y;
+
+            if (quadrant.name === "top") {
+              x = Math.random() * (window.innerWidth - 150);
+              y =
+                window.innerHeight * quadrant.yRange[0] +
+                Math.random() *
+                  window.innerHeight *
+                  (quadrant.yRange[1] - quadrant.yRange[0]);
+            } else if (quadrant.name === "bottom") {
+              x = Math.random() * (window.innerWidth - 150);
+              y =
+                window.innerHeight * quadrant.yRange[0] +
+                Math.random() *
+                  window.innerHeight *
+                  (quadrant.yRange[1] - quadrant.yRange[0]);
+            } else {
+              x =
+                window.innerWidth * quadrant.xRange[0] +
+                Math.random() *
+                  window.innerWidth *
+                  (quadrant.xRange[1] - quadrant.xRange[0]);
+              y =
+                window.innerHeight * quadrant.yRange[0] +
+                Math.random() *
+                  window.innerHeight *
+                  (quadrant.yRange[1] - quadrant.yRange[0]);
+            }
+
+            return { x, y };
+          };
+
+          // Function to get random quadrant (different from last one)
+          const getRandomQuadrant = () => {
+            let availableQuadrants = quadrants.filter(
+              (q) => q.name !== lastQuadrant
+            );
+            const quadrant =
+              availableQuadrants[
+                Math.floor(Math.random() * availableQuadrants.length)
+              ];
+            lastQuadrant = quadrant.name;
+            return quadrant;
+          };
+
+          // Function to create and animate a single image
+          const createAnimatedImage = () => {
+            const imageSrc = getNextImage();
+            const quadrant = getRandomQuadrant();
+            const position = getQuadrantPosition(quadrant);
+
+            // Create image element
+            const img = bgContainer
+              .append("img")
+              .attr("src", imageSrc)
+              .style("position", "absolute")
+              .style("width", "150px")
+              .style("height", "auto")
+              .style("opacity", "0")
+              .style("transition", "opacity 2s ease-in-out")
+              .style("z-index", "2001")
+              .style("filter", "grayscale(100%)");
+
+            img
+              .style("left", `${position.x}px`)
+              .style("top", `${position.y}px`);
+
+            // Fade in
+            setTimeout(() => {
+              img.style("opacity", "0.3");
+
+              // Start fade out after 5 seconds
+              setTimeout(() => {
+                img.style("opacity", "0");
+                // Remove element after fade out completes
+                setTimeout(() => {
+                  img.remove();
+                }, 2000);
+              }, 5000);
+            }, 100);
+
+            // Schedule next image every 1.5 seconds
+            setTimeout(createAnimatedImage, 500);
+          };
+
+          // Start the animation after 1 second
+          setTimeout(createAnimatedImage, 1000);
+        });
     },
   },
   {
@@ -201,6 +340,20 @@ const stepsConfig = [
     text: "I used machine learning to classify 20,000 books",
     fullwidth: true,
     render: () => {
+      // Fade out and remove all background images
+      const bgContainer = d3.select("#background-images");
+      if (!bgContainer.empty()) {
+        bgContainer
+          .selectAll("img")
+          .style("transition", "opacity 1s ease-in-out")
+          .style("opacity", "0");
+
+        // Remove the container after fade out completes
+        setTimeout(() => {
+          bgContainer.remove();
+        }, 1000);
+      }
+
       // Clear existing content
       const figure = d3.select("#figure-container");
       figure.html("");

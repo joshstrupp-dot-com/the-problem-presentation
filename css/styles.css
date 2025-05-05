@@ -16,59 +16,6 @@
   --color-pink: #be00d7;
 }
 
-/* .big-text {
-  color: #000;
-  text-align: center;
-  font-family: "Big Caslon";
-  font-size: 50px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 35px;
-}
-
-.emphesis-text {
-  text-align: center;
-  font-family: "Libre Franklin";
-  font-size: 32px;
-  font-style: normal;
-  font-weight: 800;
-  line-height: 35px;
-  text-transform: uppercase;
-} */
-
-/* .tooltip-header {
-  font-family: "Big Caslon";
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 22px;
-} */
-
-/* .tooltip-eyebrow {
-  color: #000;
-  font-family: "Andale Mono";
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 35px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-} */
-
-/* .tooltip-bg {
-  border-radius: 5px;
-  border: 2px solid #000;
-  background: url(../assets/textures/paper-texture.jpg) lightgray 50% / cover
-      no-repeat,
-    radial-gradient(
-      151.92% 127.02% at 15.32% 21.04%,
-      rgba(225, 214, 194, 0.1) 0%,
-      rgba(225, 214, 194, 0.02) 77.08%,
-      rgba(225, 214, 194, 0) 100%
-    );
-  backdrop-filter: blur(40px);
-} */
-
 .andale {
   font-family: "Andale Mono", "Menlo", "Monaco", "Consolas", monospace;
   font-size: 14px;
@@ -303,7 +250,7 @@ body {
 
 #intro {
   max-width: 40rem;
-  margin: 2rem auto;
+  /* margin: 2rem auto; */
   padding: 0 1rem;
 }
 
@@ -321,7 +268,7 @@ body {
   position: relative;
   display: flex;
 
-  padding: 1rem;
+  padding: 0rem;
   min-height: 100vh;
   margin-left: 0rem;
 }
@@ -393,7 +340,7 @@ figure p {
   /* Remove vertical positioning that pushed steps down */
   /* position: relative; */
   /* top: 50%; */
-  opacity: 0;
+  opacity: 0.5;
 }
 
 .step:last-child {
@@ -573,30 +520,32 @@ figure p {
 .year-label-group {
   pointer-events: none;
   z-index: 1000;
-  background: white;
+  background: black;
 }
 
 .year-label-group text {
-  fill: var(--color-base);
+  fill: black;
   dominant-baseline: middle;
   z-index: 1001;
-  text-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 10px rgba(242, 239, 233, 0.9);
 }
 
 .year-label-group text:first-child {
   font-family: "Big Caslon";
-  font-size: 18px;
+  font-size: 22px;
   font-style: normal;
   font-weight: 500;
   line-height: 22px;
+  margin-bottom: 8px; /* Add space below first text */
 }
 
 .year-label-group text:last-child {
   font-family: "Andale Mono", "Menlo", "Monaco", "Consolas", monospace;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  opacity: 0.2;
 }
 
 .hover-image-group {
