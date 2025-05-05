@@ -208,58 +208,131 @@ const stepsConfig = [
         .style("width", "100vw")
         .style("height", "100vh")
         .style("pointer-events", "none")
-        .style("z-index", "2000"); // High z-index to be above all content
+        .style("z-index", "2000");
 
-      // Function to create and animate a single image
-      const createAnimatedImage = () => {
-        // Get random image from the directory
-        const images = Array.from(
-          document.querySelectorAll("#background-images img")
-        );
-        const availableImages = [
-          "year_1855_1859.webp",
-          "year_1900_1904.webp",
-          "year_1950_1954.webp",
-          "year_1970_1974.webp",
-          "year_2000_2004.webp",
-          "year_2015_2019.webp",
-        ];
-        const randomImage =
-          availableImages[Math.floor(Math.random() * availableImages.length)];
+      // Get all PNG files from the directory
+      fetch("assets/smoke-screen-images/")
+        .then((response) => response.text())
+        .then((data) => {
+          // Parse HTML response to get all PNG files
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(data, "text/html");
+          const files = Array.from(doc.querySelectorAll("a"))
+            .map((a) => a.href)
+            .filter((href) => href.endsWith(".png"));
 
-        // Create image element
-        const img = bgContainer
-          .append("img")
-          .attr("src", `assets/chap-2-hover-imgs/${randomImage}`)
-          .style("position", "absolute")
-          .style("width", "150px")
-          .style("height", "auto")
-          .style("opacity", "0")
-          .style("transition", "opacity 2s ease-in-out")
-          .style("z-index", "2001"); // Increased z-index for each image
+          let remainingImages = [...files];
+          let lastQuadrant = null;
 
-        // Random position
-        const x = Math.random() * (window.innerWidth - 150);
-        const y = Math.random() * (window.innerHeight - 150);
-        img.style("left", `${x}px`).style("top", `${y}px`);
+          // Define quadrants
+          const quadrants = [
+            { name: "top", yRange: [0, 0.25] },
+            { name: "right", yRange: [0.25, 0.75], xRange: [0.75, 1] },
+            { name: "bottom", yRange: [0.75, 1] },
+            { name: "left", yRange: [0.25, 0.75], xRange: [0, 0.25] },
+          ];
 
-        // Fade in and out
-        setTimeout(() => {
-          img.style("opacity", "0.3");
-          setTimeout(() => {
-            img.style("opacity", "0");
+          // Function to get next random image
+          const getNextImage = () => {
+            if (remainingImages.length === 0) {
+              remainingImages = [...files];
+            }
+            const randomIndex = Math.floor(
+              Math.random() * remainingImages.length
+            );
+            return remainingImages.splice(randomIndex, 1)[0];
+          };
+
+          // Function to get random position in a quadrant
+          const getQuadrantPosition = (quadrant) => {
+            let x, y;
+
+            if (quadrant.name === "top") {
+              x = Math.random() * (window.innerWidth - 150);
+              y =
+                window.innerHeight * quadrant.yRange[0] +
+                Math.random() *
+                  window.innerHeight *
+                  (quadrant.yRange[1] - quadrant.yRange[0]);
+            } else if (quadrant.name === "bottom") {
+              x = Math.random() * (window.innerWidth - 150);
+              y =
+                window.innerHeight * quadrant.yRange[0] +
+                Math.random() *
+                  window.innerHeight *
+                  (quadrant.yRange[1] - quadrant.yRange[0]);
+            } else {
+              x =
+                window.innerWidth * quadrant.xRange[0] +
+                Math.random() *
+                  window.innerWidth *
+                  (quadrant.xRange[1] - quadrant.xRange[0]);
+              y =
+                window.innerHeight * quadrant.yRange[0] +
+                Math.random() *
+                  window.innerHeight *
+                  (quadrant.yRange[1] - quadrant.yRange[0]);
+            }
+
+            return { x, y };
+          };
+
+          // Function to get random quadrant (different from last one)
+          const getRandomQuadrant = () => {
+            let availableQuadrants = quadrants.filter(
+              (q) => q.name !== lastQuadrant
+            );
+            const quadrant =
+              availableQuadrants[
+                Math.floor(Math.random() * availableQuadrants.length)
+              ];
+            lastQuadrant = quadrant.name;
+            return quadrant;
+          };
+
+          // Function to create and animate a single image
+          const createAnimatedImage = () => {
+            const imageSrc = getNextImage();
+            const quadrant = getRandomQuadrant();
+            const position = getQuadrantPosition(quadrant);
+
+            // Create image element
+            const img = bgContainer
+              .append("img")
+              .attr("src", imageSrc)
+              .style("position", "absolute")
+              .style("width", "150px")
+              .style("height", "auto")
+              .style("opacity", "0")
+              .style("transition", "opacity 2s ease-in-out")
+              .style("z-index", "2001")
+              .style("filter", "grayscale(100%)");
+
+            img
+              .style("left", `${position.x}px`)
+              .style("top", `${position.y}px`);
+
+            // Fade in
             setTimeout(() => {
-              img.remove();
-            }, 2000);
-          }, 3000);
-        }, 100);
+              img.style("opacity", "0.3");
 
-        // Schedule next image
-        setTimeout(createAnimatedImage, 2000);
-      };
+              // Start fade out after 5 seconds
+              setTimeout(() => {
+                img.style("opacity", "0");
+                // Remove element after fade out completes
+                setTimeout(() => {
+                  img.remove();
+                }, 2000);
+              }, 5000);
+            }, 100);
 
-      // Start the animation after 3 seconds
-      setTimeout(createAnimatedImage, 3000);
+            // Schedule next image every 1.5 seconds
+            setTimeout(createAnimatedImage, 500);
+          };
+
+          // Start the animation after 1 second
+          setTimeout(createAnimatedImage, 1000);
+        });
     },
   },
   {
@@ -267,6 +340,20 @@ const stepsConfig = [
     text: "I used machine learning to classify 20,000 books",
     fullwidth: true,
     render: () => {
+      // Fade out and remove all background images
+      const bgContainer = d3.select("#background-images");
+      if (!bgContainer.empty()) {
+        bgContainer
+          .selectAll("img")
+          .style("transition", "opacity 1s ease-in-out")
+          .style("opacity", "0");
+
+        // Remove the container after fade out completes
+        setTimeout(() => {
+          bgContainer.remove();
+        }, 1000);
+      }
+
       // Clear existing content
       const figure = d3.select("#figure-container");
       figure.html("");
