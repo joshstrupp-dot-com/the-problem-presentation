@@ -644,9 +644,9 @@
       // Add labels for the two piles with fade-in animation
       g.append("foreignObject")
         .attr("class", "category-label")
-        .attr("x", chartWidth * 0.2)
-        .attr("y", worldPilePosition.y - 50)
-        .attr("width", chartWidth * 1)
+        .attr("x", chartWidth * 0.5) // Moved to right side
+        .attr("y", worldPilePosition.y - 60) // Moved up 10px
+        .attr("width", chartWidth * 0.4) // Reduced width
         .attr("height", 150)
         .style("opacity", 0)
         .html(
@@ -661,7 +661,19 @@
           text-transform: uppercase;
           color: #000;
           white-space: nowrap;
-        ">THE WORLD</div>`
+        ">THE WORLD</div>
+        <div style="
+          width: 100%;
+          text-align: center;
+          font-family: 'Andale Mono', monospace;
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 30px;
+          color: #000;
+          opacity: 0.5;
+          text-transform: uppercase;
+          letter-spacing: 3px;
+        ">society · family · metaphysics</div>`
         )
         .transition()
         .duration(1500)
@@ -669,9 +681,9 @@
 
       g.append("foreignObject")
         .attr("class", "category-label")
-        .attr("x", chartWidth * 0.2)
-        .attr("y", youPilePosition.y - 50)
-        .attr("width", chartWidth * 1)
+        .attr("x", chartWidth * 0.5) // Moved to right side
+        .attr("y", youPilePosition.y - 60) // Moved up 10px
+        .attr("width", chartWidth * 0.4) // Reduced width
         .attr("height", 150)
         .style("opacity", 0)
         .html(
@@ -686,7 +698,19 @@
           text-transform: uppercase;
           color: #000;
           white-space: nowrap;
-        ">YOU</div>`
+        ">YOU</div>
+        <div style="
+          width: 100%;
+          text-align: center;
+          font-family: 'Andale Mono', monospace;
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 30px;
+          color: #000;
+          opacity: 0.5;
+          text-transform: uppercase;
+          letter-spacing: 3px;
+        ">self-esteem · willpower · doubt</div>`
         )
         .transition()
         .duration(1500)
