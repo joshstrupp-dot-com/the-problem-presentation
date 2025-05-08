@@ -72,18 +72,18 @@
           showlegend: false,
           text: data.map((d) => d.author_clean),
           hovertemplate:
-            "<b>%{text}</b><br>" +
-            "Books: %{x}<br>" +
+            "<b style='font-family: \"Big Caslon\"; font-size: 18px; font-weight: 500; line-height: 22px; display: block;'>%{text}</b><br><br>" +
+            "<span style='font-family: \"Andale Mono\"; font-size: 12px; line-height: 27px; text-transform: uppercase; opacity: 0.9;'>Books: %{x}<br>" +
             "Rating: %{y}<br>" +
-            "Cred Score: %{z}<br>" +
+            "Cred Score: %{z}</span>" +
             "<extra></extra>",
           marker: {
             size: data.map((d) => (d.highlighted ? 25 : 8)),
             color: data.map((d) => {
               if (d.author_clean === "Gabor Maté") {
-                return "url(assets/authors/gabor-mate.jpeg)";
+                return "#bfbf1d";
               }
-              return d.highlighted ? "var(--color-yellow)" : "#e1d6c2";
+              return d.highlighted ? "#bfbf1d" : "#e1d6c2";
             }),
             opacity: data.map((d) => opacityScale(d.avg_star_rating)),
             line: {
@@ -204,9 +204,9 @@
           "marker.color": [
             data.map((d) => {
               if (d.author_clean === "Gabor Maté") {
-                return "url(assets/authors/gabor-mate.jpeg)";
+                return "#bfbf1d";
               }
-              return d.highlighted ? "var(--color-yellow)" : "#e1d6c2";
+              return d.highlighted ? "#bfbf1d" : "#e1d6c2";
             }),
           ],
           "marker.opacity": [data.map((d) => opacityScale(d.avg_star_rating))],

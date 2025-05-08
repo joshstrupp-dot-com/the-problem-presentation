@@ -549,7 +549,7 @@ const stepsConfig = [
   },
   {
     id: "chapter-3",
-    text: "Context matters. Many authors see fire and fan flames. Others see fire and wonder what caused it.",
+    text: "Context matters. History impacts feelings of helplessness. But who’s preying on those feelings? ",
     fullwidth: true,
     fadeIn: true,
     fadeOut: true,
