@@ -574,6 +574,7 @@
         .attr("height", height)
         .attr("preserveAspectRatio", "xMidYMid slice")
         .style("opacity", 0)
+        .style("filter", "grayscale(100%)")
         .style("clip-path", "inset(0 0 0 0 round 5px 5px 0 0)");
 
       // Create the indicator rectangle
