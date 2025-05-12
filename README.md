@@ -8,5 +8,8 @@ Self-help is everywhere—books, podcasts, seminars—and whether we realize it 
 ## Project Presentation & Demo
 https://github.com/joshstrupp-dot-com/the-problem-presentation/blob/main/demo.mp4?raw=true
 
+## Full Written Thesis
+https://github.com/joshstrupp-dot-com/the-problem-presentation/blob/main/Strupp_Thesis_Final.pdf
+
 ## Acknowledgements
 Big thanks to Daniel Sauter for your guidance and *boundless* enthusiasm. Shout out to Thiago Herson and Richard The for advising and supporting me along the way. And, of course, lots of love to the entire graduating class. Y'all. Rule. 
