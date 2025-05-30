@@ -557,4 +557,10 @@
 
   // Also clean up when window unloads
   window.addEventListener("unload", cleanup);
+
+  // Listen for visualization cleanup event
+  document.addEventListener("visualizationCleanup", () => {
+    console.log("📢 Received visualizationCleanup event in chapter-1-grid");
+    cleanup();
+  });
 })();

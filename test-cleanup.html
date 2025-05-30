@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cleanup Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      button {
+        margin: 10px 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      #status {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 14px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .log-entry {
+        margin: 5px 0;
+        padding: 5px;
+        border-left: 3px solid #ccc;
+        padding-left: 10px;
+      }
+      .log-cleanup {
+        border-left-color: #4caf50;
+      }
+      .log-create {
+        border-left-color: #2196f3;
+      }
+      .log-error {
+        border-left-color: #f44336;
+      }
+      #element-status {
+        margin: 20px 0;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .element-check {
+        padding: 10px;
+        border-radius: 5px;
+        background: #f0f0f0;
+      }
+      .element-exists {
+        background: #ffcccc;
+      }
+      .element-removed {
+        background: #ccffcc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Visualization Cleanup Test</h1>
+    <p>
+      Use this page to test that visualizations are properly cleaned up when
+      navigating between steps.
+    </p>
+
+    <div>
+      <button onclick="checkElements()">Check Persistent Elements</button>
+      <button onclick="createTestElements()">Create Test Elements</button>
+      <button onclick="triggerCleanup()">Trigger Cleanup</button>
+      <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div id="element-status"></div>
+    <div id="status"></div>
+
+    <script>
+      const persistentElements = [
+        "#chapter-1-grid-absolute",
+        "#background-images",
+        "#cursor-trail-parent",
+      ];
+
+      function log(message, type = "info") {
+        const status = document.getElementById("status");
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement("div");
+        logEntry.className = `log-entry log-${type}`;
+        logEntry.textContent = `[${timestamp}] ${message}`;
+        status.appendChild(logEntry);
+        status.scrollTop = status.scrollHeight;
+        console.log(message);
+      }
+
+      function checkElements() {
+        const elementStatus = document.getElementById("element-status");
+        elementStatus.innerHTML = "";
+
+        persistentElements.forEach((selector) => {
+          const element = document.querySelector(selector);
+          const statusDiv = document.createElement("div");
+          statusDiv.className = `element-check ${
+            element ? "element-exists" : "element-removed"
+          }`;
+          statusDiv.textContent = `${selector}: ${
+            element ? "EXISTS" : "REMOVED"
+          }`;
+          elementStatus.appendChild(statusDiv);
+
+          log(
+            `Checking ${selector}: ${element ? "EXISTS" : "REMOVED"}`,
+            element ? "create" : "cleanup"
+          );
+        });
+      }
+
+      function createTestElements() {
+        // Create test versions of persistent elements
+        persistentElements.forEach((selector) => {
+          const id = selector.replace("#", "");
+          if (!document.getElementById(id)) {
+            const div = document.createElement("div");
+            div.id = id;
+            div.style.position = "fixed";
+            div.style.width = "100px";
+            div.style.height = "100px";
+            div.style.background = "rgba(255, 0, 0, 0.3)";
+            div.style.top = Math.random() * 200 + "px";
+            div.style.left = Math.random() * 200 + "px";
+            div.style.zIndex = "9999";
+            div.textContent = id;
+            document.body.appendChild(div);
+            log(`Created test element: ${selector}`, "create");
+          }
+        });
+
+        // Also set smoke screen flag
+        window.smokeScreenAnimationActive = true;
+        log("Set smokeScreenAnimationActive = true", "create");
+
+        checkElements();
+      }
+
+      function triggerCleanup() {
+        log("Triggering cleanup...", "cleanup");
+
+        // Simulate the cleanup function from scrolly-utils.js
+        persistentElements.forEach((selector) => {
+          const element = document.querySelector(selector);
+          if (element) {
+            element.remove();
+            log(`Removed: ${selector}`, "cleanup");
+          }
+        });
+
+        // Stop smoke screen animation
+        if (window.smokeScreenAnimationActive) {
+          window.smokeScreenAnimationActive = false;
+          log("Set smokeScreenAnimationActive = false", "cleanup");
+        }
+
+        // Clear timeouts
+        if (window.activeTimeouts) {
+          log(
+            `Clearing ${window.activeTimeouts.length} active timeouts`,
+            "cleanup"
+          );
+          window.activeTimeouts.forEach((id) => clearTimeout(id));
+          window.activeTimeouts = [];
+        }
+
+        // Dispatch cleanup event
+        document.dispatchEvent(new CustomEvent("visualizationCleanup"));
+        log("Dispatched visualizationCleanup event", "cleanup");
+
+        checkElements();
+      }
+
+      function clearLog() {
+        document.getElementById("status").innerHTML = "";
+        document.getElementById("element-status").innerHTML = "";
+      }
+
+      // Initial check
+      log("Page loaded - checking for persistent elements...");
+      checkElements();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Visualization Reload</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      button {
+        margin: 10px 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      #test-container {
+        margin: 20px 0;
+        padding: 20px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        min-height: 500px;
+        position: relative;
+      }
+      #console-output {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 14px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .console-entry {
+        margin: 5px 0;
+        padding: 5px;
+        border-left: 3px solid #007bff;
+        padding-left: 10px;
+      }
+      .success {
+        border-left-color: #28a745;
+      }
+      .error {
+        border-left-color: #dc3545;
+      }
+      .info {
+        border-left-color: #17a2b8;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Visualization Reload Test</h1>
+    <p>
+      Use this page to test if visualizations are properly reloading when
+      navigating back to steps.
+    </p>
+
+    <div>
+      <h2>Actions:</h2>
+      <button onclick="testChapter1Reload()">Test Chapter 1 Reload</button>
+      <button onclick="testChapter2Reload()">Test Chapter 2 Reload</button>
+      <button onclick="testChapter3Reload()">Test Chapter 3 Reload</button>
+      <button onclick="clearContainer()">Clear Container</button>
+      <button onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <div id="test-container">
+      <div id="figure-container" style="width: 100%; height: 100%">
+        <p style="text-align: center; color: #999">
+          Visualization will appear here
+        </p>
+      </div>
+    </div>
+
+    <h2>Console Output:</h2>
+    <div id="console-output"></div>
+
+    <!-- Load required libraries -->
+    <script src="lib/d3.v7.min.js"></script>
+    <script src="js/visualization-manager.js"></script>
+
+    <script>
+      // Override console.log to capture output
+      const originalLog = console.log;
+      const consoleOutput = document.getElementById("console-output");
+
+      console.log = function (...args) {
+        originalLog.apply(console, args);
+        const entry = document.createElement("div");
+        entry.className = "console-entry info";
+        entry.textContent =
+          new Date().toLocaleTimeString() + " - " + args.join(" ");
+        consoleOutput.appendChild(entry);
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+      };
+
+      console.error = function (...args) {
+        originalLog.apply(console, args);
+        const entry = document.createElement("div");
+        entry.className = "console-entry error";
+        entry.textContent =
+          new Date().toLocaleTimeString() + " - ERROR: " + args.join(" ");
+        consoleOutput.appendChild(entry);
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+      };
+
+      function clearContainer() {
+        const figure = document.getElementById("figure-container");
+        figure.innerHTML =
+          '<p style="text-align: center; color: #999;">Visualization cleared</p>';
+        console.log("Container cleared");
+      }
+
+      function clearConsole() {
+        consoleOutput.innerHTML = "";
+      }
+
+      function testChapter1Reload() {
+        console.log("Testing Chapter 1 reload...");
+
+        // Clear the container first
+        clearContainer();
+
+        // Create chapter-1 div
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-1")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        console.log("Created chapter-1 container");
+
+        // Use VisualizationManager to load the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-1",
+          "external-internal-sort"
+        );
+      }
+
+      function testChapter2Reload() {
+        console.log("Testing Chapter 2 reload...");
+
+        // Clear the container first
+        clearContainer();
+
+        // Create chapter-2 div
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-2")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        console.log("Created chapter-2 container");
+
+        // Use VisualizationManager to load the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-2",
+          "all-years"
+        );
+      }
+
+      function testChapter3Reload() {
+        console.log("Testing Chapter 3 reload...");
+
+        // Clear the container first
+        clearContainer();
+
+        // Create chapter-3 div
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-3")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        console.log("Created chapter-3 container");
+
+        // Use VisualizationManager to load the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-3",
+          "authors-3"
+        );
+      }
+
+      // Listen for visualization events
+      document.addEventListener("visualizationUpdate", (event) => {
+        console.log("📢 Visualization update event:", event.detail);
+      });
+
+      console.log("Test page loaded and ready");
+    </script>
+  </body>
+</html>

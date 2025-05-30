@@ -292,6 +292,12 @@ const stepsConfig = [
 
           // Function to create and animate a single image
           const createAnimatedImage = () => {
+            // Check if we should continue - exit early if animation has been stopped
+            if (!window.smokeScreenAnimationActive) {
+              console.log("🛑 Smoke screen animation stopped");
+              return;
+            }
+
             const imageSrc = getNextImage();
             const quadrant = getRandomQuadrant();
             const position = getQuadrantPosition(quadrant);
@@ -326,12 +332,28 @@ const stepsConfig = [
               }, 5000);
             }, 100);
 
-            // Schedule next image every 1.5 seconds
-            setTimeout(createAnimatedImage, 500);
+            // Schedule next image every 500ms - store timeout ID
+            const timeoutId = setTimeout(createAnimatedImage, 500);
+
+            // Track active timeouts
+            if (!window.activeTimeouts) {
+              window.activeTimeouts = [];
+            }
+            window.activeTimeouts.push(timeoutId);
           };
 
+          // Set the flag to indicate animation is active
+          window.smokeScreenAnimationActive = true;
+          console.log("🎬 Starting smoke screen animation");
+
           // Start the animation after 1 second
-          setTimeout(createAnimatedImage, 1000);
+          const initialTimeout = setTimeout(createAnimatedImage, 1000);
+
+          // Track this timeout too
+          if (!window.activeTimeouts) {
+            window.activeTimeouts = [];
+          }
+          window.activeTimeouts.push(initialTimeout);
         });
     },
   },
@@ -401,12 +423,40 @@ const stepsConfig = [
     text: "into 10 categories that designate what problem they aim to address, then organized them into two umbrella categories. Books that claim the problem comes from:",
     fullwidth: true,
     render: () => {
-      // Update to intro-2 step
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "intro-2" },
-        })
-      );
+      // Check if chapter-1 visualization exists and has content
+      const chapter1Container = d3.select("#chapter-1");
+      const hasVisualization =
+        !chapter1Container.empty() &&
+        chapter1Container.select("svg").size() > 0;
+
+      if (!hasVisualization) {
+        console.log(
+          "Chapter-1 visualization not found or empty, using VisualizationManager..."
+        );
+
+        // Clear and recreate the container
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-1")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Use VisualizationManager to reload the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-1",
+          "intro-2"
+        );
+      } else {
+        // Update to intro-2 step
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "intro-2" },
+          })
+        );
+      }
     },
   },
   {
@@ -415,12 +465,40 @@ const stepsConfig = [
     fullwidth: true,
     fadeOut: true,
     render: () => {
-      // Empty placeholder for this step
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "external-internal-sort" },
-        })
-      );
+      // Check if chapter-1 visualization exists and has content
+      const chapter1Container = d3.select("#chapter-1");
+      const hasVisualization =
+        !chapter1Container.empty() &&
+        chapter1Container.select("svg").size() > 0;
+
+      if (!hasVisualization) {
+        console.log(
+          "Chapter-1 visualization not found or empty, using VisualizationManager..."
+        );
+
+        // Clear and recreate the container
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-1")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Use VisualizationManager to reload the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-1",
+          "external-internal-sort"
+        );
+      } else {
+        // Just dispatch the event for this step
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "external-internal-sort" },
+          })
+        );
+      }
     },
   },
   // {
@@ -494,7 +572,7 @@ const stepsConfig = [
   // },
   // {
   //   id: "through-ww1",
-  //   text: "Books about finding spiritual and religious meaning begin to rise in the wake of war. Why wouldn’t they? Your neighbor may be a German spy or worse: a communist. Like Smiles’ readers, these Americans, rightfully so, hope to find some semblance of control when your fate is oversees in the hands of 4.7 million young privates.",
+  //   text: "Books about finding spiritual and religious meaning begin to rise in the wake of war. Why wouldn't they? Your neighbor may be a German spy or worse: a communist. Like Smiles' readers, these Americans, rightfully so, hope to find some semblance of control when your fate is oversees in the hands of 4.7 million young privates.",
   //   fullwidth: true,
   //   render: () => {
   //     // Just update the existing visualization
@@ -507,49 +585,133 @@ const stepsConfig = [
   // },
   {
     id: "post-20s",
-    text: "This trend of responding to external forces continued until The Great Depression gave rise to entirely new sub-genres of self-help — books that see stock markets crash and claim you “win friends and influence people” or use “the power of positive thinking” to take back control.",
+    text: `This trend of responding to external forces continued until The Great Depression gave rise to entirely new sub-genres of self-help — books that see stock markets crash and claim you "win friends and influence people" or use "the power of positive thinking" to take back control.`,
     fullwidth: true,
     render: () => {
-      // Just update the existing visualization
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "post-20s" },
-        })
-      );
+      // Check if chapter-2 visualization exists and has content
+      const chapter2Container = d3.select("#chapter-2");
+      const hasVisualization =
+        !chapter2Container.empty() &&
+        chapter2Container.select("svg").size() > 0;
+
+      if (!hasVisualization) {
+        console.log(
+          "Chapter-2 visualization not found or empty, using VisualizationManager..."
+        );
+
+        // Clear and recreate the container
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-2")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Use VisualizationManager to reload the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-2",
+          "post-20s"
+        );
+      } else {
+        // Just update the existing visualization
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "post-20s" },
+          })
+        );
+      }
     },
   },
 
   {
     id: "neoliberal-shift",
-    text: "Eventually we get to the “Me Decade.” Flower power blossomed and Watergate sowed doubt, Reagan Era neoliberalism was on the rise. “YOU can take care of yourself” became the common sentiment. Suddenly, book shelves saw fewer guides to changing the world, and more manuals for changing yourself.",
+    text: `Eventually we get to the "Me Decade." Flower power blossomed and Watergate sowed doubt, Reagan Era neoliberalism was on the rise. "YOU can take care of yourself" became the common sentiment. Suddenly, book shelves saw fewer guides to changing the world, and more manuals for changing yourself.`,
     fullwidth: true,
     render: () => {
-      // Just update the existing visualization
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "neoliberal-shift" },
-        })
-      );
+      // Check if chapter-2 visualization exists and has content
+      const chapter2Container = d3.select("#chapter-2");
+      const hasVisualization =
+        !chapter2Container.empty() &&
+        chapter2Container.select("svg").size() > 0;
+
+      if (!hasVisualization) {
+        console.log(
+          "Chapter-2 visualization not found or empty, using VisualizationManager..."
+        );
+
+        // Clear and recreate the container
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-2")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Use VisualizationManager to reload the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-2",
+          "neoliberal-shift"
+        );
+      } else {
+        // Just update the existing visualization
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "neoliberal-shift" },
+          })
+        );
+      }
     },
   },
 
   {
     id: "all-years",
-    text: "The gap finally closes as we enter the 21st century. Self-help pivots toward coping and finding resilience within yourself. Many authors push “personal hustle” as a response to economic insecurity, or “leaning in” first, addressing sexism second.",
+    text: `The gap finally closes as we enter the 21st century. Self-help pivots toward coping and finding resilience within yourself. Many authors push "personal hustle" as a response to economic insecurity, or "leaning in" first, addressing sexism second.`,
     fullwidth: true,
     fadeOut: true,
     render: () => {
-      // Just update the existing visualization
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "all-years" },
-        })
-      );
+      // Check if chapter-2 visualization exists and has content
+      const chapter2Container = d3.select("#chapter-2");
+      const hasVisualization =
+        !chapter2Container.empty() &&
+        chapter2Container.select("svg").size() > 0;
+
+      if (!hasVisualization) {
+        console.log(
+          "Chapter-2 visualization not found or empty, using VisualizationManager..."
+        );
+
+        // Clear and recreate the container
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-2")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Use VisualizationManager to reload the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-2",
+          "all-years"
+        );
+      } else {
+        // Just update the existing visualization
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "all-years" },
+          })
+        );
+      }
     },
   },
   {
     id: "chapter-3",
-    text: "Context matters. History impacts feelings of helplessness. But who’s preying on those feelings? ",
+    text: "Context matters. History impacts feelings of helplessness. But who's preying on those feelings?",
     fullwidth: true,
     fadeIn: true,
     fadeOut: true,
@@ -597,26 +759,82 @@ const stepsConfig = [
     text: "There are some who are beloved, with ratings in the top 10% of all authors.",
     fullwidth: true,
     render: () => {
-      // Maintain the credibility-score state
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "authors-2" },
-        })
-      );
+      // Check if chapter-3 visualization exists and has content
+      const chapter3Container = d3.select("#chapter-3");
+      const hasVisualization =
+        !chapter3Container.empty() &&
+        chapter3Container.select("svg").size() > 0;
+
+      if (!hasVisualization) {
+        console.log(
+          "Chapter-3 visualization not found or empty, using VisualizationManager..."
+        );
+
+        // Clear and recreate the container
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-3")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Use VisualizationManager to reload the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-3",
+          "authors-2"
+        );
+      } else {
+        // Maintain the credibility-score state
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "authors-2" },
+          })
+        );
+      }
     },
   },
 
   {
     id: "credibility-score",
-    text: "Then there are those who I’ve heard referred to as “drug dealers.” This may seem excessive, but when you see titles like “You Are a Badass” and“Turn Your Weight Loss Vision Into Reality!,” tell me you don’t want a taste.",
+    text: `Then there are those who I've heard referred to as "drug dealers." This may seem excessive, but when you see titles like "You Are a Badass" and "Turn Your Weight Loss Vision Into Reality!," tell me you don't want a taste.`,
     fullwidth: true,
     render: () => {
-      // Maintain the credibility-score state
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "authors-3" },
-        })
-      );
+      // Check if chapter-3 visualization exists and has content
+      const chapter3Container = d3.select("#chapter-3");
+      const hasVisualization =
+        !chapter3Container.empty() &&
+        chapter3Container.select("svg").size() > 0;
+
+      if (!hasVisualization) {
+        console.log(
+          "Chapter-3 visualization not found or empty, using VisualizationManager..."
+        );
+
+        // Clear and recreate the container
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        const vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-3")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Use VisualizationManager to reload the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-3",
+          "authors-3"
+        );
+      } else {
+        // Maintain the credibility-score state
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "authors-3" },
+          })
+        );
+      }
     },
   },
   {
@@ -664,12 +882,42 @@ const stepsConfig = [
     fadeIn: false,
     fadeOut: true,
     render: () => {
-      // Simply update the visualization state
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "low-credibility" },
-        })
-      );
+      // Check if chapter-3-3d visualization exists and has content
+      let vizContainer = d3.select("#chapter-3-3d");
+      const hasVisualization =
+        !vizContainer.empty() &&
+        (vizContainer.select("canvas").size() > 0 ||
+          vizContainer.select("#plotly-div").size() > 0);
+
+      if (!hasVisualization) {
+        console.log(
+          "Chapter-3-3d visualization not found or empty, using VisualizationManager..."
+        );
+
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-3-3d")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Use VisualizationManager to reload the visualization
+        window.VisualizationManager.ensureVisualizationInitialized(
+          "chapter-3-3d",
+          "low-credibility"
+        );
+
+        // No longer track with window.chapter3_3d_loaded
+      } else {
+        // Simply update the visualization state
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "low-credibility" },
+          })
+        );
+      }
     },
   },
 

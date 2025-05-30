@@ -7,6 +7,28 @@
 let figure, stepsContainer, scroller, scrolly;
 // Global vizSequence removed in favor of per-step fade flags
 
+// Track the previous step index for cleanup
+let previousStepIndex = -1;
+
+// Define visualization groups - steps that share the same visualization
+const visualizationGroups = {
+  grid: ["blame-game", "blame-game-2", "blame-game-3", "systemic-problems"],
+  chapter1: ["fastest-growing", "ml-categories", "external-internal-sort"],
+  chapter2: ["samuel-smiles", "post-20s", "neoliberal-shift", "all-years"],
+  chapter3: ["celebrity-authors", "quality-authors", "credibility-score"],
+  "chapter3-3d": ["earned-credibility", "l-ron-hubbard"],
+};
+
+// Helper function to get visualization group for a step
+function getVisualizationGroup(stepId) {
+  for (const [group, steps] of Object.entries(visualizationGroups)) {
+    if (steps.includes(stepId)) {
+      return group;
+    }
+  }
+  return null; // Step not in any group
+}
+
 // Initialize utils with references to DOM elements
 function initScrollyUtils(
   figureRef,
@@ -39,11 +61,94 @@ function createSteps() {
   return stepsContainer.selectAll(".step");
 }
 
+// Universal cleanup function to remove persistent visualizations
+function cleanupPreviousVisualizations(fromStep, toStep) {
+  console.log(
+    `🧹 Running cleanup for previous visualizations... (${fromStep} → ${toStep})`
+  );
+
+  // Check if we're moving between different visualization groups
+  const fromGroup = getVisualizationGroup(fromStep);
+  const toGroup = getVisualizationGroup(toStep);
+
+  console.log(`  📊 Visualization groups: ${fromGroup} → ${toGroup}`);
+
+  // Only do full cleanup if we're changing visualization groups
+  if (fromGroup !== toGroup) {
+    console.log(`  ✓ Different visualization groups - performing full cleanup`);
+
+    // Clear the figure container when switching between major visualizations
+    const figure = d3.select("#figure-container");
+    if (!figure.empty()) {
+      console.log(`  ✓ Clearing figure container`);
+      figure.html("");
+    }
+
+    // Remove known persistent containers
+    const persistentElements = [
+      "#chapter-1-grid-absolute",
+      "#background-images",
+      "#cursor-trail-parent",
+      // Add other known persistent element IDs here as we discover them
+    ];
+
+    persistentElements.forEach((selector) => {
+      const element = document.querySelector(selector);
+      if (element) {
+        console.log(`  ✓ Removing persistent element: ${selector}`);
+        element.remove();
+      }
+    });
+
+    // Stop smoke screen animation if running
+    if (window.smokeScreenAnimationActive) {
+      console.log("  ✓ Stopping smoke screen animation");
+      window.smokeScreenAnimationActive = false;
+    }
+
+    // Clear any active timeouts that might have been set
+    if (window.activeTimeouts) {
+      console.log(
+        `  ✓ Clearing ${window.activeTimeouts.length} active timeouts`
+      );
+      window.activeTimeouts.forEach((id) => clearTimeout(id));
+      window.activeTimeouts = [];
+    }
+
+    // Dispatch a cleanup event that visualizations can listen to
+    console.log("  📢 Dispatching visualizationCleanup event");
+    document.dispatchEvent(new CustomEvent("visualizationCleanup"));
+  } else {
+    console.log(`  ℹ️ Same visualization group - skipping cleanup`);
+  }
+}
+
 // Handle step transitions
 function handleStepEnter(response) {
   // response = { element, direction, index }
   console.log("Step enter:", response);
   console.log(`Step ID: ${window.stepsConfig[response.index]?.id}`);
+
+  // Get current and previous step IDs
+  const currentStepId = window.stepsConfig[response.index]?.id;
+  const previousStepId =
+    previousStepIndex >= 0 ? window.stepsConfig[previousStepIndex]?.id : null;
+
+  // Clean up previous visualizations if needed
+  if (previousStepId && currentStepId) {
+    cleanupPreviousVisualizations(previousStepId, currentStepId);
+  }
+
+  // Call step-specific cleanup if available
+  if (
+    previousStepIndex >= 0 &&
+    window.stepsConfig[previousStepIndex]?.cleanup
+  ) {
+    console.log(
+      `  🧹 Running step-specific cleanup for: ${window.stepsConfig[previousStepIndex].id}`
+    );
+    window.stepsConfig[previousStepIndex].cleanup();
+  }
 
   // Add color to current step only
   stepsContainer.selectAll(".step").classed("is-active", (d, i) => {
@@ -60,6 +165,7 @@ function handleStepEnter(response) {
 
   // Call the render function for this step
   if (currentStep && currentStep.render) {
+    console.log(`  🎨 Rendering step: ${currentStep.id}`);
     currentStep.render();
   }
 
@@ -80,6 +186,9 @@ function handleStepEnter(response) {
     // Non-fade steps: reset opacity to fully visible
     figure.interrupt().style("opacity", 1);
   }
+
+  // Update previous step index at the end
+  previousStepIndex = response.index;
 }
 
 // Handle step exit transitions
