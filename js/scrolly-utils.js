@@ -109,12 +109,12 @@ function handleResize() {
   // Calculate viewport height
   const viewportHeight = window.innerHeight;
 
-  // Position first step 75% down the viewport
+  // Position first step 25% down the viewport
   step
     .filter((d, i) => i === 0)
-    .style("margin-top", `${Math.floor(viewportHeight * 0.75)}px`);
+    .style("margin-top", `${Math.floor(viewportHeight * 0.25)}px`);
 
-  // Set vertical margin between steps
+  // Set vertical margin between steps to span from 25% to 75%
   const verticalMargin = Math.floor(viewportHeight * 0.5);
   step.style("margin-bottom", `${verticalMargin}px`);
 

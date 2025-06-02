@@ -21,6 +21,14 @@ const stepsConfig = [
       const figure = d3.select("#figure-container");
       figure.html("");
 
+      // Ensure any previous blame-game visualization is cleared from the DOM
+      const existingOverlay = document.getElementById(
+        "chapter-1-grid-absolute"
+      );
+      if (existingOverlay) {
+        existingOverlay.remove();
+      }
+
       // Add scrolling words animation container
       const container = figure
         .append("div")
@@ -354,6 +362,14 @@ const stepsConfig = [
         }, 1000);
       }
 
+      // Ensure any previous blame-game visualization is cleared from the DOM
+      const existingOverlay = document.getElementById(
+        "chapter-1-grid-absolute"
+      );
+      if (existingOverlay) {
+        existingOverlay.remove();
+      }
+
       // Clear existing content
       const figure = d3.select("#figure-container");
       figure.html("");
@@ -494,7 +510,7 @@ const stepsConfig = [
   // },
   // {
   //   id: "through-ww1",
-  //   text: "Books about finding spiritual and religious meaning begin to rise in the wake of war. Why wouldn’t they? Your neighbor may be a German spy or worse: a communist. Like Smiles’ readers, these Americans, rightfully so, hope to find some semblance of control when your fate is oversees in the hands of 4.7 million young privates.",
+  //   text: "Books about finding spiritual and religious meaning begin to rise in the wake of war. Why wouldn't they? Your neighbor may be a German spy or worse: a communist. Like Smiles' readers, these Americans, rightfully so, hope to find some semblance of control when your fate is oversees in the hands of 4.7 million young privates.",
   //   fullwidth: true,
   //   render: () => {
   //     // Just update the existing visualization
@@ -507,7 +523,7 @@ const stepsConfig = [
   // },
   {
     id: "post-20s",
-    text: "This trend of responding to external forces continued until The Great Depression gave rise to entirely new sub-genres of self-help — books that see stock markets crash and claim you “win friends and influence people” or use “the power of positive thinking” to take back control.",
+    text: `This trend of responding to external forces continued until The Great Depression gave rise to entirely new sub-genres of self-help — books that see stock markets crash and claim you "win friends and influence people" or use "the power of positive thinking" to take back control.`,
     fullwidth: true,
     render: () => {
       // Just update the existing visualization
@@ -521,7 +537,7 @@ const stepsConfig = [
 
   {
     id: "neoliberal-shift",
-    text: "Eventually we get to the “Me Decade.” Flower power blossomed and Watergate sowed doubt, Reagan Era neoliberalism was on the rise. “YOU can take care of yourself” became the common sentiment. Suddenly, book shelves saw fewer guides to changing the world, and more manuals for changing yourself.",
+    text: `Eventually we get to the "Me Decade." Flower power blossomed and Watergate sowed doubt, Reagan Era neoliberalism was on the rise. "YOU can take care of yourself" became the common sentiment. Suddenly, book shelves saw fewer guides to changing the world, and more manuals for changing yourself.`,
     fullwidth: true,
     render: () => {
       // Just update the existing visualization
@@ -535,7 +551,7 @@ const stepsConfig = [
 
   {
     id: "all-years",
-    text: "The gap finally closes as we enter the 21st century. Self-help pivots toward coping and finding resilience within yourself. Many authors push “personal hustle” as a response to economic insecurity, or “leaning in” first, addressing sexism second.",
+    text: `The gap finally closes as we enter the 21st century. Self-help pivots toward coping and finding resilience within yourself. Many authors push "personal hustle" as a response to economic insecurity, or "leaning in" first, addressing sexism second.`,
     fullwidth: true,
     fadeOut: true,
     render: () => {
@@ -608,7 +624,7 @@ const stepsConfig = [
 
   {
     id: "credibility-score",
-    text: "Then there are those who I’ve heard referred to as “drug dealers.” This may seem excessive, but when you see titles like “You Are a Badass” and“Turn Your Weight Loss Vision Into Reality!,” tell me you don’t want a taste.",
+    text: `Then there are those who I've heard referred to as "drug dealers." This may seem excessive, but when you see titles like "You Are a Badass" and "Turn Your Weight Loss Vision Into Reality!", tell me you don't want a taste.`,
     fullwidth: true,
     render: () => {
       // Maintain the credibility-score state

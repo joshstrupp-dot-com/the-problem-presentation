@@ -78,6 +78,11 @@
     },
   ];
 
+  // Determine whether we should play the initial entry animation (only the first time this script is executed in the session)
+  const playEntryAnimation = !window.blameGameAnimationPlayed;
+  // Flag so that next executions know animation has been shown already
+  window.blameGameAnimationPlayed = true;
+
   // Load and display book covers in a more compact grid with entry animation
   d3.csv("data/sh_train_0409.csv")
     .then((data) => {
@@ -154,7 +159,10 @@
       // Calculate total animation time for all books
       const lastBookDelay = (covers.length - 1) * 0.035; // Reduced from 0.05 to 0.02
       const singleAnimDuration = 0.6; // Reduced from 0.7 to 0.4
-      const totalAnimTime = lastBookDelay + singleAnimDuration + 0.4; // Reduced buffer from 0.5 to 0.3
+      // If this is the first time, include the animation duration, otherwise skip waiting
+      const totalAnimTime = playEntryAnimation
+        ? lastBookDelay + singleAnimDuration + 0.4 // Reduced buffer from 0.5 to 0.3
+        : 0;
 
       // Create placeholders in the grid
       covers.forEach((d, i) => {
@@ -172,7 +180,7 @@
         img.style.width = "70px";
         img.style.height = "auto";
         img.style.boxShadow = "0 0 30px rgba(0, 0, 0, 0.1)";
-        img.style.opacity = "0";
+        img.style.opacity = playEntryAnimation ? "0" : "1";
         img.style.pointerEvents = "none";
         img.dataset.index = i;
         img.dataset.bookId = d.book_id || i; // Store book ID if available
@@ -180,8 +188,10 @@
         img.dataset.isSpecific = d.is_specific ? "true" : "false"; // Mark if this is a specific book
         bookElements.push(img);
 
-        // Add the initial animation
-        img.style.animation = `fadeInUp 0.5s ease-out forwards ${i * 0.03}s`; // Reduced from 0.7s to 0.4s and from 0.05s to 0.02s
+        // Add the initial animation only on the first visit
+        if (playEntryAnimation) {
+          img.style.animation = `fadeInUp 0.5s ease-out forwards ${i * 0.03}s`; // Reduced from 0.7s to 0.4s and from 0.05s to 0.02s
+        }
 
         // Position it over its placeholder initially
         const placeholder = gridContainer.querySelector(
@@ -205,20 +215,28 @@
         absoluteContainer.appendChild(img);
       });
 
-      // Set a timer to mark animation completion
-      setTimeout(() => {
-        initialAnimationComplete = true;
-        console.log(
-          "Initial grid animation complete after",
-          totalAnimTime,
-          "seconds"
-        );
+      if (playEntryAnimation) {
+        // Wait for the animation to finish before freezing positions
+        setTimeout(() => {
+          initialAnimationComplete = true;
+          console.log(
+            "Initial grid animation complete after",
+            totalAnimTime,
+            "seconds"
+          );
 
-        // If we're already in blame-game step, freeze positions
+          // If we're already in blame-game step, freeze positions
+          if (currentStep === "blame-game" && !positionsFrozen) {
+            freezeBookPositions();
+          }
+        }, totalAnimTime * 1000);
+      } else {
+        // No entry animation, mark as complete immediately and freeze positions if needed
+        initialAnimationComplete = true;
         if (currentStep === "blame-game" && !positionsFrozen) {
           freezeBookPositions();
         }
-      }, totalAnimTime * 1000);
+      }
     })
     .catch((error) => {
       console.error("Error loading book covers:", error);
@@ -557,4 +575,15 @@
 
   // Also clean up when window unloads
   window.addEventListener("unload", cleanup);
+
+  // --- Overlay cleanup: Remove overlay if grid container is removed from DOM ---
+  const observer = new MutationObserver(() => {
+    if (!document.getElementById("chapter-1-grid")) {
+      if (absoluteContainer && absoluteContainer.parentNode) {
+        absoluteContainer.parentNode.removeChild(absoluteContainer);
+      }
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 })();
