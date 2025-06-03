@@ -1,6 +1,6 @@
 /**
- * Main application entry point
- * Initializes the scrollytelling functionality
+ * Chapter 3 Main application entry point
+ * Initializes the scrollytelling functionality for Chapter 3
  */
 
 // Initialize on document load
@@ -17,11 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize utils with DOM references
   initScrollyUtils(figure, stepsContainer, scroller, scrolly);
 
-  // Preload data
+  // Preload data specifically for chapter 3
   window.dataCache = window.dataCache || {};
-  d3.csv("data/sh_0415_time/sh_0415_time.csv").then((data) => {
-    window.dataCache.timeData = data;
-  });
   d3.csv("data/sh_0415_author/author.csv").then((data) => {
     window.dataCache.authorData = data;
   });
@@ -66,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function init() {
-    // Clear localStorage to always use the configuration from steps-config.js
+    // Clear localStorage to always use the configuration from chapter3-steps-config.js
     localStorage.removeItem("scrollySteps");
 
     // Always create fresh steps from the configuration

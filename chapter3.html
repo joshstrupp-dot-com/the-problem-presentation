@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapter 3 - The Problem with Fixing Yourself</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Franklin:wght@200;400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.2/browser/pixi.min.js"></script>
+  </head>
+  <body>
+    <!-- Back button -->
+    <div
+      id="back-button"
+      style="
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        background: var(--color-orange);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 30px;
+        cursor: pointer;
+        font-family: 'Andale Mono', monospace;
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        z-index: 9999;
+      "
+    >
+      ← Chapter 2
+    </div>
+
+    <main>
+      <section id="scrolly">
+        <article id="steps-container">
+          <!-- Steps will be dynamically generated from config -->
+        </article>
+
+        <figure id="figure-container">
+          <!-- Figure content will be dynamically updated -->
+        </figure>
+      </section>
+    </main>
+
+    <!-- Libraries -->
+    <script src="lib/d3.v7.min.js"></script>
+    <script src="lib/scrollama.min.js"></script>
+    <script
+      src="https://cdn.plot.ly/plotly-3.0.1.min.js"
+      charset="utf-8"
+    ></script>
+    <script src="https://unpkg.com/d3-interpolate-path/build/d3-interpolate-path.min.js"></script>
+
+    <!-- Chapter 3 specific scripts -->
+    <script src="js/chapter3-steps-config.js"></script>
+    <script src="js/scrolly-utils.js"></script>
+    <script src="js/chapter3-main.js"></script>
+
+    <script>
+      // Back button functionality
+      document
+        .getElementById("back-button")
+        .addEventListener("click", function () {
+          window.location.href = "chapter2.html";
+        });
+
+      // Add hover effects for back button
+      const backButton = document.getElementById("back-button");
+      backButton.addEventListener("mouseover", function () {
+        this.style.background = "var(--color-teal)";
+        this.style.transform = "scale(1.05)";
+      });
+      backButton.addEventListener("mouseout", function () {
+        this.style.background = "var(--color-orange)";
+        this.style.transform = "scale(1)";
+      });
+    </script>
+  </body>
+</html>

@@ -45,6 +45,12 @@ function handleStepEnter(response) {
   console.log("Step enter:", response);
   console.log(`Step ID: ${window.stepsConfig[response.index]?.id}`);
 
+  // Clean up any navigation buttons and their containers from previous steps
+  d3.select("#chapter-2-button").remove();
+  d3.select("#chapter-2-button-container").remove();
+  d3.select("#chapter-3-button").remove();
+  d3.select("#chapter-3-button-container").remove();
+
   // Add color to current step only
   stepsContainer.selectAll(".step").classed("is-active", (d, i) => {
     return i === response.index;
@@ -101,7 +107,7 @@ function handleStepExit(response) {
   console.log(`Exiting Step ID: ${window.stepsConfig[response.index]?.id}`);
 }
 
-// Generic window resize listener event
+// Generic window resize listener event - Universal step positioning
 function handleResize() {
   // Get current step elements
   const step = stepsContainer.selectAll(".step");
@@ -109,19 +115,29 @@ function handleResize() {
   // Calculate viewport height
   const viewportHeight = window.innerHeight;
 
-  // Position first step 25% down the viewport
-  step
-    .filter((d, i) => i === 0)
-    .style("margin-top", `${Math.floor(viewportHeight * 0.25)}px`);
+  // Universal step positioning:
+  // - First step of any chapter always starts at top (margin-top: 0)
+  // - Steps have 50% viewport height margin between them
+  // - This ensures steps trigger at 75% and transition at 25%
 
-  // Set vertical margin between steps to span from 25% to 75%
+  // First step always starts at the top
+  step.filter((d, i) => i === 0).style("margin-top", "0px");
+
+  // Set vertical margin between steps to 50% viewport height
+  // This creates the proper spacing for 75% trigger / 25% transition
   const verticalMargin = Math.floor(viewportHeight * 0.5);
   step.style("margin-bottom", `${verticalMargin}px`);
 
-  // But remove margin from last step
+  // Handle last step margin based on whether it's a concluding header
+  const lastStep = window.stepsConfig[window.stepsConfig.length - 1];
+  const isLastStepHeader = lastStep && lastStep.customClass === "header";
+
   step
     .filter((d, i, nodes) => i === nodes.length - 1)
-    .style("margin-bottom", "0px");
+    .style(
+      "margin-bottom",
+      isLastStepHeader ? "0px" : `${Math.floor(viewportHeight * 0.1)}px`
+    );
 
   // Set figure to take up full viewport height with padding
   figure.style("height", "calc(100vh - 2rem)").style("top", "1rem");
@@ -135,17 +151,38 @@ function updateScrollama() {
   scroller
     .setup({
       step: "#scrolly article .step",
-      offset: 0.6, // Set to 75% down the viewport
+      offset: 0.6, // Steps trigger at 60% down the viewport (changed from 75%)
       debug: false,
     })
     .onStepEnter(handleStepEnter)
     .onStepExit(handleStepExit)
     .onStepProgress((response) => {
       // response = { element, index, progress, direction }
-      // This fires continuously as the user scrolls through a step
+      const stepId = window.stepsConfig[response.index]?.id;
 
-      // You can use this to create animations that respond to scroll position
-      // For example, fade elements based on progress
+      // Custom fade for quick-fixes step
+      if (stepId === "quick-fixes") {
+        // Calculate how far the step's top is from the top of the viewport
+        const rect = response.element.getBoundingClientRect();
+        const stepTop = rect.top;
+        const viewportHeight = window.innerHeight;
+        const targetY = viewportHeight * 0.25; // 25vh for transition
+
+        // Fade out as the top approaches 25vh (between 40vh and 25vh for a smooth fade)
+        const fadeStart = viewportHeight * 0.4;
+        const fadeEnd = targetY;
+        let opacity = 1;
+        if (stepTop < fadeStart) {
+          opacity = Math.max(
+            0,
+            Math.min(1, (stepTop - fadeEnd) / (fadeStart - fadeEnd))
+          );
+        }
+        d3.select("#figure-container").style("opacity", opacity);
+        return; // Don't use the default fade logic for this step
+      }
+
+      // Default fade logic for other steps
       if (window.stepsConfig[response.index]?.fade) {
         d3.select(response.element).style("opacity", response.progress);
       }
