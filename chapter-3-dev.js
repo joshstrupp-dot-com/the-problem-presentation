@@ -84,6 +84,7 @@
   let allAuthorData; // Store the data globally
   let svg; // Store the SVG globally
   let currentStepId = "all-authors"; // Track current step
+  let tooltip; // Store the tooltip globally
 
   ///////////////////////////////////////////////////////////// ! Data Filtering Functions
   // Function to filter data based on step ID
@@ -138,6 +139,9 @@
   // Function to display author data
   function displayAuthorData(data, stepId) {
     if (!data || data.length === 0) return;
+
+    // Clean up old tooltips
+    d3.selectAll(".tooltip").remove();
 
     // Instead of clearing everything, only clear axes and labels
     svg.selectAll(".x-axis, .y-axis, .annotation").remove();
@@ -245,7 +249,7 @@
       .text("Average Star Rating");
 
     ///////////////////////////////////////////////////////////// ! Tooltip Creation
-    const tooltip = d3.select("body").append("div").attr("class", "tooltip");
+    tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
     ///////////////////////////////////////////////////////////// ! Data Points Creation
     const defs = svg.append("defs");
@@ -471,5 +475,25 @@
   document.addEventListener("visualizationUpdate", (event) => {
     const stepId = event.detail.step;
     displayAuthorData(filterDataForStep(stepId), stepId);
+  });
+
+  // Add scroll event listener to hide tooltip when scrolling
+  window.addEventListener("scroll", () => {
+    if (svg) {
+      // Hide tooltip when scrolling (try both global reference and selector)
+      if (tooltip) {
+        tooltip.style("opacity", 0);
+      }
+      d3.selectAll(".tooltip").style("opacity", 0);
+
+      // Reset any scaled featured authors back to normal size
+      svg
+        .selectAll(".featured-point")
+        .transition()
+        .duration(300)
+        .attr("transform", function (d) {
+          return `translate(${d.x},${d.y}) scale(1)`;
+        });
+    }
   });
 })();

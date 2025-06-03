@@ -49,12 +49,32 @@ const chapter3StepsConfig = [
     text: "There are some who are beloved, with ratings in the top 10% of all authors.",
     fullwidth: true,
     render: () => {
-      // Maintain the credibility-score state
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "authors-2" },
-        })
-      );
+      // Ensure 2D visualization is loaded
+      let vizContainer = d3.select("#chapter-3");
+      if (vizContainer.empty()) {
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-3")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Load and execute chapter-3-dev.js
+        const script = document.createElement("script");
+        script.src = "chapter-3-dev.js";
+        document.body.appendChild(script);
+      }
+
+      // Dispatch the visualization update
+      setTimeout(() => {
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "authors-2" },
+          })
+        );
+      }, 100);
     },
   },
 
@@ -63,12 +83,32 @@ const chapter3StepsConfig = [
     text: `Then there are those who I've heard referred to as "drug dealers." This may seem excessive, but when you see titles like "You Are a Badass" and "Turn Your Weight Loss Vision Into Reality!", tell me you don't want a taste.`,
     fullwidth: true,
     render: () => {
-      // Maintain the credibility-score state
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "authors-3" },
-        })
-      );
+      // Ensure 2D visualization is loaded
+      let vizContainer = d3.select("#chapter-3");
+      if (vizContainer.empty()) {
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-3")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Load and execute chapter-3-dev.js
+        const script = document.createElement("script");
+        script.src = "chapter-3-dev.js";
+        document.body.appendChild(script);
+      }
+
+      // Dispatch the visualization update
+      setTimeout(() => {
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "authors-3" },
+          })
+        );
+      }, 100);
     },
   },
   {
@@ -116,12 +156,35 @@ const chapter3StepsConfig = [
     fadeIn: false,
     fadeOut: true,
     render: () => {
-      // Simply update the visualization state
-      document.dispatchEvent(
-        new CustomEvent("visualizationUpdate", {
-          detail: { step: "low-credibility" },
-        })
-      );
+      // Ensure 3D visualization is loaded
+      let vizContainer = d3.select("#chapter-3-3d");
+      if (vizContainer.empty()) {
+        const figure = d3.select("#figure-container");
+        figure.html("");
+
+        vizContainer = figure
+          .append("div")
+          .attr("id", "chapter-3-3d")
+          .style("width", "100%")
+          .style("height", "100%");
+
+        // Load and execute chapter-3-3d.js only if not already loaded
+        if (!window.chapter3_3d_loaded) {
+          const script = document.createElement("script");
+          script.src = "chapter-3-3d.js";
+          document.body.appendChild(script);
+          window.chapter3_3d_loaded = true;
+        }
+      }
+
+      // Dispatch the visualization update
+      setTimeout(() => {
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "low-credibility" },
+          })
+        );
+      }, 100);
     },
   },
 

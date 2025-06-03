@@ -48,6 +48,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Flag to track if cursor is in the author div
   let isInAuthorDiv = false;
 
+  // Store last known mouse position
+  let lastMousePosition = { x: 0, y: 0 };
+
   // Function to create cursors
   function createCursors(positions = null) {
     // Clear existing cursors
@@ -81,16 +84,16 @@ document.addEventListener("DOMContentLoaded", function () {
   createCursors();
 
   // Function to check if cursor is in hero section or author div
-  function checkCursorPosition(event) {
+  function checkCursorPosition(clientX, clientY) {
     const heroSection = document.getElementById("hero");
     const heroRect = heroSection.getBoundingClientRect();
 
     // Check if cursor is in hero section
     const isInHero =
-      event.clientX >= heroRect.left &&
-      event.clientX <= heroRect.right &&
-      event.clientY >= heroRect.top &&
-      event.clientY <= heroRect.bottom;
+      clientX >= heroRect.left &&
+      clientX <= heroRect.right &&
+      clientY >= heroRect.top &&
+      clientY <= heroRect.bottom;
 
     // Check if cursor is in author div
     const authorDiv = document.querySelector(".body.bottom-left.andale");
@@ -99,10 +102,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (authorDiv) {
       const authorRect = authorDiv.getBoundingClientRect();
       isInAuthor =
-        event.clientX >= authorRect.left &&
-        event.clientX <= authorRect.right &&
-        event.clientY >= authorRect.top &&
-        event.clientY <= authorRect.bottom;
+        clientX >= authorRect.left &&
+        clientX <= authorRect.right &&
+        clientY >= authorRect.top &&
+        clientY <= authorRect.bottom;
     }
 
     // If state changed for hero section, update visibility
@@ -129,8 +132,12 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener(
     "mousemove",
     function (event) {
+      // Store last known mouse position
+      lastMousePosition.x = event.clientX;
+      lastMousePosition.y = event.clientY;
+
       // Check cursor position
-      checkCursorPosition(event);
+      checkCursorPosition(event.clientX, event.clientY);
 
       // Only update cursor positions if in hero section and not in author div
       if (!isInHeroSection || isInAuthorDiv) return;
@@ -151,11 +158,23 @@ document.addEventListener("DOMContentLoaded", function () {
     true
   );
 
+  // Track scroll events to update cursor visibility
+  document.addEventListener(
+    "scroll",
+    function () {
+      // Use last known mouse position to check if cursor effect should be visible
+      checkCursorPosition(lastMousePosition.x, lastMousePosition.y);
+    },
+    true
+  );
+
   // Initial check for cursor position
   document.addEventListener(
     "mousemove",
     function (event) {
-      checkCursorPosition(event);
+      lastMousePosition.x = event.clientX;
+      lastMousePosition.y = event.clientY;
+      checkCursorPosition(event.clientX, event.clientY);
     },
     { once: true }
   );
